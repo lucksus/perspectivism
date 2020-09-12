@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
+import postcss from "rollup-plugin-postcss";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -59,6 +60,18 @@ export default {
 			dedupe: ['svelte']
 		}),
 		commonjs(),
+		postcss({
+			extract: true,
+			minimize: true,
+			use: [
+			  ['sass', {
+				includePaths: [
+				  './src/theme',
+				  './node_modules'
+				]
+			  }]
+			]
+		  }),
 		typescript({ sourceMap: !production }),
 
 		// In dev mode, call `npm run start` once
