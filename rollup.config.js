@@ -31,7 +31,7 @@ function serve() {
 }
 
 export default {
-	input: 'src/App.svelte',
+	input: 'src/ui/App.svelte',
 	output: {
 		sourcemap: true,
 		format: 'iife',
@@ -66,13 +66,13 @@ export default {
 			use: [
 			  ['sass', {
 				includePaths: [
-				  './src/theme',
+				  './src/ui/theme',
 				  './node_modules'
 				]
 			  }]
 			]
 		  }),
-		typescript({ sourceMap: !production }),
+		//typescript({ sourceMap: !production }),
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated

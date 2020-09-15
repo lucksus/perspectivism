@@ -13,10 +13,12 @@
 	<script defer src='build/bundle.js'></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', function() {
+			const { remote } = require('electron')
 			var app = new PerspectivismUi({
 				target: document.body,
 				props: {
-					name: "Perspectivism"
+					name: "Perspectivism",
+					rootConfigPath: remote.getGlobal('rootConfigPath')
 				}
 			});
 		});

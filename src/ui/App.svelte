@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let name: string;
+	export let rootConfigPath: string;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	let collapsed = true;
@@ -30,6 +31,7 @@
 		</Row>
 	</TopAppBar>
 	<h1>Hello {name}!</h1>
+	<h2>Root config path is: {rootConfigPath}</h2>
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 </main>
 

@@ -1,12 +1,19 @@
+require = require("esm")(module/*, options*/)
+module.exports = require("./main.js")
 const { app, BrowserWindow } = require('electron')
-console.log(app)
+const Config = require('./src/main-thread/Config')
+
+Config.init()
+global.rootConfigPath = Config.rootConfigPath
+
 function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
     }
   })
 
