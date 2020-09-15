@@ -31,11 +31,11 @@ function serve() {
 }
 
 export default {
-	input: 'src/main.ts',
+	input: 'src/App.svelte',
 	output: {
 		sourcemap: true,
 		format: 'iife',
-		name: 'app',
+		name: 'PerspectivismUi',
 		file: 'public/build/bundle.js'
 	},
 	plugins: [

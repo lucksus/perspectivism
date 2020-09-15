@@ -11,6 +11,16 @@
 	<link rel='stylesheet' href='build/bundle.css'>
 
 	<script defer src='build/bundle.js'></script>
+	<script>
+		window.addEventListener('DOMContentLoaded', function() {
+			var app = new PerspectivismUi({
+				target: document.body,
+				props: {
+					name: "Perspectivism"
+				}
+			});
+		});
+	</script>
 </head>
 
 <body>
