@@ -8,12 +8,15 @@
 	import List, {Item, Text, Graphic, Separator, Subheader} from '@smui/list';
 	import Chip, {Set, Icon, Text as ChipText} from '@smui/chips';
 	import Fab, {Icon as FabIcon} from '@smui/fab';
+	import Perspective from './Perspective.svelte';
 
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
 	let drawer
-	let hovered = $perspectiveStore
+	let hovered = JSON.parse(JSON.stringify($perspectiveStore))
+
+	let selectedPerspective = null
 
 
 	function createNewPerspective() {
@@ -24,7 +27,14 @@
 		}
 
 		const name = prefix+number
-		perspectiveStore.add(name, {})
+		perspectiveStore.add(name, {name})
+	}
+
+	function deletePerspective(perspective) {
+		if(selectedPerspective == perspective) {
+			selectedPerspective = null
+		}
+		perspectiveStore.remove(perspective)
 	}
 
 </script>
@@ -61,10 +71,12 @@
 			<Item href="javascript:void(0)"
 				on:mouseenter="{e => hovered[perspective] = false}"
 				on:mouseleave="{e => hovered[perspective] = true}"
+				on:click={() => selectedPerspective = perspective}
+				activated={selectedPerspective == perspective}
 			>
 				<Text>{perspective}</Text>
 				<Fab mini="true" bind:exited={hovered[perspective]}
-					on:click={()=>{perspectiveStore.remove(perspective)}}
+					on:click={()=>deletePerspective(perspective)}
 				>
 					<FabIcon class="material-icons">delete</FabIcon>
 				</Fab>
@@ -86,10 +98,19 @@
 		</Content>
 	</Drawer>
 	<Scrim></Scrim>
-	<h1>Hello {name}!</h1>
-	<h2>Root config path is: {rootConfigPath}</h2>
-	<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+
+	{#if !selectedPerspective}
+		<h1>Hello {name}!</h1>
+		<h2>Root config path is: {rootConfigPath}</h2>
+		<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>
+		<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	{/if}
+
+	{#if selectedPerspective}
+		<Perspective perspective={$perspectiveStore[selectedPerspective]}></Perspective>
+	{/if}
+
+
 </main>
 
 <style>
