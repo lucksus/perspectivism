@@ -5,8 +5,17 @@ const path = require('path')
 const fs = require('fs')
 
 const Config = require('./src/main-thread/Config')
+const IPFS = require('./src/main-thread/IPFS')
 
 Config.init()
+IPFS.init().then(async (node) => {
+  const fileAdded = await node.add({
+    path: 'lucksus.txt',
+    content: "lucksus test 1"
+  })
+
+  console.log('Added file:', fileAdded.path, fileAdded.cid)
+})
 
 function createWindow () {
   // Create the browser window.
