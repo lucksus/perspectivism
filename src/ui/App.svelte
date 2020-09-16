@@ -7,13 +7,16 @@
 	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
 	import List, {Item, Text, Graphic, Separator, Subheader} from '@smui/list';
 	import Chip, {Set, Icon, Text as ChipText} from '@smui/chips';
+	import Fab, {Icon as FabIcon} from '@smui/fab';
 
-	let collapsed = true;
+	let collapsed = false;
+	let collapsing = false;
 	let drawerOpen = false;
 	let drawer
+	let hovered = $perspectiveStore
 
 
-	const createNewPerspective = () => {
+	function createNewPerspective() {
 		let number = 1
 		let prefix = "New Perspective "
 		while(Object.keys($perspectiveStore).includes(prefix+number)) {
@@ -23,6 +26,7 @@
 		const name = prefix+number
 		perspectiveStore.add(name, {})
 	}
+
 </script>
 
 <svelte:head>
@@ -34,33 +38,36 @@
 <main>
 	<TopAppBar dense='true' variant='short' 
 		bind:collapsed
-		on:mouseenter="{e => collapsed=false}"
-		on:mouseleave="{e => collapsed=true}"
+		on:mouseenter="{e => collapsing ? collapsed=false : undefined}"
+		on:mouseleave="{e => collapsing ? collapsed=true : undefined}"
 	>
 		<Row>
 		<Section>
 			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
 			<Title>{name}</Title>
 		</Section>
-		<Section align="end" toolbar>
-			<IconButton class="material-icons" aria-label="Download">file_download</IconButton>
-			<IconButton class="material-icons" aria-label="Print this page">print</IconButton>
-			<IconButton class="material-icons" aria-label="Bookmark this page">bookmark</IconButton>
-		</Section>
 		</Row>
 	</TopAppBar>
 
 
-	<Drawer variant="dismissible" bind:this={drawer} bind:open={drawerOpen}>
+	<Drawer variant="modal" bind:this={drawer} bind:open={drawerOpen}>
 		<Header>
-		<Title>Perspectives</Title>
+		<DrawerTitle>Perspectives</DrawerTitle>
 		<Subtitle>Switch to perspective from list</Subtitle>
 		</Header>
 		<Content>
 		<List>
 			{#each Object.keys($perspectiveStore) as perspective}
-			<Item href="javascript:void(0)">
+			<Item href="javascript:void(0)"
+				on:mouseenter="{e => hovered[perspective] = false}"
+				on:mouseleave="{e => hovered[perspective] = true}"
+			>
 				<Text>{perspective}</Text>
+				<Fab mini="true" bind:exited={hovered[perspective]}
+					on:click={()=>{perspectiveStore.remove(perspective)}}
+				>
+					<FabIcon class="material-icons">delete</FabIcon>
+				</Fab>
 			</Item>
 			{/each}
 
@@ -78,6 +85,7 @@
 		</List>
 		</Content>
 	</Drawer>
+	<Scrim></Scrim>
 	<h1>Hello {name}!</h1>
 	<h2>Root config path is: {rootConfigPath}</h2>
 	<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>

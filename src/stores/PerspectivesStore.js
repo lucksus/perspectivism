@@ -25,6 +25,13 @@ async function createPerspectiveStore() {
             })
             save()
         },
+        remove: (name) => {
+            update((perspectives) => {
+                delete perspectives[name]
+                return perspectives
+            })
+            save()
+        }
     };
 }
 
