@@ -11,14 +11,16 @@
 	<link rel='stylesheet' href='build/bundle.css'>
 
 	<script defer src='build/bundle.js'></script>
+	<script src='../src/stores/PerspectivesStore.js'></script>
 	<script>
-		window.addEventListener('DOMContentLoaded', function() {
+		window.addEventListener('DOMContentLoaded', async function() {
 			const { remote } = require('electron')
+			let perspectiveStore = await createPerspectiveStore()
 			var app = new PerspectivismUi({
 				target: document.body,
 				props: {
 					name: "Perspectivism",
-					rootConfigPath: remote.getGlobal('rootConfigPath')
+					perspectiveStore,
 				}
 			});
 		});

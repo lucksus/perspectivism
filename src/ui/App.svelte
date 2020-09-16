@@ -1,9 +1,28 @@
 <script lang="ts">
 	export let name: string;
 	export let rootConfigPath: string;
+	export let perspectiveStore: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
+	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
+	import List, {Item, Text, Graphic, Separator, Subheader} from '@smui/list';
+	import Chip, {Set, Icon, Text as ChipText} from '@smui/chips';
+
 	let collapsed = true;
+	let drawerOpen = false;
+	let drawer
+
+
+	const createNewPerspective = () => {
+		let number = 1
+		let prefix = "New Perspective "
+		while(Object.keys($perspectiveStore).includes(prefix+number)) {
+			number++
+		}
+
+		const name = prefix+number
+		perspectiveStore.add(name, {})
+	}
 </script>
 
 <svelte:head>
@@ -20,7 +39,7 @@
 	>
 		<Row>
 		<Section>
-			<IconButton class="material-icons">menu</IconButton>
+			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
 			<Title>{name}</Title>
 		</Section>
 		<Section align="end" toolbar>
@@ -30,8 +49,38 @@
 		</Section>
 		</Row>
 	</TopAppBar>
+
+
+	<Drawer variant="dismissible" bind:this={drawer} bind:open={drawerOpen}>
+		<Header>
+		<Title>Perspectives</Title>
+		<Subtitle>Switch to perspective from list</Subtitle>
+		</Header>
+		<Content>
+		<List>
+			{#each Object.keys($perspectiveStore) as perspective}
+			<Item href="javascript:void(0)">
+				<Text>{perspective}</Text>
+			</Item>
+			{/each}
+
+			{#if Object.keys($perspectiveStore).length == 0}
+
+			<Chip><ChipText>No Perspectives yet</ChipText></Chip>
+			{/if}
+	
+			<Separator nav />
+			<Item on:click={createNewPerspective}>
+				<Graphic class="material-icons" aria-hidden="true">note_add</Graphic>
+				<Text>Create Perspective</Text>
+			</Item>
+			
+		</List>
+		</Content>
+	</Drawer>
 	<h1>Hello {name}!</h1>
 	<h2>Root config path is: {rootConfigPath}</h2>
+	<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>
 	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 </main>
 
