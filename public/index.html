@@ -11,16 +11,17 @@
 	<link rel='stylesheet' href='build/bundle.css'>
 
 	<script defer src='build/bundle.js'></script>
-	<script src='../src/stores/PerspectivesStore.js'></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', async function() {
-			const { remote } = require('electron')
-			let perspectiveStore = await createPerspectiveStore()
+			const { remote, ipcRenderer } = require('electron')
+			const IPFS = require('../src/services/IPFS.js')
+			const perspectiveStore = await require('../src/stores/PerspectivesStore.js')()
 			var app = new PerspectivismUi({
 				target: document.body,
 				props: {
 					name: "Perspectivism",
 					perspectiveStore,
+					IPFS,
 				}
 			});
 		});

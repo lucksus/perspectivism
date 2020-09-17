@@ -1,7 +1,7 @@
 const { writable } = require('svelte/store')
 const { ipcRenderer } = require('electron')
 
-async function createPerspectiveStore() {
+module.exports = async function createPerspectiveStore() {
     let perspectives = null
 
     async function load() {

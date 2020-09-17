@@ -2,6 +2,7 @@
 	export let name: string;
 	export let rootConfigPath: string;
 	export let perspectiveStore: object;
+	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -107,7 +108,7 @@
 	{/if}
 
 	{#if selectedPerspective}
-		<Perspective perspective={$perspectiveStore[selectedPerspective]}></Perspective>
+		<Perspective perspective={$perspectiveStore[selectedPerspective]}, {IPFS}></Perspective>
 	{/if}
 
 
