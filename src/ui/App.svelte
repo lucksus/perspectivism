@@ -1,7 +1,6 @@
 <script lang="ts">
-	export let name: string;
-	export let rootConfigPath: string;
 	export let perspectiveStore: object;
+	export let linkRepoController: object;
 	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
@@ -18,7 +17,6 @@
 	let hovered = JSON.parse(JSON.stringify($perspectiveStore))
 
 	let selectedPerspective = null
-
 
 	function createNewPerspective() {
 		let number = 1
@@ -55,7 +53,7 @@
 		<Row>
 		<Section>
 			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
-			<Title>{name}</Title>
+			<Title>Perspectivism</Title>
 		</Section>
 		</Row>
 	</TopAppBar>
@@ -102,13 +100,14 @@
 
 	{#if !selectedPerspective}
 		<h1>Hello {name}!</h1>
-		<h2>Root config path is: {rootConfigPath}</h2>
 		<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>
 		<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
 	{/if}
 
 	{#if selectedPerspective}
-		<Perspective perspective={$perspectiveStore[selectedPerspective]}, {IPFS}></Perspective>
+		<p></p>
+		<h1>selectedPerspective: {selectedPerspective}</h1>
+		<Perspective perspective={$perspectiveStore[selectedPerspective]} {...$$props}></Perspective>
 	{/if}
 
 
