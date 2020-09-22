@@ -1,5 +1,5 @@
 import type Link from "../acai/Links";
-import type { ExpressionRef } from "../acai/Links";
+import type ExpressionRef from "../acai/ExpressionRef";
 import type { Perspective } from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
@@ -24,7 +24,7 @@ export default class LinkRepoController {
             this.getPerspective(p)
                 .get('root-links')
                 .load(linksObject => {
-                    const links = <Link[]>Object.values(linksObject)
+                    const links = Object.values(linksObject) as Link[]
                     console.log("LINK REPO: Found root links:", links)
                     resolve(links)
                 }, {wait:1})
@@ -35,14 +35,14 @@ export default class LinkRepoController {
         const linkNode = this.addLink(p, link)
         this.getPerspective(p).get('root-links').set(linkNode)
     }
-    
+
     addLink(p: Perspective, link: Link) {
-        const hash = new SHA3(256); 
+        const hash = new SHA3(256);
         hash.update(JSON.stringify(link));
         const addr = hash.digest('hex');
 
         const linkNode = this.getPerspective(p).get('links').get(addr).put(link)
-        
+
         // store link in both directions:
         // 1. from source to target
         this.getPerspective(p).get('sources').get(link.source).set(linkNode)
@@ -76,7 +76,7 @@ export default class LinkRepoController {
                 .once(links => resolve(links))
         })
     }
-    
+
 
 }
 
