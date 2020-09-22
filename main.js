@@ -5,9 +5,11 @@ const path = require('path')
 const fs = require('fs')
 
 const Config = require('./src/main-thread/Config')
+const Gun = require('./src/main-thread/Gun')
 const IPFS = require('./src/main-thread/IPFS')
 
 Config.init()
+const gun = Gun.init(path.join(Config.rootConfigPath, 'gunDB.json6'))
 IPFS.init()
 
 function createWindow () {
