@@ -2,3 +2,8 @@
 /public/build/
 
 .DS_Store
+
+/src/acai/*.js
+/src/main-thread/LanguageController.js
+/src/main-thread/LinkRepoController.js
+/src/**/*.js.map
