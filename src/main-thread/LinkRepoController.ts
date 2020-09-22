@@ -1,6 +1,6 @@
 import type Link from "../acai/Links";
 import type ExpressionRef from "../acai/ExpressionRef";
-import type { Perspective } from "../acai/Perspective";
+import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
 

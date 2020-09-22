@@ -1,6 +1,7 @@
 <script lang="ts">
-    export let perspective: object
-    export let perspectiveStore: object
+    import type Perspective from '../acai/Perspective'
+
+    export let perspective: Perspective
     export let linkRepoController: object
     export let IPFS: object
 
