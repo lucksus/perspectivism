@@ -1,13 +1,10 @@
+const Gun = require("gun")
+require('gun/lib/load.js')
+require('gun/lib/then.js')
 
 export function init(dbFilePath) {
-    const Gun = require("gun/gun")
-    require('gun-file')
-    require('gun/lib/load.js')
-    require('gun/lib/then.js')
-    const gun = Gun({
-        file: dbFilePath ? dbFilePath : './data.json6',
+    return Gun({ 
+        file: dbFilePath,
         localStorage: false,
-    })
-
-    return gun
+     })
 } 

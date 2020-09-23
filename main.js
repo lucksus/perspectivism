@@ -10,7 +10,7 @@ const IPFS = require('./src/main-thread/IPFS')
 const LinkRepoController = require('./src/main-thread/LinkRepoController')
 
 Config.init()
-const gun = Gun.init(path.join(Config.rootConfigPath, 'gunDB.json6'))
+const gun = Gun.init(Config.dataPath)
 LinkRepoController.init(gun)
 IPFS.init()
 
