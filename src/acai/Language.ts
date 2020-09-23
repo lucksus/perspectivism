@@ -23,18 +23,16 @@ export interface Address {
 }
 
 export interface ExpressionAdapter {
-    readonly id: string;
-
-    create_public_expression(content: object): Address;
-    get_expression_by_address(address: Address): void | Expression;
+    create_public_expression(content: object): Promise<Address>;
+    get_expression_by_address(address: Address): Promise<void | Expression>;
 
     /// Get expressions authored by a given Agent/Identity
-    get_by_author(author: Agent, count: number, page: number): void | Expression;
+    get_by_author(author: Agent, count: number, page: number): Promise<void | Expression>;
 
     /// Send an expression to someone privately p2p
     send_private(to: Agent, content: object);
     /// Get private expressions sent to you
-    inbox(): Expression[];
+    inbox(): Promise<Expression[]>;
 
 }
 
