@@ -8,11 +8,16 @@ const Config = require('./src/main-thread/Config')
 const Gun = require('./src/main-thread/Gun')
 const IPFS = require('./src/main-thread/IPFS')
 const LinkRepoController = require('./src/main-thread/LinkRepoController')
+const LanguageController = require('./src/main-thread/LanguageController')
 
 Config.init()
 const gun = Gun.init(Config.dataPath)
 LinkRepoController.init(gun)
 IPFS.init()
+
+const agent = { did: 'did:local-test-agent' }
+const context = { agent, IPFS }
+LanguageController.init(context)
 
 function createWindow () {
   // Create the browser window.
