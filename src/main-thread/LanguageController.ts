@@ -5,9 +5,10 @@ import type { InteractionCall } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
+import path from 'path'
 import multihashes from 'multihashes'
 
-const builtInLanguages = ['../languages/note-ipfs/build/bundle.js' ]
+const builtInLanguages = ['./src/languages/note-ipfs/build/bundle.js' ]
 
 export class LanguageController {
     #languages: Map<string, Language>
@@ -20,7 +21,7 @@ export class LanguageController {
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
             const hash = multihashes.toHexString(multihashes.encode(bundleBytes, 'sha1'))
-            const create = require(bundle)
+            const create = require(path.join(process.env.PWD, bundle))
             const language = create(context)
 
             this.#languages.set(hash, language)
