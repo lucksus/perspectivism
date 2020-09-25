@@ -4,31 +4,24 @@ import commonjs from '@rollup/plugin-commonjs';
 //import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import postcss from "rollup-plugin-postcss";
-import { string } from 'rollup-plugin-string'
 
 const production = !process.env.ROLLUP_WATCH;
 
-export default {
-	input: 'index.js',
+export default [
+{
+	input: 'ConstructorIcon.svelte',
 	output: {
 		sourcemap: true,
 		format: 'cjs',
-		name: 'NoteIpfs',
-		file: 'build/bundle.js'
+		name: 'ConstructorIcon',
+		file: 'build/ConstructorIcon.js'
 	},
 	plugins: [
-		string({
-			include: 'build/*.js'
-		}),
 		svelte({
 			// enable run-time checks when not in production
 			dev: !production,
-			// we'll extract any component CSS out into
-			// a separate file - better for performance
-			//css: css => {
-			//	css.write('bundle.css');
-			//},
 			preprocess: sveltePreprocess(),
+			customElement: true,
 		}),
 
 		// If you have external dependencies installed from
@@ -53,8 +46,14 @@ export default {
 			  }]
 			]
 		  }),
+		//typescript({ sourceMap: !production }),
+		
+		// If we're building for production (npm run build
+		// instead of npm run dev), minify
+		//production && terser()
 	],
 	watch: {
 		clearScreen: false
 	}
 }
+]
