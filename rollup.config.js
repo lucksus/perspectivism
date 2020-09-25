@@ -96,7 +96,7 @@ export default [
 	input: 'src/languages/note-ipfs/index.js',
 	output: {
 		sourcemap: true,
-		format: 'iife',
+		format: 'cjs',
 		name: 'NoteIpfs',
 		file: 'src/languages/note-ipfs/build/bundle.js'
 	},
