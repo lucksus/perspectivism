@@ -9,19 +9,6 @@ import multihashes from 'multihashes'
 
 const builtInLanguages = ['../languages/note-ipfs/build/bundle.js' ]
 
-class HashedLanguage {
-    hash: string;
-    language: Language;
-
-    toLanguageRef(): LanguageRef {
-        return {
-            languageHash: this.hash,
-            languageType: null,
-            name: this.language.name,
-        }
-    }
-}
-
 export class LanguageController {
     #languages: Map<string, Language>
     #context: LanguageContext;
