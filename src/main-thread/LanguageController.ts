@@ -6,7 +6,9 @@ import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
 import path from 'path'
+import multihashing from 'multihashing'
 import multihashes from 'multihashes'
+import { ipcMain } from 'electron'
 
 const builtInLanguages = ['./src/languages/note-ipfs/build/bundle.js' ]
 
@@ -20,7 +22,7 @@ export class LanguageController {
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
-            const hash = multihashes.toHexString(multihashes.encode(bundleBytes, 'sha1'))
+            const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
             const create = require(path.join(process.env.PWD, bundle))
             const language = create(context)
 
