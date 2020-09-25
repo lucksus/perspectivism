@@ -71,7 +71,10 @@ export class LanguageController {
 export function init(context: LanguageContext): LanguageController {
     const languageController = new LanguageController(context)
 
-    //ipcMain.handle('links-getRoot', async (e, p: Perspective) => await linkRepoController.getRootLinks(p))
+    ipcMain.handle('languages-getInstalled', (e) => languageController.getInstalledLanguages())
+    ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
+    ipcMain.handle('languages-getExpression', async (event, expressionRef) => await languageController.getExpression(expressionRef))
+    ipcMain.handle('languages-interact', async (event, expressionRef, interaction) => await languageController.interact(expressionRef, interaction))
 
     return languageController
 }
