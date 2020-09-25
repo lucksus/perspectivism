@@ -17,7 +17,8 @@ IPFS.init()
 
 const agent = { did: 'did:local-test-agent' }
 const context = { agent, IPFS }
-LanguageController.init(context)
+const languageController = LanguageController.init(context)
+console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
 
 function createWindow () {
   // Create the browser window.
