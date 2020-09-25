@@ -4,6 +4,7 @@ import type { Address } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
 import Adapter from './adapter'
+import ConstructorIcon from './build/ConstructorIcon.js'
 
 
 function iconFor(expression: Address): string {
@@ -11,7 +12,7 @@ function iconFor(expression: Address): string {
 }
 
 function constructorIcon(): string {
-    return ""
+    return ConstructorIcon
 }
 
 function interactions(a: Agent, expression: Address): Interaction[] {

@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "main": "main.js",
   "scripts": {
-    "build": "rollup -c",
+    "build-languages": "cd src/languages/note-ipfs && npm run build && cd -",
+    "build": "tsc && rollup -c && npm run build-languages",
     "dev": "tsc && rollup -c -w",
     "serve": "sirv public",
     "validate": "svelte-check",
