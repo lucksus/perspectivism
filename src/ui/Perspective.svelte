@@ -1,7 +1,9 @@
 <script lang="ts">
     import type Perspective from '../acai/Perspective'
+    import type { LanguageController } from '../main-thread/LanguageController';
 
     export let perspective: Perspective
+    export let languageController: LanguageController
     export let linkRepoController: object
     export let IPFS: object
 
@@ -11,11 +13,22 @@
     //console.log(JSON.stringify(perspective))
 
     import IconButton from '@smui/icon-button';
-    import { afterUpdate } from 'svelte';
-
+    import Fab, {Icon, Label} from '@smui/fab';
+    
     let fileObject = null
     let downloaded = null
     let rootLinks = []
+
+    let languages = []
+    let languageIcons = {
+        'note-ipfs': 'note'
+    }
+    let constructorIconComponents = {}
+
+    languageController.getInstalledLanguages().then( installedLanguages => {
+        console.log("Got installed languages:", JSON.stringify(installedLanguages))
+        languages = installedLanguages
+    })
 
     async function saveIPFS() {
         fileObject = await IPFS.add({content: perspective})
@@ -55,6 +68,28 @@
         await loadRootLinks()
     }
 
+    function moduleFromString(src, filename) {
+        const Module = module.constructor;
+        const m = new Module();
+        m._compile(src, filename);
+        return m.exports;
+    }
+
+    async function createExpression(lang) {
+        console.log("Create expression:", lang, JSON.stringify(lang))
+        if(!constructorIconComponents[lang.name]) {
+            const code = await languageController.getConstructorIcon(lang)
+            console.log("EVALUATING CODE: ", code)
+            const ConstructorIcon = moduleFromString(code, lang.name)
+            constructorIconComponents[lang.name] = ConstructorIcon
+            customElements.define(lang.name, ConstructorIcon);
+        }
+
+        const constructorIcon = new constructorIconComponents[lang.name]()
+        const container = document.getElementById("constructor-container")
+        container.appendChild(constructorIcon)
+    }
+
     $: if(perspective) loadRootLinks()
 
 </script>
@@ -63,11 +98,13 @@
 <div>
     <h1>Perspective {JSON.stringify(perspective)}</h1>
     <h2>Root links: {JSON.stringify(rootLinks)}</h2>
-    <IconButton class="material-icons" on:click={saveIPFS}>cloud_upload</IconButton>
-    <IconButton class="material-icons" on:click={loadIPFS}>cloud_download</IconButton>
-    <IconButton class="material-icons" on:click={createLink}>create_new_folder</IconButton>
-    <IconButton class="material-icons" on:click={createLink2}>create_new_folder</IconButton>
-    {#if fileObject}
-        <span>Saved: {fileObject.cid.multihash}</span>
-    {/if}
+
+    <div id="constructor-container"></div>
+
+    {#each languages as lang}
+        <Fab extended on:click={() => createExpression(lang)}>
+            <Icon class="material-icons">{languageIcons[lang.name]}</Icon>
+            <Label>Create {lang.name} expression</Label>
+        </Fab>
+    {/each}
 </div>

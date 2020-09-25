@@ -52,7 +52,7 @@ export class LanguageController {
     }
 
     getConstructorIcon(language: LanguageRef): string {
-        return this.#languages[language.languageHash].constructorIcon()
+        return this.#languages.get(language.languageHash).constructorIcon()
     }
 
     getIcon(expression: ExpressionRef): string {

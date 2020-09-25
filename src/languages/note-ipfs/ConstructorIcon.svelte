@@ -1,3 +1,5 @@
+<svelte:options tag={null}/>
+
 <script lang="ts">
     export let commitExpression
     export let discard

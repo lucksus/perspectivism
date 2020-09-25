@@ -1,6 +1,7 @@
 <script lang="ts">
+	import type { LanguageController } from '../main-thread/LanguageController';
 	export let perspectiveStore: object;
-	export let languageController: object;
+	export let languageController: LanguageController;
 	export let linkRepoController: object;
 	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
