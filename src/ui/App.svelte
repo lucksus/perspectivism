@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let perspectiveStore: object;
+	export let languageController: object;
 	export let linkRepoController: object;
 	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
@@ -9,6 +10,7 @@
 	import Chip, {Set, Icon, Text as ChipText} from '@smui/chips';
 	import Fab, {Icon as FabIcon} from '@smui/fab';
 	import Perspective from './Perspective.svelte';
+	import LanguagesSettings from './LanguagesSettings.svelte'
 
 	let collapsed = false;
 	let collapsing = false;
@@ -16,7 +18,10 @@
 	let drawer
 	let hovered = JSON.parse(JSON.stringify($perspectiveStore))
 
-	let selectedPerspective = null
+	let selectedMainView = {
+		perspective: null,
+		settings: null,
+	}
 
 	function createNewPerspective() {
 		let number = 1
@@ -30,8 +35,8 @@
 	}
 
 	function deletePerspective(perspective) {
-		if(selectedPerspective == perspective) {
-			selectedPerspective = null
+		if(selectedMainView.perspective == perspective) {
+			selectedMainView.perspective = null
 		}
 		perspectiveStore.remove(perspective)
 	}
@@ -45,24 +50,13 @@
 </svelte:head>
 
 <main>
-	<TopAppBar dense='true' variant='short' 
-		bind:collapsed
-		on:mouseenter="{e => collapsing ? collapsed=false : undefined}"
-		on:mouseleave="{e => collapsing ? collapsed=true : undefined}"
-	>
-		<Row>
-		<Section>
-			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
-			<Title>Perspectivism</Title>
-		</Section>
-		</Row>
-	</TopAppBar>
+
 
 
 	<Drawer variant="modal" bind:this={drawer} bind:open={drawerOpen}>
 		<Header>
-		<DrawerTitle>Perspectives</DrawerTitle>
-		<Subtitle>Switch to perspective from list</Subtitle>
+			<DrawerTitle>Perspectives</DrawerTitle>
+			<Subtitle>Switch to perspective from list</Subtitle>
 		</Header>
 		<Content>
 		<List>
@@ -70,8 +64,8 @@
 			<Item href="javascript:void(0)"
 				on:mouseenter="{e => hovered[perspective] = false}"
 				on:mouseleave="{e => hovered[perspective] = true}"
-				on:click={() => selectedPerspective = perspective}
-				activated={selectedPerspective == perspective}
+				on:click={() => selectedMainView = { perspective, settings: null }}
+				activated={selectedMainView.perspective == perspective}
 			>
 				<Text>{perspective}</Text>
 				<Fab mini="true" bind:exited={hovered[perspective]}
@@ -87,10 +81,27 @@
 			<Chip><ChipText>No Perspectives yet</ChipText></Chip>
 			{/if}
 	
-			<Separator nav />
 			<Item on:click={createNewPerspective}>
 				<Graphic class="material-icons" aria-hidden="true">note_add</Graphic>
 				<Text>Create Perspective</Text>
+			</Item>
+
+			<Separator nav />
+
+			<Header>
+				<DrawerTitle>Settings</DrawerTitle>
+				<Subtitle>
+					Manage installed Languages and other stuff
+				</Subtitle>
+			</Header>
+			
+
+			<Item 
+				activated={selectedMainView.settings == 'languages'}
+				on:click={() => selectedMainView = { perspective: null, settings: 'languages' }}
+			>
+				<Graphic class="material-icons" aria-hidden="true">insert_comment</Graphic>
+				<Text>Manage Languages</Text>
 			</Item>
 			
 		</List>
@@ -98,19 +109,31 @@
 	</Drawer>
 	<Scrim></Scrim>
 
-	{#if !selectedPerspective}
-		<h1>Hello {name}!</h1>
-		<h2>Perspectives: {JSON.stringify($perspectiveStore)}</h2>
-		<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-	{/if}
+	<TopAppBar dense='true' variant='static' 
+		bind:collapsed
+		on:mouseenter="{e => collapsing ? collapsed=false : undefined}"
+		on:mouseleave="{e => collapsing ? collapsed=true : undefined}"
+	>
+		<Row>
+		<Section>
+			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
+			<Title>Perspectivism</Title>
+		</Section>
+		</Row>
+	</TopAppBar>
 
-	{#if selectedPerspective}
+	{#if selectedMainView.perspective}
 		<p></p>
-		<h1>selectedPerspective: {selectedPerspective}</h1>
-		<Perspective perspective={$perspectiveStore[selectedPerspective]} {...$$props}></Perspective>
+		<h1>selectedPerspective: {selectedMainView.perspective}</h1>
+		<Perspective perspective={$perspectiveStore[selectedMainView.perspective]} {...$$props}></Perspective>
+	{:else if selectedMainView.settings }
+		{#if selectedMainView.settings == 'languages'}
+			<LanguagesSettings languageController={languageController}></LanguagesSettings>
+		{/if}
+	{:else}
+		<h1>Welcome to Perspectivism!</h1>
+		<h2>Please open the drawer and create or select a perspective to start...</h2>
 	{/if}
-
-
 </main>
 
 <style>

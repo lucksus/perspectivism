@@ -41,6 +41,7 @@
     "ipfs": "^0.50.2",
     "multihashing": "^0.3.3",
     "sha3": "^2.1.3",
-    "sirv-cli": "^1.0.0"
+    "sirv-cli": "^1.0.0",
+    "svelte-table": "^0.1.11"
   }
 }
