@@ -15,6 +15,7 @@ export class LanguageController {
 
     constructor(context: LanguageContext) {
         this.#context = context
+        this.#languages = new Map()
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
