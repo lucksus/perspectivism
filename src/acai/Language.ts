@@ -1,3 +1,4 @@
+import type Address from './Address'
 import type Agent from './Agent'
 import type Expression from './Expression'
 
@@ -16,10 +17,6 @@ export default interface Language {
 
     // All available interactions agent 'a' could execute on given expression
     interactions(a: Agent, expression: Address): Interaction[];
-}
-
-export interface Address {
-    toString(): string;
 }
 
 export interface ExpressionAdapter {

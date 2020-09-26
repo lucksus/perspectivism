@@ -1,6 +1,6 @@
+import type Address from '../../acai/Address'
 import type Agent from '../../acai/Agent'
 import type Language from '../../acai/Language'
-import type { Address } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
 import Adapter from './adapter'

@@ -1,9 +1,9 @@
+import type Address from '../../acai/Address'
 import Agent from '../../acai/Agent'
 import type Expression from '../../acai/Expression'
 import type { ExpressionAdapter } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { IPFSNode } from '../../acai/LanguageContext'
-import IpfsAddress from './address'
 
 const _appendBuffer = (buffer1, buffer2) => {
     const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -25,7 +25,7 @@ export default class Adapter implements ExpressionAdapter {
         this.#IPFS = context.IPFS
     }
 
-    async create_public_expression(note: object): Promise<IpfsAddress> {
+    async create_public_expression(note: object): Promise<Address> {
         const expression = {
             author: this.#agent.did,
             timestamp: new Date().toString(),
@@ -35,10 +35,10 @@ export default class Adapter implements ExpressionAdapter {
         const content = JSON.stringify(expression)
         const result = await this.#IPFS.add({content})
         // @ts-ignore
-        return new IpfsAddress(result.cid)
+        return result.cid.toString() as Address
     }
 
-    async get_expression_by_address(address: IpfsAddress): Promise<void | Expression> {
+    async get_expression_by_address(address: Address): Promise<void | Expression> {
         const cid = address.toString()
 
         const chunks = []

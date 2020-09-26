@@ -14,7 +14,8 @@
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
-import Link from '../acai/Links';
+    import Link from '../acai/Links';
+    import { exprRef2String } from '../acai/ExpressionRef';
     
     let fileObject = null
     let downloaded = null
@@ -91,7 +92,16 @@ import Link from '../acai/Links';
         const constructorIcon = new constructorIconComponents[lang.name]()
         constructorIcon.commitExpression = async (content) => {
             const expressionRef = await languageController.createPublicExpression(lang, content)
-            console.log("Created new expression:", JSON.stringify(expressionRef.toString()))
+            console.log("Got ExpressionRef:", JSON.stringify(expressionRef))
+            const exprURL = exprRef2String(expressionRef)
+            console.log("Created new expression:", exprURL)
+            
+            const link = new Link({source: exprURL, target: exprURL})
+            console.log("Adding new link:", link)
+            rootLinks.push(link)
+            await linkRepoController.addRootLink(perspective, link)
+            console.log("Adding link done!")
+
             container.innerHTML = ''
             
         }

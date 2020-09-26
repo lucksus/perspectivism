@@ -1,7 +1,7 @@
 import type Expression from '../acai/Expression';
 import ExpressionRef from '../acai/ExpressionRef';
 import type Language from '../acai/Language'
-import type { Address, InteractionCall } from '../acai/Language'
+import type { InteractionCall } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
@@ -31,7 +31,7 @@ export class LanguageController {
     }
 
     private languageForExpression(e: ExpressionRef): Language {
-        const language = this.#languages[e.language.languageHash]
+        const language = this.#languages[e.language.address]
         if(language) {
             return language.iconFor(e.expression)
         } else {
@@ -40,7 +40,7 @@ export class LanguageController {
     }
 
     private languageByRef(ref: LanguageRef): Language {
-        const language = this.#languages.get(ref.languageHash)
+        const language = this.#languages.get(ref.address)
         if(language) {
             return language
         } else {
@@ -52,8 +52,7 @@ export class LanguageController {
         let refs: LanguageRef[] = []
         this.#languages.forEach((language, hash) => {
             refs.push({
-                languageHash: hash,
-                languageType: null,
+                address: hash,
                 name: language.name,
             })
         })
@@ -69,12 +68,12 @@ export class LanguageController {
         return new ExpressionRef(lang, address)
     }
 
-    getIcon(expression: ExpressionRef): string {
-        return this.languageForExpression(expression).iconFor(expression)
+    getIcon(ref: ExpressionRef): string {
+        return this.languageForExpression(ref).iconFor(ref.expression)
     }
 
-    async getExpression(expression: ExpressionRef): Promise<void | Expression> {
-        return this.languageForExpression(expression).expressionAdapter.get_expression_by_address(expression)
+    async getExpression(ref: ExpressionRef): Promise<void | Expression> {
+        return this.languageForExpression(ref).expressionAdapter.get_expression_by_address(ref.expression)
     }
 
     interact(expression: ExpressionRef, interaction: InteractionCall) {
