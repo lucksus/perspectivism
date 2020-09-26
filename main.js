@@ -13,12 +13,12 @@ const LanguageController = require('./src/main-thread/LanguageController')
 Config.init()
 const gun = Gun.init(Config.dataPath)
 LinkRepoController.init(gun)
-IPFS.init()
-
-const agent = { did: 'did:local-test-agent' }
-const context = { agent, IPFS }
-const languageController = LanguageController.init(context)
-console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
+IPFS.init().then((IPFS) => {
+  const agent = { did: 'did:local-test-agent' }
+  const context = { agent, IPFS }
+  const languageController = LanguageController.init(context)
+  console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
+})
 
 function createWindow () {
   // Create the browser window.
