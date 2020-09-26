@@ -77,6 +77,19 @@
         return m.exports;
     }
 
+    async function commitExpression(lang, content, container) {
+        const expressionRef = await languageController.createPublicExpression(lang, content)
+        console.log("Got ExpressionRef:", JSON.stringify(expressionRef))
+        const exprURL = exprRef2String(expressionRef)
+        console.log("Created new expression:", exprURL)
+        
+        const link = new Link({source: exprURL, target: exprURL})
+        rootLinks = [...rootLinks, link]
+        linkRepoController.addRootLink(perspective, link)
+
+        container.innerHTML = ''
+    }
+
     async function createExpression(lang) {
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
@@ -89,21 +102,10 @@
 
         const container = document.getElementById("constructor-container")
 
+        container.innerHTML = ''
         const constructorIcon = new constructorIconComponents[lang.name]()
         constructorIcon.commitExpression = async (content) => {
-            const expressionRef = await languageController.createPublicExpression(lang, content)
-            console.log("Got ExpressionRef:", JSON.stringify(expressionRef))
-            const exprURL = exprRef2String(expressionRef)
-            console.log("Created new expression:", exprURL)
-            
-            const link = new Link({source: exprURL, target: exprURL})
-            console.log("Adding new link:", link)
-            rootLinks.push(link)
-            await linkRepoController.addRootLink(perspective, link)
-            console.log("Adding link done!")
-
-            container.innerHTML = ''
-            
+            commitExpression(lang, content, container)
         }
         constructorIcon.discard = () => {
             container.innerHTML = ''

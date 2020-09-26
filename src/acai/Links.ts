@@ -6,10 +6,8 @@ export default class Link {
     predicate?: ExpressionRef;
 
     constructor(obj) {
-        this.source = obj.source
-        this.target = obj.target
-        this.predicate = obj.predicate
+        this.source = obj.source ? obj.source : ''
+        this.target = obj.target ? obj.target : ''
+        this.predicate = obj.predicate ? obj.predicate : ''
     }
 }
-
-
