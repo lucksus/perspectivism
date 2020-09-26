@@ -1,7 +1,7 @@
 import type Expression from '../acai/Expression';
-import type ExpressionRef from '../acai/ExpressionRef';
+import ExpressionRef from '../acai/ExpressionRef';
 import type Language from '../acai/Language'
-import type { InteractionCall } from '../acai/Language'
+import type { Address, InteractionCall } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
@@ -39,6 +39,15 @@ export class LanguageController {
         }
     }
 
+    private languageByRef(ref: LanguageRef): Language {
+        const language = this.#languages.get(ref.languageHash)
+        if(language) {
+            return language
+        } else {
+            throw new Error("Language not found by reference: " + JSON.stringify(ref))
+        }
+    }
+
     getInstalledLanguages(): LanguageRef[] {
         let refs: LanguageRef[] = []
         this.#languages.forEach((language, hash) => {
@@ -51,8 +60,13 @@ export class LanguageController {
         return refs
     }
 
-    getConstructorIcon(language: LanguageRef): string {
-        return this.#languages.get(language.languageHash).constructorIcon()
+    getConstructorIcon(lang: LanguageRef): string {
+        return this.languageByRef(lang).constructorIcon()
+    }
+
+    async createPublicExpression(lang: LanguageRef, content: object): Promise<ExpressionRef> {
+        const address = await this.languageByRef(lang).expressionAdapter.create_public_expression(content)
+        return new ExpressionRef(lang, address)
     }
 
     getIcon(expression: ExpressionRef): string {
@@ -73,6 +87,7 @@ export function init(context: LanguageContext): LanguageController {
 
     ipcMain.handle('languages-getInstalled', (e) => languageController.getInstalledLanguages())
     ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
+    ipcMain.handle('languages-createPublicExpression', async (e, languageRef, content) => await languageController.createPublicExpression(languageRef, content))
     ipcMain.handle('languages-getExpression', async (event, expressionRef) => await languageController.getExpression(expressionRef))
     ipcMain.handle('languages-interact', async (event, expressionRef, interaction) => await languageController.interact(expressionRef, interaction))
 

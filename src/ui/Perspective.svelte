@@ -14,6 +14,7 @@
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
+import Link from '../acai/Links';
     
     let fileObject = null
     let downloaded = null
@@ -85,8 +86,19 @@
             customElements.define(lang.name, ConstructorIcon);
         }
 
-        const constructorIcon = new constructorIconComponents[lang.name]()
         const container = document.getElementById("constructor-container")
+
+        const constructorIcon = new constructorIconComponents[lang.name]()
+        constructorIcon.commitExpression = async (content) => {
+            const expressionRef = await languageController.createPublicExpression(lang, content)
+            console.log("Created new expression:", JSON.stringify(expressionRef.toString()))
+            container.innerHTML = ''
+            
+        }
+        constructorIcon.discard = () => {
+            container.innerHTML = ''
+        }
+        
         container.appendChild(constructorIcon)
     }
 
