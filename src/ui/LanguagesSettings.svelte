@@ -15,17 +15,17 @@
             sortable: true,
         },
         {
-            key: 'hash',
-            title: 'Hash',
-            value: v => v.languageHash,
+            key: 'address',
+            title: 'address',
+            value: v => v.address,
             sortable: true,
         },
-        {
-            key: 'type',
-            title: 'Type',
-            value: v => v.languageType,
-            sortable: true,
-        }
+        //{
+        //    key: 'type',
+        //    title: 'Type',
+        //    value: v => v.languageType,
+        //    sortable: true,
+        //}
     ]
     
 
