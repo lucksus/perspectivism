@@ -1,5 +1,5 @@
 import type Address from './Address';
-import type LanguageRef from './LanguageRef'
+import LanguageRef from './LanguageRef'
 
 // Expression address + unique Language ID = global expression URL
 export default class ExpressionRef {
@@ -18,3 +18,21 @@ export function exprRef2String(ref: ExpressionRef): string {
     return `expr:${ref.language.address}:${ref.expression}`
 }
 
+export function parseExprURL(url: string): ExpressionRef {
+    let re = /expr:([^:^\s]+):([^:^\s]+)/
+    const matches = re.exec(url)
+    
+    if(!matches || matches.length != 3) {
+        throw new Error("Couldn't parse string as expression URL: " + url)
+    }
+
+    const language = matches[1]
+    const expression = matches[2]
+
+    const languageRef = new LanguageRef()
+    languageRef.address = language
+
+    const ref = new ExpressionRef(languageRef, expression)
+    console.debug(`Parsed ${url} to ${JSON.stringify(ref)}`)
+    return ref
+}
