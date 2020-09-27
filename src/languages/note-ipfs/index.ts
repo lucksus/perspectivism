@@ -4,11 +4,12 @@ import type Language from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
 import Adapter from './adapter'
+import Icon from './build/Icon.js'
 import ConstructorIcon from './build/ConstructorIcon.js'
 
 
 function iconFor(expression: Address): string {
-    return ""
+    return Icon
 }
 
 function constructorIcon(): string {
