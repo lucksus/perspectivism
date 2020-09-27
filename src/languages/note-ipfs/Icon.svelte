@@ -6,9 +6,11 @@
 </script>
 
 <div class="container">
-    <span class="header">Author:</span><span class="value">{expression.author}</span>
-    <span class="header">Timestamp:</span><span class="value">{expression.timestamp}</span>
-    <input disabled bind:value={expression.data}>
+    {#if expression}
+        <span class="header">Author:</span><span class="value">{expression.author}</span>
+        <span class="header">Timestamp:</span><span class="value">{expression.timestamp}</span>
+        <input disabled bind:value={expression.data}>
+    {/if}
 </div>
 
 

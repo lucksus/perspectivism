@@ -16,16 +16,22 @@
     import Fab, {Icon, Label} from '@smui/fab';
     import Link from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
+    import ExpressionIcon from './ExpressionIcon.svelte';
+    import type { link } from 'fs';
+    import iconComponentFromString from './iconComponentFromString';
     
     let fileObject = null
     let downloaded = null
     let rootLinks = []
+    let rootExpressions = []
 
     let languages = []
     let languageIcons = {
         'note-ipfs': 'note'
     }
     let constructorIconComponents = {}
+    let iconComponents = {}
+    let expressions = {}
 
     languageController.getInstalledLanguages().then( installedLanguages => {
         console.log("Got installed languages:", JSON.stringify(installedLanguages))
@@ -70,12 +76,7 @@
         await loadRootLinks()
     }
 
-    function moduleFromString(src, filename) {
-        const Module = module.constructor;
-        const m = new Module();
-        m._compile(src, filename);
-        return m.exports;
-    }
+
 
     async function commitExpression(lang, content, container) {
         const expressionRef = await languageController.createPublicExpression(lang, content)
@@ -94,8 +95,7 @@
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
             const code = await languageController.getConstructorIcon(lang)
-            console.log("EVALUATING CODE: ", code)
-            const ConstructorIcon = moduleFromString(code, lang.name)
+            const ConstructorIcon = iconComponentFromString(code, lang.name)
             constructorIconComponents[lang.name] = ConstructorIcon
             customElements.define(lang.name, ConstructorIcon);
         }
@@ -122,6 +122,13 @@
 <div>
     <h1>Perspective {JSON.stringify(perspective)}</h1>
     <h2>Root links: {JSON.stringify(rootLinks)}</h2>
+
+    <ul>
+        {#each rootLinks as link}
+            <ExpressionIcon expressionURL={link.target} {languageController}></ExpressionIcon>
+        {/each}
+    </ul>
+    
 
     <div id="constructor-container"></div>
 
