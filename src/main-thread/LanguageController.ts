@@ -31,11 +31,11 @@ export class LanguageController {
     }
 
     private languageForExpression(e: ExpressionRef): Language {
-        const language = this.#languages[e.language.address]
+        const language = this.#languages.get(e.language.address)
         if(language) {
-            return language.iconFor(e.expression)
+            return language
         } else {
-            throw new Error("Language for expression not found: " + e)
+            throw new Error("Language for expression not found: " + JSON.stringify(e))
         }
     }
 
@@ -86,6 +86,16 @@ export function init(context: LanguageContext): LanguageController {
 
     ipcMain.handle('languages-getInstalled', (e) => languageController.getInstalledLanguages())
     ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
+    ipcMain.handle('languages-getIcon', async (e, expressionRef) => {
+        let result
+        try {
+            result = await languageController.getIcon(expressionRef)
+        } catch(e) {
+            console.error("ERROR: exception during languageController.getIcon(expressionRef):", e)
+            result = null
+        }
+        return result
+    })
     ipcMain.handle('languages-createPublicExpression', async (e, languageRef, content) => await languageController.createPublicExpression(languageRef, content))
     ipcMain.handle('languages-getExpression', async (event, expressionRef) => await languageController.getExpression(expressionRef))
     ipcMain.handle('languages-interact', async (event, expressionRef, interaction) => await languageController.interact(expressionRef, interaction))
