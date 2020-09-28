@@ -24,13 +24,13 @@ This repository contains two parts that will soon get separated:
     
 ## Why?
 
-**Silos.**
+### Silos.
 Not only are centralized databases and servers data-silos - monolothic applications with their own ontologies and special purpose UIs can't just easily interoperate even if built on decentralized storage.
 
-**Competing tech solutions.**
+### Competing tech solutions.
 Should I build my app on Holochain, Solid, Ethereum, EOS, matrix, IPFS, ThreeFold, Semantic Web, you-name-it? Can I do all of the above, and still use centralized components while stuff is emerging and changing?
 
-**Sensemaking**
+### Sensemaking
 [The Internet is broken](https://www.ted.com/talks/tristan_harris_how_a_handful_of_tech_companies_control_billions_of_minds_every_day#t-26228). We need a solution that helps us escape the [war on sensemaking](https://www.youtube.com/watch?v=7LqaotiGWjQ&t=255s) without introducing the next concentration of power or mono-perspectiv 
 orthodoxy. We need to be able to communicate complex stuff efficiently and freely between memetic tribes. We need an ecosystem of compatible micro-apps that can share information in a meanigful way.
 
@@ -49,9 +49,6 @@ It captures the characteristics of the real-world human network in fron of the s
 2. Even with centralized data-centric apps, we treat communcation services like **Languages**: do you speak WhatsApp or Telegram, Facebook or Twitter or Instagram? For the user, it is a means of reaching specific people and being able to express specific and different (messages, posts, pictures) perceptions.
 3. Meaning is dependent on context. Context is different for each agent - it is constituted by their **Perspective**, their unique set of associations and differentiations, their learned assumptions and expectations of sameness and difference. A specific Perspective as a curated selection of associations is what constitutes the perception of a Gestalt, and thus its meaning.
 
-### Explicit Perspectives are key
-
-
 
 ## Perspectivism
 The core assumption is this:
@@ -61,30 +58,33 @@ Since this might be perceived as a big and unreasonable claim, **Perspectivism**
 
 ### Code overview
 
-* Electron app with all the UI code (which gets bundled to `public/build/bundle.js`) in `src/ui` - based on Svelte.
-* Code that runs in the Node main thread resides in `src/main-thread` - that includes:
+* Electron app with all the UI code (which gets bundled to `public/build/bundle.js`) in [src/ui](src/ui) - based on Svelte.
+* Code that runs in the Node main thread resides in [src/main-thread](src/main-thread) - that includes:
     1. LanguageController - loads language bundles and provide access to installed languages
     2. LinkRepoController - build around GunDB / stores links per Perspective
     3. IPFS adapter and GunDB initialization code
     4. TODO: Holochain conductor adapter and other adapters will follow
-* `src/services` contains proxy objects for the controllers and storage services that are used
+* [src/services](src/services) contains proxy objects for the controllers and storage services that are used
     from the UI thread and that use Electron IPC to connect to the instances in the main thread
 
 LanguageController can load and store Languages in the form of JavaScript bundles assuming they are CommonJS modules exporting a function that creates an object of type Language as defined in [src/acai/Language.ts](src/acai/Language.ts).
 
-[src/languages/note-ipfs](src/languages/note-ipfs) contains a full Language sub-project including UI components that is provided as a first example and proof-of-concept.
+[src/languages/note-ipfs](src/languages/note-ipfs) contains a full sub-project of a language including UI components.
 
 ## Build
 
-Obviously, first do:
+Getting from first checkout to running Perspectivism:
 ```
 npm install
+npm run build
+npm run dev
 ```
 
+### Note on building of built-in Languages
 Currently, Perspectivism comes with one built-in Language `note-ipfs` which implements small text notes stored in IPFS. If you run
 ```
 npm run build
 ```
-it will build both `note-ipfs` and then Perspectivism.
+in the root directory it will also run `npm run build` inside `src/languages/note-ipfs` which will build the Language bundle.
 
 `npm run dev` or `npm start` will not (re-) build the built-in language(s) but will suffice once they are build.
