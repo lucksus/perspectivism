@@ -27,10 +27,10 @@ This repository contains two parts that will soon get separated:
 ### Silos.
 Not only are centralized databases and servers data-silos - monolothic applications with their own ontologies and special purpose UIs can't just easily interoperate even if built on decentralized storage.
 
-### Competing tech solutions.
+### Competing tech.
 Should I build my app on Holochain, Solid, Ethereum, EOS, matrix, IPFS, ThreeFold, Semantic Web, you-name-it? Can I do all of the above, and still use centralized components while stuff is emerging and changing?
 
-### Sensemaking
+### Sensemaking.
 [The Internet is broken](https://www.ted.com/talks/tristan_harris_how_a_handful_of_tech_companies_control_billions_of_minds_every_day#t-26228). We need a solution that helps us escape the [war on sensemaking](https://www.youtube.com/watch?v=7LqaotiGWjQ&t=255s) without introducing the next concentration of power or mono-perspectiv 
 orthodoxy. We need to be able to communicate complex stuff efficiently and freely between memetic tribes. We need an ecosystem of compatible micro-apps that can share information in a meanigful way.
 
