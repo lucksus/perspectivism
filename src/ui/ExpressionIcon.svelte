@@ -15,6 +15,8 @@
     let expression: void | Expression = null
     let customElementName: void | string = null
 
+    let container
+
     try {
         expressionRef = parseExprURL(expressionURL)
     } catch(e) {
@@ -69,6 +71,12 @@
         }
     }
     
+    $: if(container && componentConstructor && expression) {
+        container.inner_HTML = ''
+        const icon = new componentConstructor()
+        icon.expression = expression
+        container.appendChild(icon)
+    }
 
 </script>
 
@@ -79,7 +87,4 @@
     Loading failed!
 {/if}
 
-{#if componentConstructor}
-    <h3>Icon:</h3>
-    <svelte:component this="{componentConstructor}" expression={expression}/>
-{/if}
+<div bind:this={container}/>
