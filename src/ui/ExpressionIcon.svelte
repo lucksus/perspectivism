@@ -2,7 +2,7 @@
     import type Expression from "../acai/Expression"
     import ExpressionRef, { parseExprURL } from "../acai/ExpressionRef";
     import type { LanguageController } from "../main-thread/LanguageController";
-import iconComponentFromString from "./iconComponentFromString";
+    import iconComponentFromString from "./iconComponentFromString";
 
     export let expressionURL: string
     export let componentConstructor
