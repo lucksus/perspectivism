@@ -7,21 +7,13 @@
     export let linkRepoController: object
     export let IPFS: object
 
-    //console.log(perspectiveName)
-    //let perspective = null
-    //$: perspective = $perspectiveStore[perspectiveName]
-    //console.log(JSON.stringify(perspective))
-
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
     import Link from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
-    import type { link } from 'fs';
     import iconComponentFromString from './iconComponentFromString';
     
-    let fileObject = null
-    let downloaded = null
     let rootLinks = []
     let rootExpressions = []
 
@@ -38,45 +30,9 @@
         languages = installedLanguages
     })
 
-    async function saveIPFS() {
-        fileObject = await IPFS.add({content: perspective})
-        console.log("fileObject in UI:", fileObject)
-    }
-
-    async function loadIPFS() {
-        downloaded = await IPFS.cat("QmdLiaDBWdxfHMWMyeSeUR25Cg6jH9x9iJTH1L34JnP5RZ")
-        console.log("downloed in UI:", downloaded)
-    }
-
     async function loadRootLinks() {
         rootLinks = await linkRepoController.getRootLinks(perspective)
     }
-
-    async function createLink() {
-        const link = {
-            source: 'source1',
-            target: 'target1',
-            perdicate: 'wurst',
-        }
-
-        linkRepoController.addRootLink(perspective, link)
-        await new Promise((resolve)=>setTimeout(resolve, 10))
-        await loadRootLinks()
-    }
-
-    async function createLink2() {
-        const link = {
-            source: 'source2',
-            target: 'target2',
-            perdicate: 'wurst',
-        }
-
-        linkRepoController.addRootLink(perspective, link)
-        await new Promise((resolve)=>setTimeout(resolve, 10))
-        await loadRootLinks()
-    }
-
-
 
     async function commitExpression(lang, content, container) {
         const expressionRef = await languageController.createPublicExpression(lang, content)
