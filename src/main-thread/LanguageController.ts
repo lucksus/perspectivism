@@ -10,7 +10,10 @@ import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import { ipcMain } from 'electron'
 
-const builtInLanguages = ['./src/languages/note-ipfs/build/bundle.js' ]
+const builtInLanguages = [
+    'note-ipfs',
+    'url-iframe'
+].map(l => `./src/languages/${l}/build/bundle.js`)
 
 export class LanguageController {
     #languages: Map<string, Language>
