@@ -25,6 +25,37 @@
     let iconComponents = {}
     let expressions = {}
 
+    let content
+    let zoom = 0
+    let translateX = 0
+    let translateY = 0
+    let mousedown = false
+
+    $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
+        console.debug("SET TRANSFORM:", zoom)
+        content.setAttribute("style", `transform: translateX(${translateX}px) translateY(${translateY}px) translateZ(${zoom}px);`)
+    }
+
+    function handleMouseWheel(event) {
+        zoom += event.deltaY * 0.05
+        console.log("zoom:", zoom)
+    }
+
+    function handleMouseMove(event) {
+        if(mousedown) {
+            translateX += event.movementX
+            translateY += event.movementY
+        }
+    }
+
+    function handleMouseDown(event) {
+        mousedown = true
+    }
+
+    function handleMouseUp(event) {
+        mousedown = false
+    }
+
     languageController.getInstalledLanguages().then( installedLanguages => {
         console.log("Got installed languages:", JSON.stringify(installedLanguages))
         languages = installedLanguages
@@ -75,23 +106,36 @@
 </script>
 
 
-<div>
-    <h1>Perspective {JSON.stringify(perspective)}</h1>
-    <h2>Root links: {JSON.stringify(rootLinks)}</h2>
+<div class="perspective-container" 
+    on:mousewheel={handleMouseWheel}
+    on:mousemove={handleMouseMove}
+    on:mousedown={handleMouseDown}
+    on:mouseup={handleMouseUp}
+>
+    <div class="perspective-content" bind:this={content}>
+        <h1>Perspective {JSON.stringify(perspective)}</h1>
+        <h2>Root links: {JSON.stringify(rootLinks)}</h2>
 
-    <ul>
-        {#each rootLinks as link}
-            <ExpressionIcon expressionURL={link.target} {languageController}></ExpressionIcon>
+        <ul>
+            {#each rootLinks as link}
+                <ExpressionIcon expressionURL={link.target} {languageController}></ExpressionIcon>
+            {/each}
+        </ul>
+        
+
+        <div id="constructor-container"></div>
+
+        {#each languages as lang}
+            <Fab extended on:click={() => createExpression(lang)}>
+                <Icon class="material-icons">{languageIcons[lang.name]}</Icon>
+                <Label>Create {lang.name} expression</Label>
+            </Fab>
         {/each}
-    </ul>
-    
-
-    <div id="constructor-container"></div>
-
-    {#each languages as lang}
-        <Fab extended on:click={() => createExpression(lang)}>
-            <Icon class="material-icons">{languageIcons[lang.name]}</Icon>
-            <Label>Create {lang.name} expression</Label>
-        </Fab>
-    {/each}
+    </div>
 </div>
+
+<style>
+    .perspective-container {
+        perspective: 100px;
+    }
+</style>
