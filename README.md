@@ -13,11 +13,15 @@ This repository contains two parts that will soon get separated:
 
 2. **Perspectivism**
     This is an agent-centric browser and example implementation of ACAI. Its a desktop GUI application that provides means for creating Perspectives and creating and linking expressions inside these Perspectives. It therefore holds a set of Languages in which expressions can be created. Languages have access to a list of storage backe-ends (currently implemented only IPFS, Holochain and others will follow soon).
+
+    ![welcome open drawer](screenshots/welcome_open_drawer.png)
     
     Many features, such as Shared Perspectives, are still missing and 
     currently under development.
     
     It includes an [example Language](src/languages/note-ipfs) for simple text notes, implemented on top of IPFS.
+
+    ![perspective with debug](screenshots/perspective_with_debug.png)
     
     TODO: add list of features here.
     
