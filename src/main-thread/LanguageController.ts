@@ -9,6 +9,7 @@ import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import { ipcMain } from 'electron'
+import Keccak from 'sha3-wasm'
 
 const builtInLanguages = ['./src/languages/note-ipfs/build/bundle.js' ]
 
@@ -22,11 +23,14 @@ export class LanguageController {
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
-            const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
+            const hashLength = 96
+            const digest = Keccak.SHAKE256(hashLength).update(bundleBytes).digest()
+            const encoded = multihashes.encode(digest, 'shake-256', 12)
+            const hashString = multihashes.toHexString(encoded)
             const create = require(path.join(process.env.PWD, bundle))
             const language = create(context)
 
-            this.#languages.set(hash, language)
+            this.#languages.set(hashString, language)
         })
     }
 
