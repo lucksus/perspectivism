@@ -145,7 +145,7 @@
 <style>
 	main {
 		text-align: center;
-		padding: 1em;
+		padding: 0;
 		max-width: 240px;
 		margin: 0 auto;
 	}
