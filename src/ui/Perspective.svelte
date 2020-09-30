@@ -112,10 +112,8 @@
     on:mousedown={handleMouseDown}
     on:mouseup={handleMouseUp}
 >
+    <h2 class="debug">Root links: {JSON.stringify(rootLinks)}</h2>
     <div class="perspective-content" bind:this={content}>
-        <h1>Perspective {JSON.stringify(perspective)}</h1>
-        <h2>Root links: {JSON.stringify(rootLinks)}</h2>
-
         <ul>
             {#each rootLinks as link}
                 <ExpressionIcon expressionURL={link.target} {languageController}></ExpressionIcon>
@@ -137,5 +135,11 @@
 <style>
     .perspective-container {
         perspective: 100px;
+    }
+
+    .debug {
+        position: fixed;
+        width: 100%;
+        z-index: -10;
     }
 </style>

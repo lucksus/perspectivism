@@ -118,14 +118,19 @@
 		<Row>
 		<Section>
 			<IconButton class="material-icons" on:click={() => {drawerOpen = !drawerOpen}}>menu</IconButton>
-			<Title>Perspectivism</Title>
+			<Title>
+				Perspectivism
+				{#if selectedMainView.perspective}
+					> {selectedMainView.perspective}
+				{:else if selectedMainView.settings }
+					> {selectedMainView.settings}
+				{/if}
+			</Title>
 		</Section>
 		</Row>
 	</TopAppBar>
 
 	{#if selectedMainView.perspective}
-		<p></p>
-		<h1>selectedPerspective: {selectedMainView.perspective}</h1>
 		<Perspective perspective={$perspectiveStore[selectedMainView.perspective]} {...$$props}></Perspective>
 	{:else if selectedMainView.settings }
 		{#if selectedMainView.settings == 'languages'}
