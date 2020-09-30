@@ -19,7 +19,7 @@ export function exprRef2String(ref: ExpressionRef): string {
 }
 
 export function parseExprURL(url: string): ExpressionRef {
-    let re = /expr:([^:^\s]+):([^:^\s]+)/
+    let re = /^expr:([^:^\s]+):([^\s]+)$/
     const matches = re.exec(url)
     
     if(!matches || matches.length != 3) {
