@@ -1,9 +1,10 @@
 import type Address from '../../acai/Address'
 import Agent from '../../acai/Agent'
 import type Expression from '../../acai/Expression'
-import type { ExpressionAdapter } from '../../acai/Language'
+import type { ExpressionAdapter, PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { IPFSNode } from '../../acai/LanguageContext'
+import { IpfsPutAdapter } from './putAdapter'
 
 const _appendBuffer = (buffer1, buffer2) => {
     const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -16,29 +17,19 @@ const uint8ArrayConcat = (chunks) => {
     return chunks.reduce(_appendBuffer)
 }
 
+
+
 export default class Adapter implements ExpressionAdapter {
-    #agent: Agent
     #IPFS: IPFSNode
 
+    putAdapter: PublicSharing
+
     constructor(context: LanguageContext) {
-        this.#agent = context.agent
         this.#IPFS = context.IPFS
+        this.putAdapter = new IpfsPutAdapter(context)
     }
 
-    async create_public_expression(note: object): Promise<Address> {
-        const expression = {
-            author: this.#agent.did,
-            timestamp: new Date().toString(),
-            data: note,
-        }
-
-        const content = JSON.stringify(expression)
-        const result = await this.#IPFS.add({content})
-        // @ts-ignore
-        return result.cid.toString() as Address
-    }
-
-    async get_expression_by_address(address: Address): Promise<void | Expression> {
+    async get(address: Address): Promise<void | Expression> {
         const cid = address.toString()
 
         const chunks = []
@@ -57,21 +48,5 @@ export default class Adapter implements ExpressionAdapter {
 
         return expression
 
-    }
-
-    /// Get expressions authored by a given Agent/Identity
-    get_by_author(author: Agent, count: number, page: number): Promise<void | Expression> {
-        console.log("get_by_author not implemented for note-ipfs")
-        return null
-    }
-
-    /// Send an expression to someone privately p2p
-    send_private(to: Agent, content: object) {
-        console.log("send_private not implemented for note-ipfs")
-    }
-
-    /// Get private expressions sent to you
-    async inbox(): Promise<Expression[]> {
-        return []
     }
 }

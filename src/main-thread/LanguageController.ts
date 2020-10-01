@@ -1,7 +1,7 @@
 import type Expression from '../acai/Expression';
 import ExpressionRef from '../acai/ExpressionRef';
 import type Language from '../acai/Language'
-import type { InteractionCall } from '../acai/Language'
+import type { InteractionCall, PublicSharing } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
@@ -67,16 +67,34 @@ export class LanguageController {
     }
 
     async createPublicExpression(lang: LanguageRef, content: object): Promise<ExpressionRef> {
-        const address = await this.languageByRef(lang).expressionAdapter.create_public_expression(content)
+        const putAdapter = this.languageByRef(lang).expressionAdapter.putAdapter
+        let address = null
+
+        try {
+            // Ok, first we assume its a PublicSharing put adapter...
+            //@ts-ignore
+            address = await putAdapter.createPublic(content)
+        } catch(e) {
+            try {
+                // ...and if it's not, let's try to treat it like a
+                // ReadOnlyLangauge..
+                //@ts-ignore
+                address = await putAdapter.addressOf(content)
+            } catch(e) {
+                // If both don't work, we don't know what to do with this put adapter :/
+                throw new Error(`Incompatible putAdapter in Languge ${JSON.stringify(lang)}\nPutAdapter: ${Object.keys(putAdapter)}`)
+            }
+        }
+
         return new ExpressionRef(lang, address)
     }
 
-    getIcon(ref: ExpressionRef): string {
-        return this.languageForExpression(ref).iconFor(ref.expression)
+    getIcon(lang: LanguageRef): string {
+        return  this.languageByRef(lang).icon()
     }
 
     async getExpression(ref: ExpressionRef): Promise<void | Expression> {
-        return this.languageForExpression(ref).expressionAdapter.get_expression_by_address(ref.expression)
+        return this.languageForExpression(ref).expressionAdapter.get(ref.expression)
     }
 
     interact(expression: ExpressionRef, interaction: InteractionCall) {

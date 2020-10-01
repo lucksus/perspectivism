@@ -51,7 +51,7 @@
         if(!componentConstructor) {
             try {
                 console.debug("ExpressionIcon loading icon with ref:", JSON.stringify(expressionRef))
-                const code = await languageController.getIcon(expressionRef)
+                const code = await languageController.getIcon(expressionRef.language)
                 componentConstructor = iconComponentFromString(code, "icon")
                 customElements.define(customElementName, componentConstructor)
             } catch (e) {

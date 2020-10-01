@@ -8,7 +8,7 @@ import Icon from './build/Icon.js'
 import ConstructorIcon from './build/ConstructorIcon.js'
 
 
-function iconFor(expression: Address): string {
+function icon(): string {
     return Icon
 }
 
@@ -25,9 +25,8 @@ export default function create(context: LanguageContext): Language {
 
     return {
         name: 'url-iframe',
-        hash: '',
         expressionAdapter,
-        iconFor,
+        icon,
         constructorIcon,
         interactions,
     } as Language

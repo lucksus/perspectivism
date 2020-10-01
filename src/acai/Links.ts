@@ -11,3 +11,9 @@ export default class Link {
         this.predicate = obj.predicate ? obj.predicate : ''
     }
 }
+
+export interface LinkQuery {
+    source?: ExpressionRef;
+    target?: ExpressionRef;
+    predicate?: ExpressionRef;
+}
