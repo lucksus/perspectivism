@@ -84,7 +84,7 @@
             const code = await languageController.getConstructorIcon(lang)
             const ConstructorIcon = iconComponentFromString(code, lang.name)
             constructorIconComponents[lang.name] = ConstructorIcon
-            customElements.define(lang.name, ConstructorIcon);
+            customElements.define(lang.name+"-constructor", ConstructorIcon);
         }
 
         const container = document.getElementById("constructor-container")

@@ -15,9 +15,15 @@ const builtInLanguages = [
     'url-iframe'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
+const aliases = {
+    'http': 'url-iframe',
+    'https': 'url-iframe'
+}
+
 export class LanguageController {
     #languages: Map<string, Language>
     #context: LanguageContext;
+
 
     constructor(context: LanguageContext) {
         this.#context = context
@@ -29,12 +35,19 @@ export class LanguageController {
             const create = require(path.join(process.env.PWD, bundle))
             const language = create(context)
 
+            Object.keys(aliases).forEach(alias => {
+                if(language.name == aliases[alias]) {
+                    aliases[alias] = hash
+                }
+            })
+
             this.#languages.set(hash, language)
         })
     }
 
     private languageForExpression(e: ExpressionRef): Language {
-        const language = this.#languages.get(e.language.address)
+        let address = aliases[e.language.address] ? aliases[e.language.address] : e.language.address
+        const language = this.#languages.get(address)
         if(language) {
             return language
         } else {
@@ -43,7 +56,8 @@ export class LanguageController {
     }
 
     private languageByRef(ref: LanguageRef): Language {
-        const language = this.#languages.get(ref.address)
+        let address = aliases[ref.address] ? aliases[ref.address] : ref.address
+        let language = this.#languages.get(address)
         if(language) {
             return language
         } else {
@@ -57,6 +71,12 @@ export class LanguageController {
             refs.push({
                 address: hash,
                 name: language.name,
+            })
+        })
+        Object.keys(aliases).forEach(alias => {
+            refs.push({
+                address: alias,
+                name: alias,
             })
         })
         return refs

@@ -118,11 +118,11 @@ digraph D {
 
 Links, as described above, point to two expressions. How do you point to an expression, globally? With a URL:
 ```
-expr:Qm58dh238794ydsf:Qmdhw3uir4hdsrukithk
+Qm58dh238794ydsf://Qmdhw3uir4hdsrukithk
 ```
 that is
 ```
-expr:<language address>:<expression address>
+<language address>://<expression address>
 ```
 With the TypeScript types:
 
@@ -142,6 +142,8 @@ class ExpressionRef {
 }
 
 ```
+
+So we just let the Language's address/hash become a URL schema. With aliases like 'https' that are pointing to a hash of an installed Language (overwritable per perspective) we can include all existing URLs as expressions.
 
 ### Links
 Now we can just combine two expression URLs to a link, like a graph edge:

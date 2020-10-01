@@ -13,9 +13,15 @@ export default class Adapter implements ExpressionAdapter {
     }
 
     async get(address: Address): Promise<void | Expression> {
-        const data = { url: address }
+        let url
+        try {
+            url = new URL(address)
+        } catch(e) {
+            address = 'https:' + address
+            url = new URL(address)
+        }
 
-        const url = new URL(address)
+        const data = { url: address }
 
         const expression = {
             author: new Agent(url.hostname),
