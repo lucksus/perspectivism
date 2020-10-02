@@ -7,11 +7,13 @@
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
-	import List, {Item, Text, Graphic, Separator, Subheader} from '@smui/list';
+	import List, {Item, Text, Graphic, Separator, Meta, Subheader} from '@smui/list';
 	import Chip, {Set, Icon, Text as ChipText} from '@smui/chips';
 	import Fab, {Icon as FabIcon} from '@smui/fab';
+	import Button, {Group, GroupItem, Label} from '@smui/button';
 	import Perspective from './Perspective.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
+	import PerspectiveSettings from './PerspectiveSettings.svelte'
 
 	let collapsed = false;
 	let collapsing = false;
@@ -22,6 +24,7 @@
 	let selectedMainView = {
 		perspective: null,
 		settings: null,
+		edit: null,
 	}
 
 	function createNewPerspective() {
@@ -40,6 +43,13 @@
 			selectedMainView.perspective = null
 		}
 		perspectiveStore.remove(perspective)
+	}
+
+	function editPerspective(perspective) {
+		selectedMainView.perspective = null
+		selectedMainView.settings = null
+		selectedMainView.edit = perspective
+		console.log("EDIT PERSPECTIVE", perspective)
 	}
 
 </script>
@@ -62,19 +72,32 @@
 		<Content>
 		<List>
 			{#each Object.keys($perspectiveStore) as perspective}
-			<Item href="javascript:void(0)"
-				on:mouseenter="{e => hovered[perspective] = false}"
-				on:mouseleave="{e => hovered[perspective] = true}"
-				on:click={() => selectedMainView = { perspective, settings: null }}
-				activated={selectedMainView.perspective == perspective}
-			>
-				<Text>{perspective}</Text>
-				<Fab mini="true" bind:exited={hovered[perspective]}
-					on:click={()=>deletePerspective(perspective)}
+				<Item href="javascript:void(0)"
+					on:mouseenter="{e => hovered[perspective] = false}"
+					on:mouseleave="{e => hovered[perspective] = true}"
+					activated={selectedMainView.perspective == perspective}
+					on:click={() => selectedMainView = { perspective, settings: null }}
 				>
-					<FabIcon class="material-icons">delete</FabIcon>
-				</Fab>
-			</Item>
+					<Text>{perspective}</Text>
+					{#if !hovered[perspective]}
+					<Meta>
+						<div on:click|stopPropagation="">
+							<Group variant="unelevated">
+								<Button variant="unelevated" color="secondary" on:click={()=>deletePerspective(perspective)}>
+									<Label>Delete</Label>
+								</Button>
+								<Button variant="unelevated" on:click={(event)=>{
+									editPerspective(perspective)
+								}}>
+									<Label>Edit</Label>
+								</Button>
+							</Group>
+						</div>
+						
+					</Meta>
+					{/if}
+				</Item>
+				
 			{/each}
 
 			{#if Object.keys($perspectiveStore).length == 0}
@@ -124,6 +147,8 @@
 					> {selectedMainView.perspective}
 				{:else if selectedMainView.settings }
 					> {selectedMainView.settings}
+				{:else if selectedMainView.edit }
+					> Editing Perspective "{selectedMainView.edit}"
 				{/if}
 			</Title>
 		</Section>
@@ -136,6 +161,8 @@
 		{#if selectedMainView.settings == 'languages'}
 			<LanguagesSettings languageController={languageController}></LanguagesSettings>
 		{/if}
+	{:else if selectedMainView.edit }
+		<PerspectiveSettings perspectiveName={selectedMainView.edit} {...$$props}></PerspectiveSettings>
 	{:else}
 		<h1>Welcome to Perspectivism!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>

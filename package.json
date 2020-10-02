@@ -18,6 +18,7 @@
     "@rollup/plugin-typescript": "^4.0.0",
     "@smui/fab": "^1.0.0",
     "@smui/icon-button": "^1.0.0",
+    "@smui/textfield": "^1.0.0",
     "@smui/top-app-bar": "^1.0.0",
     "@tsconfig/svelte": "^1.0.0",
     "electron": "^10.1.1",
@@ -35,8 +36,10 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
+    "@smui/button": "^1.0.0",
     "@smui/chips": "^1.0.0",
     "@smui/drawer": "^1.0.0",
+    "@smui/form-field": "^1.0.0",
     "@smui/list": "^1.0.0",
     "esm": "^3.2.25",
     "gun": "^0.2020.520",

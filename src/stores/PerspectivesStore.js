@@ -31,6 +31,18 @@ module.exports = async function createPerspectiveStore() {
                 return perspectives
             })
             save()
+        },
+        update: (name, perspective) => {
+            update((perspectives) => {
+                if(name != perspective.name) {
+                    delete perspectives[name]
+                    name = perspective.name
+                }
+
+                perspectives[name] = perspective
+                return perspectives
+            })
+            save()
         }
     };
 }
