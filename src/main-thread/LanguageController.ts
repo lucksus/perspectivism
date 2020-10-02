@@ -65,21 +65,29 @@ export class LanguageController {
         }
     }
 
-    getInstalledLanguages(): LanguageRef[] {
+    private filteredLanguageRefs(propertyFilter: void | string): LanguageRef[] {
         let refs: LanguageRef[] = []
         this.#languages.forEach((language, hash) => {
-            refs.push({
-                address: hash,
-                name: language.name,
-            })
-        })
-        Object.keys(aliases).forEach(alias => {
-            refs.push({
-                address: alias,
-                name: alias,
-            })
+            if(!propertyFilter || Object.keys(language).includes(propertyFilter)) {
+                refs.push({
+                    address: hash,
+                    name: language.name,
+                })
+            }
         })
         return refs
+    }
+
+    getInstalledLanguages(): LanguageRef[] {
+        return this.filteredLanguageRefs()
+    }
+
+    getLanguagesWithExpressionUI(): LanguageRef[] {
+        return this.filteredLanguageRefs("expressionUI")
+    }
+
+    getLanguagesWithLinksAdapter(): LanguageRef[] {
+        return this.filteredLanguageRefs("linksAdapter")
     }
 
     getConstructorIcon(lang: LanguageRef): void | string {
@@ -130,6 +138,8 @@ export function init(context: LanguageContext): LanguageController {
     const languageController = new LanguageController(context)
 
     ipcMain.handle('languages-getInstalled', (e) => languageController.getInstalledLanguages())
+    ipcMain.handle('languages-getLanguagesWithExpressionUI', (e) => languageController.getLanguagesWithExpressionUI())
+    ipcMain.handle('languages-getLanguagesWithLinksAdapter', (e) => languageController.getLanguagesWithLinksAdapter())
     ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
     ipcMain.handle('languages-getIcon', async (e, expressionRef) => {
         let result

@@ -56,7 +56,7 @@
         mousedown = false
     }
 
-    languageController.getInstalledLanguages().then( installedLanguages => {
+    languageController.getLanguagesWithExpressionUI().then( installedLanguages => {
         console.log("Got installed languages:", JSON.stringify(installedLanguages))
         languages = installedLanguages
     })
