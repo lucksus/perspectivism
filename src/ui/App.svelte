@@ -49,7 +49,12 @@
 		selectedMainView.perspective = null
 		selectedMainView.settings = null
 		selectedMainView.edit = perspective
-		console.log("EDIT PERSPECTIVE", perspective)
+	}
+
+	function editPerspectiveSubmit() {
+		selectedMainView.perspective = null
+		selectedMainView.settings = null
+		selectedMainView.edit = null
 	}
 
 </script>
@@ -162,7 +167,7 @@
 			<LanguagesSettings languageController={languageController}></LanguagesSettings>
 		{/if}
 	{:else if selectedMainView.edit }
-		<PerspectiveSettings perspectiveName={selectedMainView.edit} {...$$props}></PerspectiveSettings>
+		<PerspectiveSettings perspectiveName={selectedMainView.edit} {...$$props} on:submit={editPerspectiveSubmit}></PerspectiveSettings>
 	{:else}
 		<h1>Welcome to Perspectivism!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>
