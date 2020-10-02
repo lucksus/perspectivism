@@ -12,7 +12,8 @@ import { ipcMain } from 'electron'
 
 const builtInLanguages = [
     'note-ipfs',
-    'url-iframe'
+    'url-iframe',
+    'gun-links'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {

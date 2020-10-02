@@ -1,6 +1,7 @@
 import type Address from './Address'
 import type Agent from './Agent'
 import type Expression from './Expression'
+import type ExpressionRef from './ExpressionRef';
 import type LinkQuery from './Links'
 
 export default interface Language {
@@ -97,10 +98,13 @@ export interface LinksAdapter {
     writable(): boolean;
     public(): boolean;
     others(): Agent[];
-    
-    get(query: LinkQuery): Expression[];
-    put(linkExpression: Expression);
-    
+
+    getRootLinks(): Promise<Expression[]>;
+    addRootLink(link: Expression) ;
+    addLink(linkExpression: Expression);
+    getLinksFrom(source: ExpressionRef): Promise<Expression[]>;
+    getLinksTo(target: ExpressionRef): Promise<Expression[]>;
+
     //Get push notified by added links
     addCallback(callback: NewLinksObserver);
 }
