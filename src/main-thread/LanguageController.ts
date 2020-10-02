@@ -82,8 +82,16 @@ export class LanguageController {
         return refs
     }
 
-    getConstructorIcon(lang: LanguageRef): string {
-        return this.languageByRef(lang).constructorIcon()
+    getConstructorIcon(lang: LanguageRef): void | string {
+        return this.languageByRef(lang).expressionUI?.constructorIcon()
+    }
+
+    getSettingsIcon(lang: LanguageRef): void | string {
+        return this.languageByRef(lang).settingsUI?.settingsIcon()
+    }
+
+    getIcon(lang: LanguageRef): void | string {
+        return  this.languageByRef(lang).expressionUI?.icon()
     }
 
     async createPublicExpression(lang: LanguageRef, content: object): Promise<ExpressionRef> {
@@ -107,10 +115,6 @@ export class LanguageController {
         }
 
         return new ExpressionRef(lang, address)
-    }
-
-    getIcon(lang: LanguageRef): string {
-        return  this.languageByRef(lang).icon()
     }
 
     async getExpression(ref: ExpressionRef): Promise<void | Expression> {

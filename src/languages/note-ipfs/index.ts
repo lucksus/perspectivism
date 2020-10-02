@@ -4,17 +4,7 @@ import type Language from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
 import Adapter from './adapter'
-import Icon from './build/Icon.js'
-import ConstructorIcon from './build/ConstructorIcon.js'
-
-
-function icon(): string {
-    return Icon
-}
-
-function constructorIcon(): string {
-    return ConstructorIcon
-}
+import { NoteExpressionUI } from './noteExpressionUI'
 
 function interactions(a: Agent, expression: Address): Interaction[] {
     return []
@@ -22,12 +12,12 @@ function interactions(a: Agent, expression: Address): Interaction[] {
 
 export default function create(context: LanguageContext): Language {
     const expressionAdapter = new Adapter(context)
+    const expressionUI = new NoteExpressionUI()
 
     return {
         name: 'note-ipfs',
         expressionAdapter,
-        icon,
-        constructorIcon,
+        expressionUI,
         interactions,
     } as Language
 }

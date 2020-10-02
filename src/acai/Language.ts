@@ -9,7 +9,7 @@ export default interface Language {
     // Adapter implementations:
     // ExpressionAdapter is only mandatory adapter which implements
     // means of getting an Expression by address and putting an expression
-    readonly expressionAdapter: ExpressionAdapter;
+    readonly expressionAdapter?: ExpressionAdapter;
 
     // Optional adapter for getting Expressions by author
     readonly getByAuthorAdapter?: GetByAuthorAdapter;
@@ -20,12 +20,21 @@ export default interface Language {
     // Optional adpater for sharing links
     readonly linksAdapter?: LinksAdapter;
 
-    // UI factories returning web components:
-    icon(): string; // returns JS code that implements this Language's web component
-    constructorIcon(): string;
+    readonly expressionUI?: ExpressionUI;
+    readonly settingsUI?: SettingsUI;    
 
     // All available interactions agent 'a' could execute on given expression
     interactions(a: Agent, expression: Address): Interaction[];
+}
+
+export interface ExpressionUI {
+    // UI factories returning web components:
+    icon(): string; // returns JS code that implements this Language's web component
+    constructorIcon(): string;
+}
+
+export interface SettingsUI {
+    settingsIcon(): string;
 }
 
 // This interface has to implementend by every language
@@ -81,6 +90,8 @@ export interface GetAllAdapter {
     getAll(filter: any, count: number, page: number): Promise<void | Expression[]>;
 }
 
+export type NewLinksObserver = (links: Expression[])=>void;
+
 // Implement this if your Language can share Links between Agents' Perspectives
 export interface LinksAdapter {
     writable(): boolean;
@@ -91,7 +102,7 @@ export interface LinksAdapter {
     put(linkExpression: Expression);
     
     //Get push notified by added links
-    addCallback(callback: (newRemoteLinks: Expression[])=>void);
+    addCallback(callback: NewLinksObserver);
 }
 
 // Implement this if your Langauge supports direct private messages
