@@ -7,20 +7,29 @@
 
     export let languageController: LanguageController;
     let languages: LanguageRef[] = []
-    let settingsIconConstructors = new Map()
+    let settingsIconConstructors = {}
 
-    languageController.getInstalledLanguages().then(l => {
+    languageController.getInstalledLanguages().then(async l => {
         languages = l
-        checkLanguagesForSettingsIcon()
+        await checkLanguagesForSettingsIcon()
+        createCustomSettingsIcons()
     })
 
-    $: if(languages.length > 0) checkLanguagesForSettingsIcon()
+    function addSettingsIcon(lang, IconConstructor) {
+      settingsIconConstructors[lang.address] = IconConstructor
+    }
+
+    async function asyncForEach(array, callback) {
+      for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array);
+      }
+    }
     
-    function checkLanguagesForSettingsIcon() {
-        languages.forEach(async lang => {
+    async function checkLanguagesForSettingsIcon() {
+      await asyncForEach(languages, async lang => {
             const settingsComponentName = lang.name + '-settings'
             console.debug("CHecking for", settingsComponentName)
-            if(!settingsIconConstructors.get(lang)) {
+            if(!settingsIconConstructors[lang.address]) {
                 console.debug("not there yet...")
                 const fromRegistry = customElements.get(settingsComponentName)
                 if(!fromRegistry) {
@@ -30,11 +39,35 @@
                     if(code) {
                         const SettingsIcon = iconComponentFromString(code, settingsComponentName)
                         customElements.define(settingsComponentName, SettingsIcon);
-                        settingsIconConstructors.set(lang, SettingsIcon)
+                        addSettingsIcon(lang, SettingsIcon)
                     }
                 }
             }  
         })
+    }
+
+    function createCustomSettingsIcons() {
+      for(const lang in settingsIconConstructors) {
+        let icon = new settingsIconConstructors[lang]()
+        document.getElementById(langToSettingsContainer(lang)).appendChild(icon)
+        icon.updateSettings = updateSettings(lang)
+      }
+    }
+
+    function langToSettingsContainer(lang) {
+      let address
+      if(lang.address) {
+        address = lang.address
+      } else {
+        address = lang
+      }
+      return `${address}-settings-icon`
+    }
+
+    function updateSettings(lang) {
+      return (newSettings) => {
+        console.log("Settings settings for lang", lang, newSettings)
+      }
     }
 
     let columns = [
@@ -75,9 +108,7 @@
           <Cell>{lang.name}</Cell>
           <Cell>{lang.address}</Cell>
           <Cell>
-              {#if settingsIconConstructors.get(lang)}
-                <svelte:component this={settingsIconConstructors.get(lang)}></svelte:component>
-              {/if}
+              <div id={langToSettingsContainer(lang)}></div>
           </Cell>
         </Row>
       {/each}
