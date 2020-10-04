@@ -4,7 +4,7 @@
   "license": "CAL-1.0",
   "main": "main.js",
   "scripts": {
-    "build-languages": "cd src/languages/note-ipfs && npm run build && cd - && cd src/languages/url-iframe && npm run build && cd - && cd src/languages/gun-links && npm run build && cd -",
+    "build-languages": "cd src/languages/note-ipfs && npm i && npm run build && cd - && cd src/languages/url-iframe && npm i && npm run build && cd - && cd src/languages/gun-links && npm i && npm run build && cd -",
     "build": "tsc && rollup -c && npm run build-languages",
     "dev": "tsc && rollup -c -w",
     "serve": "sirv public",
