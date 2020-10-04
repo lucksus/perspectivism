@@ -9,6 +9,7 @@ import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import { ipcMain } from 'electron'
+import * as Config from './Config'
 
 const builtInLanguages = [
     'note-ipfs',
@@ -103,6 +104,23 @@ export class LanguageController {
         return  this.languageByRef(lang).expressionUI?.icon()
     }
 
+    getSettings(lang: LanguageRef): object {
+        const FILEPATH = path.join(Config.languagesPath, lang.name, 'settings.json')
+        if(fs.existsSync(FILEPATH)) {
+            return JSON.parse(fs.readFileSync(FILEPATH).toString())
+        } else {
+            return {}
+        } 
+    }
+
+    putSettings(lang: LanguageRef, settings: object) {
+        const directory = path.join(Config.languagesPath, lang.name)
+        if(!fs.existsSync(directory))
+            fs.mkdirSync(directory)
+        const FILEPATH = path.join(directory, 'settings.json')
+        fs.writeFileSync(FILEPATH, JSON.stringify(settings))
+    }
+
     async createPublicExpression(lang: LanguageRef, content: object): Promise<ExpressionRef> {
         const putAdapter = this.languageByRef(lang).expressionAdapter.putAdapter
         let address = null
@@ -156,6 +174,8 @@ export function init(context: LanguageContext): LanguageController {
     ipcMain.handle('languages-createPublicExpression', async (e, languageRef, content) => await languageController.createPublicExpression(languageRef, content))
     ipcMain.handle('languages-getExpression', async (event, expressionRef) => await languageController.getExpression(expressionRef))
     ipcMain.handle('languages-interact', async (event, expressionRef, interaction) => await languageController.interact(expressionRef, interaction))
+    ipcMain.handle('languages-getSettings', async (event, languageRef) => await languageController.getSettings(languageRef))
+    ipcMain.handle('languages-putSettings', async (event, languageRef, settings) => await languageController.putSettings(languageRef, settings))
 
     return languageController
 }

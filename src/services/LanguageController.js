@@ -10,4 +10,6 @@ module.exports =  {
     getSettingsIcon:        (lang)          => ipcRenderer.invoke('languages-getSettingsIcon', lang),
     getExpression:          (expr)          => ipcRenderer.invoke('languages-getExpression', expr),
     interact:               (expr, call)    => ipcRenderer.invoke('languages-interact', expr, call),
+    getSettings:            (lang)          => ipcRenderer.invoke('languages-getSettings', lang),
+    putSettings:            (lang, settings)=> ipcRenderer.invoke('languages-putSettings', lang, settings),
 }

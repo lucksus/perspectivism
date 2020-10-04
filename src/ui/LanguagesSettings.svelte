@@ -1,23 +1,20 @@
 <script lang="ts">
-    import SvelteTable from "svelte-table";
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
+    import Button from '@smui/button'
     import type LanguageRef from "../acai/LanguageRef";
     import type { LanguageController } from "../main-thread/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
 
     export let languageController: LanguageController;
     let languages: LanguageRef[] = []
-    let settingsIconConstructors = {}
+    let settingsIconConstructors = new Map()
+    let settingsIcons = {}
 
     languageController.getInstalledLanguages().then(async l => {
         languages = l
         await checkLanguagesForSettingsIcon()
         createCustomSettingsIcons()
     })
-
-    function addSettingsIcon(lang, IconConstructor) {
-      settingsIconConstructors[lang.address] = IconConstructor
-    }
 
     async function asyncForEach(array, callback) {
       for (let index = 0; index < array.length; index++) {
@@ -29,69 +26,44 @@
       await asyncForEach(languages, async lang => {
         const settingsComponentName = lang.name + '-settings'
         console.debug("CHecking for", settingsComponentName)
-        if(!settingsIconConstructors[lang.address]) {
+        const code = await languageController.getSettingsIcon(lang)
+        if(!code) {
+          return
+        }
+        if(!settingsIconConstructors.get(lang)) {
           console.debug("not there yet...")
-          const fromRegistry = customElements.get(settingsComponentName)
-          if(!fromRegistry) {
+          let SettingsIcon = customElements.get(settingsComponentName)
+          if(!SettingsIcon) {
               console.debug("not in registry yet...")
-              const code = await languageController.getSettingsIcon(lang)
-              console.debug("GOT CODE:", code)
-              if(code) {
-                  const SettingsIcon = iconComponentFromString(code, settingsComponentName)
-                  customElements.define(settingsComponentName, SettingsIcon);
-                  addSettingsIcon(lang, SettingsIcon)
-              }
-          }
+              SettingsIcon = iconComponentFromString(code, settingsComponentName)
+              customElements.define(settingsComponentName, SettingsIcon);
+          } 
+          settingsIconConstructors.set(lang, SettingsIcon)
         }  
       })
     }
 
-    function createCustomSettingsIcons() {
-      for(const lang in settingsIconConstructors) {
-        let icon = new settingsIconConstructors[lang]()
+    async function createCustomSettingsIcons() {
+      for(const item of settingsIconConstructors) {
+        const lang = item[0]
+        const iconConstructor = item[1]
+        const icon = new iconConstructor()
+        console.log("lang", lang)
+        console.log("icon", icon)
         document.getElementById(langToSettingsContainer(lang)).appendChild(icon)
-        icon.updateSettings = updateSettings(lang)
+        settingsIcons[lang.address] = icon
+        icon.settings = await languageController.getSettings(lang)
       }
     }
 
     function langToSettingsContainer(lang) {
-      let address
-      if(lang.address) {
-        address = lang.address
-      } else {
-        address = lang
-      }
+      const address = lang.address ? lang.address : lang
       return `${address}-settings-icon`
     }
 
     function updateSettings(lang) {
-      return (newSettings) => {
-        console.log("Settings settings for lang", lang, newSettings)
-      }
+      languageController.putSettings(lang,settingsIcons[lang.address].settings )
     }
-
-    let columns = [
-        {
-            key: 'name',
-            title: 'Name',
-            value: v => v.name,
-            sortable: true,
-        },
-        {
-            key: 'address',
-            title: 'address',
-            value: v => v.address,
-            sortable: true,
-        },
-        //{
-        //    key: 'type',
-        //    title: 'Type',
-        //    value: v => v.languageType,
-        //    sortable: true,
-        //}
-    ]
-    
-
 </script>
 
 <DataTable>
@@ -109,6 +81,9 @@
           <Cell>{lang.address}</Cell>
           <Cell>
               <div id={langToSettingsContainer(lang)}></div>
+              {#if settingsIcons[lang.address]}
+                <Button on:click={()=>updateSettings(lang)}>Update</Button>
+              {/if}
           </Cell>
         </Row>
       {/each}
