@@ -142,6 +142,7 @@ export function init(context: LanguageContext): LanguageController {
     ipcMain.handle('languages-getLanguagesWithExpressionUI', (e) => languageController.getLanguagesWithExpressionUI())
     ipcMain.handle('languages-getLanguagesWithLinksAdapter', (e) => languageController.getLanguagesWithLinksAdapter())
     ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
+    ipcMain.handle('languages-getSettingsIcon', (e, languageRef) => languageController.getSettingsIcon(languageRef))
     ipcMain.handle('languages-getIcon', async (e, expressionRef) => {
         let result
         try {

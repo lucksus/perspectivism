@@ -16,6 +16,7 @@
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.0.0",
+    "@smui/data-table": "^1.0.0",
     "@smui/fab": "^1.0.0",
     "@smui/icon-button": "^1.0.0",
     "@smui/textfield": "^1.0.0",
