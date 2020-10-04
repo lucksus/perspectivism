@@ -24,18 +24,24 @@ const aliases = {
 
 export class LanguageController {
     #languages: Map<string, Language>
+    #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: LanguageContext;
 
 
     constructor(context: LanguageContext) {
         this.#context = context
         this.#languages = new Map()
+        this.#languageConstructors = new Map()
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
             const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
             const create = require(path.join(process.env.PWD, bundle))
-            const language = create(context)
+            
+            const name = create(context).name
+            const customSettings = this.getSettings({name, address: hash} as LanguageRef)
+            const language = create({...context, customSettings})
+
 
             Object.keys(aliases).forEach(alias => {
                 if(language.name == aliases[alias]) {
@@ -44,6 +50,7 @@ export class LanguageController {
             })
 
             this.#languages.set(hash, language)
+            this.#languageConstructors.set(hash, create)
         })
     }
 
@@ -119,6 +126,12 @@ export class LanguageController {
             fs.mkdirSync(directory)
         const FILEPATH = path.join(directory, 'settings.json')
         fs.writeFileSync(FILEPATH, JSON.stringify(settings))
+
+        this.#languages.set(lang.address, null)
+        const create = this.#languageConstructors.get(lang.address)
+        const context = this.#context
+        const newInstance = create({...context, customSettings: settings})
+        this.#languages.set(lang.address, newInstance)
     }
 
     async createPublicExpression(lang: LanguageRef, content: object): Promise<ExpressionRef> {
