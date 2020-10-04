@@ -27,23 +27,23 @@
     
     async function checkLanguagesForSettingsIcon() {
       await asyncForEach(languages, async lang => {
-            const settingsComponentName = lang.name + '-settings'
-            console.debug("CHecking for", settingsComponentName)
-            if(!settingsIconConstructors[lang.address]) {
-                console.debug("not there yet...")
-                const fromRegistry = customElements.get(settingsComponentName)
-                if(!fromRegistry) {
-                    console.debug("not in registry yet...")
-                    const code = await languageController.getSettingsIcon(lang)
-                    console.debug("GOT CODE:", code)
-                    if(code) {
-                        const SettingsIcon = iconComponentFromString(code, settingsComponentName)
-                        customElements.define(settingsComponentName, SettingsIcon);
-                        addSettingsIcon(lang, SettingsIcon)
-                    }
-                }
-            }  
-        })
+        const settingsComponentName = lang.name + '-settings'
+        console.debug("CHecking for", settingsComponentName)
+        if(!settingsIconConstructors[lang.address]) {
+          console.debug("not there yet...")
+          const fromRegistry = customElements.get(settingsComponentName)
+          if(!fromRegistry) {
+              console.debug("not in registry yet...")
+              const code = await languageController.getSettingsIcon(lang)
+              console.debug("GOT CODE:", code)
+              if(code) {
+                  const SettingsIcon = iconComponentFromString(code, settingsComponentName)
+                  customElements.define(settingsComponentName, SettingsIcon);
+                  addSettingsIcon(lang, SettingsIcon)
+              }
+          }
+        }  
+      })
     }
 
     function createCustomSettingsIcons() {
