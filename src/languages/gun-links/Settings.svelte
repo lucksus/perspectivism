@@ -13,6 +13,7 @@
 
 <div class="container" on:click:stopPropagation>
     {#if settings }
+        Gun Peer:
         <input bind:value={settings.gunDbPeer}>
     {:else}
         Loading...
