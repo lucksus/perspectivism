@@ -22,3 +22,5 @@ export default function create(context: LanguageContext): Language {
         interactions,
     } as Language
 }
+
+export const name: string = "url-iframe"

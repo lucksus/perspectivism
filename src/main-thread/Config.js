@@ -19,3 +19,13 @@ export function init() {
         fs.mkdirSync(languagesPath)
     }
 }
+
+export function getLanguageStoragePath(name) {
+    const languageConfigPath = path.join(languagesPath, name)
+    if(!fs.existsSync(languageConfigPath))
+        fs.mkdirSync(languageConfigPath)
+    const storageDirectory = path.join(languageConfigPath, "storage")
+    if(!fs.existsSync(storageDirectory))
+        fs.mkdirSync(storageDirectory)
+    return storageDirectory
+}

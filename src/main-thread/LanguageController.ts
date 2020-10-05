@@ -36,11 +36,11 @@ export class LanguageController {
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
             const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
-            const create = require(path.join(process.env.PWD, bundle))
+            const { default: create, name } = require(path.join(process.env.PWD, bundle))
             
-            const name = create(context).name
             const customSettings = this.getSettings({name, address: hash} as LanguageRef)
-            const language = create({...context, customSettings})
+            const storageDirectory = Config.getLanguageStoragePath(name)
+            const language = create({...context, customSettings, storageDirectory})
 
 
             Object.keys(aliases).forEach(alias => {
