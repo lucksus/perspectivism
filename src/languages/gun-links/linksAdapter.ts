@@ -1,8 +1,8 @@
 import type Expression from "../../acai/Expression";
 import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
 import type Link from "../../acai/Links";
-import type { LinkQuery } from "../../acai/Links";
-import Gun from "gun"
+const Gun = require("gun")
+require('gun/lib/load.js')
 import type LanguageContext from "../../acai/LanguageContext";
 import { SHA3 } from "sha3";
 import type ExpressionRef from "../../acai/ExpressionRef";
@@ -46,6 +46,7 @@ export class GunLinksAdapter implements LinksAdapter {
     }
 
     addRootLink(link: Expression) {
+        console.log("GUN-LINKS| adding root link:", link)
         const linkNode = this.addLink(link)
         this.#gun.get('root-links').set(linkNode)
     }
