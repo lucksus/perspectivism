@@ -13,7 +13,7 @@ export default class LinkRepoController {
     }
 
     private getPerspective(perspective: Perspective): any {
-        return this.#root.get(perspective.name)
+        return this.#root.get(perspective.uuid)
     }
 
 

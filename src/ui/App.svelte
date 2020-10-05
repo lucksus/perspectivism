@@ -35,7 +35,7 @@
 		}
 
 		const name = prefix+number
-		perspectiveStore.add(name, {name})
+		perspectiveStore.add({name})
 	}
 
 	function deletePerspective(perspective) {
@@ -83,7 +83,7 @@
 					activated={selectedMainView.perspective == perspective}
 					on:click={() => selectedMainView = { perspective, settings: null }}
 				>
-					<Text>{perspective}</Text>
+					<Text>{$perspectiveStore[perspective].name}</Text>
 					{#if !hovered[perspective]}
 					<Meta>
 						<div on:click|stopPropagation="">
@@ -149,11 +149,11 @@
 			<Title>
 				Perspectivism
 				{#if selectedMainView.perspective}
-					> {selectedMainView.perspective}
+					> {$perspectiveStore[selectedMainView.perspective].name}
 				{:else if selectedMainView.settings }
 					> {selectedMainView.settings}
 				{:else if selectedMainView.edit }
-					> Editing Perspective "{selectedMainView.edit}"
+					> Editing Perspective "{$perspectiveStore[selectedMainView.edit].name}"
 				{/if}
 			</Title>
 		</Section>
@@ -167,7 +167,7 @@
 			<LanguagesSettings languageController={languageController}></LanguagesSettings>
 		{/if}
 	{:else if selectedMainView.edit }
-		<PerspectiveSettings perspectiveName={selectedMainView.edit} {...$$props} on:submit={editPerspectiveSubmit}></PerspectiveSettings>
+		<PerspectiveSettings perspectiveId={selectedMainView.edit} {...$$props} on:submit={editPerspectiveSubmit}></PerspectiveSettings>
 	{:else}
 		<h1>Welcome to Perspectivism!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>

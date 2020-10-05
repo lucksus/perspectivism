@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let perspectiveName
+    export let perspectiveId
     export let perspectiveStore
     export let languageController
 
@@ -11,7 +11,7 @@
     const dispatch = createEventDispatcher();
 
 
-    let perspective = $perspectiveStore[perspectiveName]
+    let perspective = $perspectiveStore[perspectiveId]
     let linkLanguages = []
     let linkLanguagesLoadingDone = false
     
@@ -24,7 +24,7 @@
     
 
     function save() {
-        perspectiveStore.update(perspectiveName, perspective)
+        perspectiveStore.update(perspective)
         dispatch('submit')
     }
 </script>

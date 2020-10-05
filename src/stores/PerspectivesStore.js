@@ -1,5 +1,6 @@
 const { writable } = require('svelte/store')
 const { ipcRenderer } = require('electron')
+const { v4: uuidv4 } = require('uuid')
 
 module.exports = async function createPerspectiveStore() {
     let perspectives = null
@@ -18,28 +19,27 @@ module.exports = async function createPerspectiveStore() {
 
     return {
         subscribe,
-        add: (name, perspective) => {
+        add: (perspective) => {
+            if(!perspective.uuid) {
+                perspective.uuid = uuidv4()
+            }
             update((perspectives) => {
-                perspectives[name] = perspective
+                perspectives[perspective.uuid] = perspective
                 return perspectives
             })
             save()
         },
-        remove: (name) => {
+        remove: (uuid) => {
             update((perspectives) => {
-                delete perspectives[name]
+                delete perspectives[uuid]
                 return perspectives
             })
             save()
         },
-        update: (name, perspective) => {
+        update: (perspective) => {
+            const uuid = perspective.uuid
             update((perspectives) => {
-                if(name != perspective.name) {
-                    delete perspectives[name]
-                    name = perspective.name
-                }
-
-                perspectives[name] = perspective
+                perspectives[uuid] = perspective
                 return perspectives
             })
             save()
