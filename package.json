@@ -42,6 +42,7 @@
     "@smui/drawer": "^1.0.0",
     "@smui/form-field": "^1.0.0",
     "@smui/list": "^1.0.0",
+    "@smui/select": "^1.0.0",
     "esm": "^3.2.25",
     "gun": "^0.2020.520",
     "gun-file": "^1.0.123",
