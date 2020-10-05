@@ -58,8 +58,26 @@ export default class LinkRepoController {
         }
     }
 
-    async getRootLinks(p: Perspective): Promise<Expression[]> {
-        console.log("LINK REPO: getRootLinks for ", p.name)
+    async syncWithSharingAdapter(p: Perspective) {
+        const [localLinks, remoteLinks] = await this.getRootLinksLocalAndRemote(p)
+        const includes = (link, list) => {
+            return undefined != list.find(e => 
+                e.author == link.author &&
+                e.timestamp == link.timestamp &&
+                e.source == link.data.source &&
+                e.target == link.data.target &&
+                e.predicate == link.data.predicate
+                )
+        }
+        localLinks.forEach(l => {
+            if(!includes(l, remoteLinks)) {
+                this.callLinksAdapter(p, "addRootLink", l)
+            }
+        })
+
+    }
+
+    private getRootLinksLocalAndRemote(p: Perspective): Promise<Expression[][]> {
         const localLinks = new Promise((resolve) => {
             setTimeout(()=>resolve([]), 200)
             this.getPerspective(p)
@@ -71,11 +89,13 @@ export default class LinkRepoController {
                 }, {wait:1})
         })
 
-        const both = await Promise.all([
-            localLinks,
-            this.callLinksAdapter(p, 'getRootLinks')
-        ])
+        const remoteLinks = this.callLinksAdapter(p, 'getRootLinks')
 
+        return Promise.all([localLinks, remoteLinks])
+    } 
+
+    async getRootLinks(p: Perspective): Promise<Expression[]> {
+        const both = await this.getRootLinksLocalAndRemote(p)
         const merged = [].concat.apply([], both)
 
         console.log("MERGED LINKS:", merged)
@@ -147,6 +167,7 @@ export function init(context: any): LinkRepoController {
     ipcMain.handle('links-getTo', async (e, p: Perspective, target: ExpressionRef) => await linkRepoController.getLinksTo(p, target))
     ipcMain.handle('links-add', (e, p: Perspective, link: Link) => linkRepoController.addLink(p, link))
     ipcMain.handle('links-remove', (e, p: Perspective, link: Link) => linkRepoController.removeLink(p, link))
+    ipcMain.handle('links-sync', (e, p: Perspective) => linkRepoController.syncWithSharingAdapter(p))
 
     return linkRepoController
 }

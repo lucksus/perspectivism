@@ -2,7 +2,7 @@
 	import type { LanguageController } from '../main-thread/LanguageController';
 	export let perspectiveStore: object;
 	export let languageController: LanguageController;
-	export let linkRepoController: object;
+	export let linkRepoController: LinkRepoController;
 	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
@@ -14,12 +14,17 @@
 	import Perspective from './Perspective.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
+	import type LinkRepoController from '../main-thread/LinkRepoController';
 
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
 	let drawer
 	let hovered = JSON.parse(JSON.stringify($perspectiveStore))
+
+	for(const pID in $perspectiveStore) {
+		linkRepoController.syncWithSharingAdapter($perspectiveStore[pID])
+	}
 
 	let selectedMainView = {
 		perspective: null,
@@ -153,7 +158,7 @@
 				{:else if selectedMainView.settings }
 					> {selectedMainView.settings}
 				{:else if selectedMainView.edit }
-					> Editing Perspective "{$perspectiveStore[selectedMainView.edit].name}"
+					> Editing Perspective "{$perspectiveStore[selectedMainView.edit].nameAdd }"
 				{/if}
 			</Title>
 		</Section>
