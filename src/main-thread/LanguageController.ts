@@ -1,6 +1,7 @@
 import type Expression from '../acai/Expression';
 import ExpressionRef from '../acai/ExpressionRef';
 import type Language from '../acai/Language'
+import type { LinksAdapter } from '../acai/Language'
 import type { InteractionCall, PublicSharing } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
@@ -163,6 +164,10 @@ export class LanguageController {
 
     interact(expression: ExpressionRef, interaction: InteractionCall) {
         console.log("TODO")
+    }
+
+    getLinksAdapter(lang: LanguageRef): void | LinksAdapter {
+        return this.languageByRef(lang).linksAdapter
     }
 }
 

@@ -5,4 +5,5 @@ export default class Perspective {
     uuid: string;
     author: Agent;
     timestamp: string;
+    linksSharingLanguage: string;
 }

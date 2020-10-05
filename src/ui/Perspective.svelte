@@ -62,7 +62,8 @@
     })
 
     async function loadRootLinks() {
-        rootLinks = await linkRepoController.getRootLinks(perspective)
+        const rootExpressions = await linkRepoController.getRootLinks(perspective)
+        rootLinks = rootExpressions.map(e => e.data)
     }
 
     async function commitExpression(lang, content, container) {
