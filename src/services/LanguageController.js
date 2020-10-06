@@ -23,6 +23,10 @@ module.exports =  {
     getSettings:            (lang)          => ipcRenderer.invoke('languages-getSettings', lang),
     putSettings:            (lang, settings)=> ipcRenderer.invoke('languages-putSettings', lang, settings),
 
-    addLinkObserver: (langAddress, observer) => observersByLanguage[langAddress] = observer,
+    addLinkObserver: (langAddress, observer) => {
+        if(!observersByLanguage[langAddress])
+            observersByLanguage[langAddress] = []
+        observersByLanguage[langAddress].push(observer)
+    }
 
 }
