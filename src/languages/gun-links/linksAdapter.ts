@@ -38,6 +38,12 @@ export class GunLinksAdapter implements LinksAdapter {
         
         this.#gun = new Gun(opts)
 
+        this.#gun.get('root-links').on(links => {
+            this.#callbacks.forEach(callback => {
+                callback(links)
+            })
+        })
+
     }
 
     writable() {
