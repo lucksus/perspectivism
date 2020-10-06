@@ -31,7 +31,7 @@ IPFS.init().then((IPFS) => {
 function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1200,
+    width: 1600,
     height: 1000,
     webPreferences: {
       nodeIntegration: true,
