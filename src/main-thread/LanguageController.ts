@@ -144,7 +144,8 @@ export class LanguageController {
         this.#languages.set(lang.address, null)
         const create = this.#languageConstructors.get(lang.address)
         const context = this.#context
-        const newInstance = create({...context, customSettings: settings})
+        const storageDirectory = Config.getLanguageStoragePath(lang.name)
+        const newInstance = create({...context, storageDirectory, customSettings: settings})
         this.#languages.set(lang.address, newInstance)
     }
 
