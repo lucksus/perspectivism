@@ -106,8 +106,8 @@
     $: if(perspective) loadRootLinks()
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
         languageController.addLinkObserver(perspective.linksSharingLanguage, (links) => {
-        console.log("LINK OBSERVER got links:", links)
-            rootExpressions.map(e => e.data).forEach(l => {
+            console.log("LINK OBSERVER got links:", links)
+            links.map(e => e.data).forEach(l => {
                 rootLinks.push(l)
             })
         })
