@@ -35,12 +35,12 @@ export default [
 		}),
 		commonjs(),
 		postcss({
-			extract: true,
+			extract: false,
 			minimize: true,
 			use: [
 			  ['sass', {
 				includePaths: [
-				  './src/ui/theme',
+				  './',
 				  './node_modules'
 				]
 			  }]

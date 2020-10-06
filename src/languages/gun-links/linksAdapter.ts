@@ -12,13 +12,31 @@ export class GunLinksAdapter implements LinksAdapter {
     #gun: any
 
     constructor(context: LanguageContext) {
-        const dbPath = context.storageDirectory + "/gun"
-
         this.#callbacks = []
-        this.#gun = new Gun({
+
+        const dbPath = context.storageDirectory + "/gun"
+        const opts = {
             file: dbPath,
             localStorage: false
-        })
+        }
+
+        //@ts-ignore
+        if(context.customSettings.gunDbPeer) {
+            //@ts-ignore
+            opts.peers = {} 
+            //@ts-ignore
+            opts.peers[context.customSettings.gunDbPeer] = {}
+        }
+
+        //@ts-ignore
+        if(context.customSettings.runServer) {
+            //@ts-ignore
+            let server = require('http').createServer().listen(context.customSettings.port);
+            //@ts-ignore
+            opts.web = server
+        }
+        
+        this.#gun = new Gun(opts)
 
     }
 
