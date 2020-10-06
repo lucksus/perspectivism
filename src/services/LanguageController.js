@@ -1,5 +1,15 @@
 const { ipcRenderer } = require('electron')
 
+let observersByLanguage = {}
+
+ipcRenderer.on("links-incoming", (e, links, langRef) => {
+    const observers = observersByPerspective[langRef.address]
+    if(observersByPerspective)
+        observers.forEach(o => {
+            o(links, langRef)
+        })
+})
+
 module.exports =  {
     getInstalledLanguages:  ()              => ipcRenderer.invoke('languages-getInstalled'),
     getLanguagesWithExpressionUI:  ()       => ipcRenderer.invoke('languages-getLanguagesWithExpressionUI'),
@@ -12,4 +22,7 @@ module.exports =  {
     interact:               (expr, call)    => ipcRenderer.invoke('languages-interact', expr, call),
     getSettings:            (lang)          => ipcRenderer.invoke('languages-getSettings', lang),
     putSettings:            (lang, settings)=> ipcRenderer.invoke('languages-putSettings', lang, settings),
+
+    addLinkObserver: (langAddress, observer) => observersByLanguage[langAddress] = observer,
+
 }

@@ -14,6 +14,7 @@ export class GunLinksAdapter implements LinksAdapter {
     constructor(context: LanguageContext) {
         const dbPath = context.storageDirectory + "/gun"
 
+        this.#callbacks = []
         this.#gun = new Gun({
             file: dbPath,
             localStorage: false

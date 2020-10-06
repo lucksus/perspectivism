@@ -11,6 +11,7 @@ import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import { ipcMain } from 'electron'
 import * as Config from './Config'
+import type Address from '../acai/Address';
 
 const builtInLanguages = [
     'note-ipfs',
@@ -23,16 +24,20 @@ const aliases = {
     'https': 'url-iframe'
 }
 
+type LinkObservers = (links: Expression[], lang: LanguageRef)=>void;
+
 export class LanguageController {
     #languages: Map<string, Language>
     #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: LanguageContext;
+    #linkObservers: LinkObservers[];
 
 
     constructor(context: LanguageContext) {
         this.#context = context
         this.#languages = new Map()
         this.#languageConstructors = new Map()
+        this.#linkObservers = []
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
@@ -49,6 +54,14 @@ export class LanguageController {
                     aliases[alias] = hash
                 }
             })
+
+            if(language.linksAdapter) {
+                language.linksAdapter.addCallback(links => {
+                    this.#linkObservers.forEach(o => {
+                        o(links, {name, address: hash} as LanguageRef)
+                    })
+                })
+            }
 
             this.#languages.set(hash, language)
             this.#languageConstructors.set(hash, create)
@@ -168,6 +181,10 @@ export class LanguageController {
 
     getLinksAdapter(lang: LanguageRef): void | LinksAdapter {
         return this.languageByRef(lang).linksAdapter
+    }
+
+    addLinkObserver(observer) {
+        this.#linkObservers.push(observer)
     }
 }
 

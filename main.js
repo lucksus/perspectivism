@@ -16,10 +16,16 @@ IPFS.init().then((IPFS) => {
   const agent = { did: 'did:local-test-agent' }
   const context = { agent, IPFS }
   const languageController = LanguageController.init(context)
-  LinkRepoController.init({gun, languageController, agent})
+  const linkRepoController = LinkRepoController.init({gun, languageController, agent})
+
   console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
 
-  app.whenReady().then(createWindow)
+  app.whenReady().then(() => {
+    const win = createWindow()
+    languageController.addLinkObserver((links, langRef) => {
+      win.webContents.send("links-incoming", links, langRef)
+    })
+  })
 })
 
 function createWindow () {
@@ -38,6 +44,8 @@ function createWindow () {
 
   // Open the DevTools.
   win.webContents.openDevTools()
+
+  return win
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common

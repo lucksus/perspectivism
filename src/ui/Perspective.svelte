@@ -4,7 +4,7 @@
 
     export let perspective: Perspective
     export let languageController: LanguageController
-    export let linkRepoController: object
+    export let linkRepoController: LinkRepoController
     export let IPFS: object
 
     import IconButton from '@smui/icon-button';
@@ -13,6 +13,7 @@
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
+    import type LinkRepoController from '../main-thread/LinkRepoController';
     
     let rootLinks = []
     let rootExpressions = []
@@ -103,6 +104,14 @@
     }
 
     $: if(perspective) loadRootLinks()
+    $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
+        languageController.addLinkObserver(perspective.linksSharingLanguage, (links) => {
+        console.log("LINK OBSERVER got links:", links)
+            rootExpressions.map(e => e.data).forEach(l => {
+                rootLinks.push(l)
+            })
+        })
+    }
 
 </script>
 
