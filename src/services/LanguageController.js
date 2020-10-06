@@ -3,8 +3,8 @@ const { ipcRenderer } = require('electron')
 let observersByLanguage = {}
 
 ipcRenderer.on("links-incoming", (e, links, langRef) => {
-    const observers = observersByPerspective[langRef.address]
-    if(observersByPerspective)
+    const observers = observersByLanguage[langRef.address]
+    if(observers)
         observers.forEach(o => {
             o(links, langRef)
         })
