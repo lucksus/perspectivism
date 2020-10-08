@@ -71,7 +71,12 @@ export default class LinkRepoController {
         }
         localLinks.forEach(l => {
             if(!includes(l, remoteLinks)) {
-                this.callLinksAdapter(p, "addRootLink", l)
+                try {
+                    this.callLinksAdapter(p, "addRootLink", l)
+                } catch(e) {
+                    console.error("Error while trying to call links adapter:", e)
+                }
+                
             }
         })
 
