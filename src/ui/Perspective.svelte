@@ -14,8 +14,9 @@
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import type LinkRepoController from '../main-thread/LinkRepoController';
+    import LinksStore from '../stores/LinksStore'
     
-    let rootLinks = []
+    let rootLinks = new LinksStore()
     let rootExpressions = []
 
     let languages = []
@@ -64,7 +65,7 @@
 
     async function loadRootLinks() {
         const rootExpressions = await linkRepoController.getRootLinks(perspective)
-        rootLinks = rootExpressions.map(e => e.data)
+        rootExpressions.forEach(e => rootLinks.add(e))
     }
 
     async function commitExpression(lang, content, container) {
@@ -74,8 +75,8 @@
         console.log("Created new expression:", exprURL)
         
         const link = new Link({source: exprURL, target: exprURL})
-        rootLinks = [...rootLinks, link]
         linkRepoController.addRootLink(perspective, link)
+        loadRootLinks()
 
         container.innerHTML = ''
     }
@@ -103,12 +104,15 @@
         container.appendChild(constructorIcon)
     }
 
-    $: if(perspective) loadRootLinks()
+    $: if(perspective) {
+        rootLinks = new LinksStore()
+        loadRootLinks()
+    }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
-        languageController.addLinkObserver(perspective.linksSharingLanguage, (links) => {
+        languageController.addLinkObserver(perspective.linksSharingLanguage, links => {
             console.log("LINK OBSERVER got links:", links)
-            links.map(e => e.data).forEach(l => {
-                rootLinks = [...rootLinks, l]
+            links.forEach(l => {
+                rootLinks.add(l)
             })
         })
     }
@@ -125,8 +129,8 @@
     <h2 class="debug">Root links: {JSON.stringify(rootLinks)}</h2>
     <div class="perspective-content" bind:this={content}>
         <ul>
-            {#each rootLinks as link}
-                <ExpressionIcon expressionURL={link.target} {languageController}></ExpressionIcon>
+            {#each $rootLinks as link}
+                <ExpressionIcon expressionURL={link.data.target} {languageController}></ExpressionIcon>
             {/each}
         </ul>
         

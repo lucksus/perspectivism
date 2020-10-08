@@ -11,3 +11,4 @@
 /src/languages/**/*.js.map
 /src/languages/**/build
 /src/languages/**/node_modules
+/src/stores/LinksStore.js
