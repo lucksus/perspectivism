@@ -34,7 +34,7 @@
             <tr>
                 <td>Listen to port:</td>
                 <td>
-                    {#if settings.listen}
+                    {#if settings.runServer}
                         <input bind:value={settings.port}>
                     {:else}
                         <input disabled bind:value={settings.port}>
