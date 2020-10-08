@@ -181,6 +181,7 @@
 
 <style>
 	main {
+		height: 100%;
 		text-align: center;
 		padding: 0;
 		max-width: 240px;

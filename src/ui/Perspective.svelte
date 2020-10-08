@@ -148,6 +148,7 @@
 
 <style>
     .perspective-container {
+        height: 100%;
         perspective: 100px;
     }
 
