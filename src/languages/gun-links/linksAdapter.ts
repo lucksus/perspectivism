@@ -38,9 +38,10 @@ export class GunLinksAdapter implements LinksAdapter {
         
         this.#gun = new Gun(opts)
 
-        this.#gun.get('root-links').on(links => {
+        this.#gun.get('root-links').map().open(links => {
+            console.log("GUN-LINKS: Received root links:", links)
             this.#callbacks.forEach(callback => {
-                callback(links)
+                callback([links])
             })
         })
 
