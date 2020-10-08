@@ -10,7 +10,14 @@ function isLink(l: any): boolean {
 }
 
 function equal(l1: Expression, l2: Expression): boolean {
-    return JSON.stringify(l1) === JSON.stringify(l2)
+    return JSON.stringify(l1.author) == JSON.stringify(l2.author) &&
+        l1.timestamp == l2.timestamp &&
+        //@ts-ignore
+        l1.data.source == l2.data.source &&
+        //@ts-ignore
+        l1.data.predicate == l2.data.predicate &&
+        //@ts-ignore
+        l1.data.target == l2.data.target
 }
 
 export default class LinksStore {
