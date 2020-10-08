@@ -46,17 +46,24 @@ export default class LinkRepoController {
 
     private callLinksAdapter(p: Perspective, functionName: string, ...args): Promise<any> {
         if(p.linksSharingLanguage && p.linksSharingLanguage!="") {
-            try {
-                const langRef = {address: p.linksSharingLanguage, name: ''} as LanguageRef
-                const linksAdapter = this.#languageController.getLinksAdapter(langRef)
-                if(linksAdapter) {
-                    return linksAdapter[functionName](...args)
-                } else {
-                    throw new Error("LinksSharingLanguage '"+p.linksSharingLanguage+"' set in perspective '"+p.name+"' not installed!")
-                }
-            } catch(e) {
-                console.error("Error while trying to call links adapter:", e)
-            }
+            return new Promise(async (resolve, reject) => {
+                setTimeout(() => resolve([]), 2000)
+                try {  
+                    const langRef = {address: p.linksSharingLanguage, name: ''} as LanguageRef
+                    const linksAdapter = this.#languageController.getLinksAdapter(langRef)
+                    if(linksAdapter) {
+                        console.debug(`Calling linksAdapter.${functionName}(${args})`)
+                        const result = await linksAdapter[functionName](...args)
+                        console.debug("Got result:", result)
+                        resolve(result)
+                    } else {
+                        throw new Error("LinksSharingLanguage '"+p.linksSharingLanguage+"' set in perspective '"+p.name+"' not installed!")
+                    }
+                } catch(e) {
+                    console.error("Error while trying to call links adapter:", e)
+                    reject(e)
+                }        
+            })
         } else {
             return Promise.resolve([])
         }
