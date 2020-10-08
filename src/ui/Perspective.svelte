@@ -108,7 +108,7 @@
         languageController.addLinkObserver(perspective.linksSharingLanguage, (links) => {
             console.log("LINK OBSERVER got links:", links)
             links.map(e => e.data).forEach(l => {
-                rootLinks.push(l)
+                rootLinks = [...rootLinks, l]
             })
         })
     }
