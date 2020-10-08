@@ -2,11 +2,11 @@ import { writable } from 'svelte/store'
 import type Expression from '../acai/Expression';
 
 function isExpression(e: any): boolean {
-    return e.author && e.timestamp && e.data
+    return e && e.author && e.timestamp && e.data
 }
 
 function isLink(l: any): boolean {
-    return l.source && l.target
+    return l && l.source && l.target
 }
 
 function equal(l1: Expression, l2: Expression): boolean {
