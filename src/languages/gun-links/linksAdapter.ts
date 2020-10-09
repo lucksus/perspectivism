@@ -3,7 +3,7 @@ import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
 import type Link from "../../acai/Links";
 const Gun = require("gun")
 require('gun/lib/load.js')
-require('gun/lib/nts.js')
+require('gun/lib/time.js')
 import type LanguageContext from "../../acai/LanguageContext";
 import { SHA3 } from "sha3";
 import type ExpressionRef from "../../acai/ExpressionRef";
