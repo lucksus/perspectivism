@@ -16,7 +16,8 @@ import type Address from '../acai/Address';
 const builtInLanguages = [
     'note-ipfs',
     'url-iframe',
-    'gun-links'
+    'gun-links',
+    'ipfs-links'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
