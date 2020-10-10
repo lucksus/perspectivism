@@ -13,9 +13,8 @@ export default {
 	output: {
 		sourcemap: true,
 		format: 'cjs',
-		name: 'GunLinks',
+		name: 'IpfsLinks',
 		file: 'build/bundle.js',
-		intro: 'var window={}'
 	},
 	plugins: [
 		string({
