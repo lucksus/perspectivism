@@ -31,7 +31,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
     #storage: string
     #roomName: string
     #key: any
-    #initialized: boolean
+    #initialized: Promise<void>
     #room: any
     #peerList: object
 
@@ -41,41 +41,48 @@ export class IpfsLinksAdapter implements LinksAdapter {
         this.#storage = context.storageDirectory
         //@ts-ignore
         this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
-        this.#initialized = false
         this.#room = new Room(this.#IPFS, this.#roomName)
         this.#room.on('message', this.handlePubSubMessage)
-        this.init()
+        this.#initialized = this.init()
         
     }
 
-    async init() {
-        // Get/initialize IPNS key
-        const keys = await this.#IPFS.key.list()
-        this.#key = keys.find(e => e.name == this.#roomName)
-        if(!this.#key) {
-            this.#key = await this.#IPFS.gen(this.#roomName)
-        }
+    async init(): Promise<void> {
+        return new Promise(async (resolve) => {
+            // Get/initialize IPNS key
+            const keys = await this.#IPFS.key.list()
+            this.#key = keys.find(e => e.name == this.#roomName)
+            if(!this.#key) {
+                console.log(this.#IPFS)
+                this.#key = await this.#IPFS.key.gen(this.#roomName)
+            }
 
-        // Read/initialized peer list
-        this.#peerList = []
-        if(fs.existsSync(this.paths().peers)) {
-            this.#peerList = JSON.parse(fs.readFileSync(this.paths().peers).toString())
-        }
+            // Read/initialized peer list
+            this.#peerList = []
+            if(fs.existsSync(this.paths().peers)) {
+                this.#peerList = JSON.parse(fs.readFileSync(this.paths().peers).toString())
+            }
 
-        this.#initialized = true
+            resolve()
+        })
     }
 
     private async getLinksOfPeer(peer, ipns): Promise<void | object> {
+        console.log(`IPFS-LINKS| getLinksOfPeer(${peer}, ${ipns}) called`)
         let result = undefined
-        try {        
+        try {
+            console.log(`IPFS-LINKS| getLinksOfPeer() 1`)        
             const cid = ipns.toString()
 
             const chunks = []
             // @ts-ignore
             for await (const chunk of this.#IPFS.cat(cid)) {
+                console.log(`IPFS-LINKS| getLinksOfPeer() 2`)
                 chunks.push(chunk)
             }
+            console.log(`IPFS-LINKS| getLinksOfPeer() 3`)        
             result = JSON.parse(uint8ArrayConcat(chunks).toString());
+            console.log(`IPFS-LINKS| getLinksOfPeer(${peer}, ${ipns}):`, result)
         } catch(e) {
             console.error("IPFS LINKS| Error while retrieving links of peer", peer, " via IPNS CID", ipns,":\n", e)
         }
@@ -133,7 +140,9 @@ export class IpfsLinksAdapter implements LinksAdapter {
     }
 
     async getRootLinks(): Promise<Expression[]> {
-        let requestList = [{peer: 'me', ipns: this.#key}]
+        await this.#initialized
+
+        let requestList = [{peer: 'me', ipns: this.#key.id}]
         Object.keys(this.#peerList).forEach(peer => {
             requestList.push({peer, ipns: this.#peerList[peer]})
         })
@@ -158,6 +167,8 @@ export class IpfsLinksAdapter implements LinksAdapter {
     }
 
     private async _addLink(link: Expression, root: boolean) {
+        await this.#initialized
+
         let linksObject = await this.getLinksOfPeer("me", this.#key)
         //@ts-ignore
         if(!linksObject || !linksObject.links || !linksObject.rootLinks) {
