@@ -107,13 +107,17 @@ export class IpfsLinksAdapter implements LinksAdapter {
     private handlePubSubMessage(message) {
         const { from, data } = message
         const ipnsCid = data.toString()
+        console.log("IPFS-LINKS| PubSub message from", from, ipnsCid)
         this.rememberPeer(from, ipnsCid)
         //this.checkUpdateLinksOfPeer(from, ipnsCid)
         this.notify(from)
     }
 
     private async notify(peer) {
-        const linksOfPeer = await this.getLinksOfPeer(peer, this.#peerList[peer])
+        debug(`notify(${peer}`)
+        const cid = await this.resolveIPNS(this.#peerList[peer])
+        const linksOfPeer = await this.getLinksOfPeer(peer, cid)
+        debug(`links=${linksOfPeer}`)
         if(linksOfPeer) {
             //@ts-ignore
             this.#callbacks.forEach(cb => cb(linksOfPeer.links))
@@ -130,6 +134,27 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return result.cid
     }
 
+    private async resolveIPNS(ipns: string): Promise<string> {
+        let resolved
+        for await (const name of this.#IPFS.name.resolve(ipns)) {
+            resolved = name
+        }
+        return resolved
+    }
+
+    private async myResolvedIPNSObject(): Promise<string> {
+        let resolved
+        try {
+            debug("resolving #key:", this.#key)
+            resolved = this.resolveIPNS(this.#key.id)
+        } catch(e) {
+            debug("Couldn't get resolve my IPNS name. Publishing...")
+            resolved = await this.publish({links:[], rootLinks:[]})
+        }
+
+        return resolved
+    }
+
     writable() {
         return true
     }
@@ -140,23 +165,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
     others() {
         return []
-    }
-
-    private async myResolvedIPNSObject(): Promise<string> {
-        let resolved
-        try {
-            console.debug("IPFS-LINKS| resolving #key:", this.#key)
-            
-            for await (const name of this.#IPFS.name.resolve(this.#key.id)) {
-                resolved = name
-                console.log("resolved:", resolved)
-            }
-        } catch(e) {
-            console.log("IPFS-LINKS| Couldn't get resolve my IPNS name. Publishing...")
-            resolved = await this.publish({links:[], rootLinks:[]})
-        }
-
-        return resolved
     }
 
     async getRootLinks(): Promise<Expression[]> {
