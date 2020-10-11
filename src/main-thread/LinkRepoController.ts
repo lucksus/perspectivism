@@ -73,18 +73,19 @@ export default class LinkRepoController {
         const [localLinks, remoteLinks] = await this.getRootLinksLocalAndRemote(p)
         const includes = (link, list) => {
             return undefined != list.find(e => 
-                e.author == link.author &&
+                JSON.stringify(e.author) == JSON.stringify(link.author) &&
                 e.timestamp == link.timestamp &&
                 e.source == link.data.source &&
                 e.target == link.data.target &&
                 e.predicate == link.data.predicate
                 )
         }
-        localLinks.forEach(l => {
+        for(const i in localLinks) {
+            const l = localLinks[i]
             if(!includes(l, remoteLinks)) {
-                this.callLinksAdapter(p, "addRootLink", l)
+                await this.callLinksAdapter(p, "addRootLink", l)
             }
-        })
+        }
 
     }
 
