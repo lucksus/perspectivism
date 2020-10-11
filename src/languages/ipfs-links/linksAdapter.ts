@@ -58,7 +58,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             }
 
             // Read/initialized peer list
-            this.#peerList = []
+            this.#peerList = {}
             if(fs.existsSync(this.paths().peers)) {
                 this.#peerList = JSON.parse(fs.readFileSync(this.paths().peers).toString())
             }
