@@ -176,23 +176,25 @@ export class IpfsLinksAdapter implements LinksAdapter {
             })
         )
 
+        console.log("IPFS-LINKS| getRootLinks - allLinksOfAllPeers =", allLinksOfallPeers)
+
         //@ts-ignore
         const merged = [].concat.apply([], allLinksOfallPeers.map(e => e.links))
         return merged
     }
 
     async addRootLink(link: Expression) {
-        this._addLink(link, true)
+        await this._addLink(link, true)
     }
 
-    addLink(link: Expression) {
-        this._addLink(link, false)
+    async addLink(link: Expression) {
+        await this._addLink(link, false)
     }
 
     private async _addLink(link: Expression, root: boolean) {
         await this.#initialized
 
-        let linksObject = await this.getLinksOfPeer("me", this.#key)
+        let linksObject = await this.getLinksOfPeer("me", await this.myResolvedIPNSObject())
         //@ts-ignore
         if(!linksObject || !linksObject.links || !linksObject.rootLinks) {
             linksObject = {
@@ -206,7 +208,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             //@ts-ignore
             linksObject.rootLinks.push(linksObject.links.length - 1)
         }
-        this.publish(linksObject)
+        await this.publish(linksObject)
     }
 
     async getLinksFrom(source: ExpressionRef): Promise<Expression[]> {
