@@ -25,6 +25,10 @@ const example = {
     rootLinks: [1, 5]
 }
 
+function debug(...args) {
+    console.debug("IPFS-LINKS|", ...args)
+}
+
 export class IpfsLinksAdapter implements LinksAdapter {
     #callbacks: NewLinksObserver[];
     #IPFS: any
@@ -67,31 +71,30 @@ export class IpfsLinksAdapter implements LinksAdapter {
         })
     }
 
-    private async getLinksOfPeer(peer, ipns): Promise<void | object> {
-        console.log(`IPFS-LINKS| getLinksOfPeer(${peer}, ${ipns}) called`)
+    private async getLinksOfPeer(peer, cid): Promise<void | object> {
+        debug(`getLinksOfPeer(${peer}, ${cid}) called`)
         let result = undefined
         try {
-            console.log(`IPFS-LINKS| getLinksOfPeer() 1`)        
-            const cid = ipns.toString()
+            cid = cid.toString()
 
             const chunks = []
             // @ts-ignore
             for await (const chunk of this.#IPFS.cat(cid)) {
-                console.log(`IPFS-LINKS| getLinksOfPeer() 2`)
                 chunks.push(chunk)
             }
-            console.log(`IPFS-LINKS| getLinksOfPeer() 3`)        
             result = JSON.parse(uint8ArrayConcat(chunks).toString());
-            console.log(`IPFS-LINKS| getLinksOfPeer(${peer}, ${ipns}):`, result)
         } catch(e) {
-            console.error("IPFS LINKS| Error while retrieving links of peer", peer, " via IPNS CID", ipns,":\n", e)
+            console.error("IPFS LINKS| Error while retrieving links of peer", peer, " via IPNS CID", cid,":\n", e)
         }
 
+        debug(`getLinksOfPeer() returning:`, result)
         return result
     }
 
     private rememberPeer(peer, ipns) {
+        debug("remember peer:", peer, ipns)
         if(this.#peerList[peer.toString()] != ipns) {
+            debug("new peer!")
             this.#peerList[peer.toString()] = ipns
             fs.writeFileSync(this.paths().peers, JSON.stringify(this.#peerList))
         }
