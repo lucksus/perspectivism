@@ -120,11 +120,14 @@ export class IpfsLinksAdapter implements LinksAdapter {
         }
     }
 
-    private publish(links: object) {
+    private async publish(links: object): Promise<string>{
         const content = JSON.stringify(links)
-        const result = this.#IPFS.add({content})
-        this.#IPFS.name.publish(result.cid, {key: this.#key})
-        this.#room.broadcast(this.#key)
+        const result = await this.#IPFS.add(content)
+        console.log("IPFS-LINKS| published:", result, content)
+        const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
+        console.log("IPFS-LINKS: updated IPNS:", publishResult)
+        this.#room.broadcast(publishResult.name)
+        return result.cid
     }
 
     writable() {
@@ -139,10 +142,30 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return []
     }
 
+    private async myResolvedIPNSObject(): Promise<string> {
+        let resolved
+        try {
+            console.debug("IPFS-LINKS| resolving #key:", this.#key)
+            
+            for await (const name of this.#IPFS.name.resolve(this.#key.id)) {
+                resolved = name
+                console.log("resolved:", resolved)
+            }
+        } catch(e) {
+            console.log("IPFS-LINKS| Couldn't get resolve my IPNS name. Publishing...")
+            resolved = await this.publish({links:[], rootLinks:[]})
+        }
+
+        return resolved
+    }
+
     async getRootLinks(): Promise<Expression[]> {
         await this.#initialized
 
-        let requestList = [{peer: 'me', ipns: this.#key.id}]
+        const resolved = await this.myResolvedIPNSObject()
+
+        let requestList = [{peer: 'me', ipns: resolved}]
+
         Object.keys(this.#peerList).forEach(peer => {
             requestList.push({peer, ipns: this.#peerList[peer]})
         })
