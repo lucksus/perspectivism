@@ -8,8 +8,8 @@ export default interface Language {
     readonly name: string;
 
     // Adapter implementations:
-    // ExpressionAdapter is only mandatory adapter which implements
-    // means of getting an Expression by address and putting an expression
+    // ExpressionAdapter implements means of getting an Expression
+    // by address and putting an expression
     readonly expressionAdapter?: ExpressionAdapter;
 
     // Optional adapter for getting Expressions by author
