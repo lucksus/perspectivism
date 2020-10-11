@@ -91,7 +91,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
     }
 
     private rememberPeer(peer, ipns) {
-        if(!this.#peerList[peer.toString()] == ipns) {
+        if(this.#peerList[peer.toString()] != ipns) {
             this.#peerList[peer.toString()] = ipns
             fs.writeFileSync(this.paths().peers, JSON.stringify(this.#peerList))
         }
