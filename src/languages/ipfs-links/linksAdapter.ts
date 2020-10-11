@@ -42,7 +42,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         //@ts-ignore
         this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
         this.#room = new Room(this.#IPFS, this.#roomName)
-        this.#room.on('message', this.handlePubSubMessage)
+        this.#room.on('message', message => this.handlePubSubMessage(message))
         this.#initialized = this.init()
         
     }
@@ -149,7 +149,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             
         const allLinksOfallPeers = await Promise.all(
             requestList.map(r => {
-                this.getLinksOfPeer(r.peer, r.ipns)
+                return this.getLinksOfPeer(r.peer, r.ipns)
             })
         )
 
