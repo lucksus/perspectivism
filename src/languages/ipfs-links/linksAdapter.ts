@@ -87,7 +87,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             console.error("IPFS LINKS| Error while retrieving links of peer", peer, " via IPNS CID", cid,":\n", e)
         }
 
-        debug(`getLinksOfPeer() returning:`, result)
+        //debug(`getLinksOfPeer() returning:`, result)
         return result
     }
 
@@ -109,16 +109,17 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
     private handlePubSubMessage(message) {
         const { from, data } = message
-        const ipnsCid = data.toString()
-        console.log("IPFS-LINKS| PubSub message from", from, ipnsCid)
-        this.rememberPeer(from, ipnsCid)
+        const cid = data.toString()
+        console.log("IPFS-LINKS| PubSub message from", from, cid)
+        this.rememberPeer(from, cid)
         //this.checkUpdateLinksOfPeer(from, ipnsCid)
         this.notify(from)
     }
 
     private async notify(peer) {
         debug(`notify(${peer}`)
-        const cid = await this.resolveIPNS(this.#peerList[peer])
+        //const cid = await this.resolveIPNS(this.#peerList[peer])
+        const cid = this.#peerList[peer]
         const linksOfPeer = await this.getLinksOfPeer(peer, cid)
         debug(`links=${linksOfPeer}`)
         if(linksOfPeer) {
@@ -131,9 +132,9 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const content = JSON.stringify(links)
         const result = await this.#IPFS.add(content)
         console.log("IPFS-LINKS| published:", result, content)
-        const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
-        console.log("IPFS-LINKS: updated IPNS:", publishResult)
-        this.#room.broadcast(publishResult.name)
+        //const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
+        //console.log("IPFS-LINKS: updated IPNS:", publishResult)
+        this.#room.broadcast(result.cid.toString())
         return result.cid
     }
 
@@ -173,17 +174,17 @@ export class IpfsLinksAdapter implements LinksAdapter {
     async getRootLinks(): Promise<Expression[]> {
         await this.#initialized
 
-        const resolved = await this.myResolvedIPNSObject()
-
-        let requestList = [{peer: 'me', ipns: resolved}]
+        //const resolved = await this.myResolvedIPNSObject()
+        //let requestList = [{peer: 'me', cid: resolved}]
+        let requestList = []
 
         Object.keys(this.#peerList).forEach(peer => {
-            requestList.push({peer, ipns: this.#peerList[peer]})
+            requestList.push({peer, cid: this.#peerList[peer]})
         })
             
         const allLinksOfallPeers = await Promise.all(
             requestList.map(r => {
-                return this.getLinksOfPeer(r.peer, r.ipns)
+                return this.getLinksOfPeer(r.peer, r.cid)
             })
         )
 
