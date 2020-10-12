@@ -29,6 +29,18 @@ function debug(...args) {
     console.debug("IPFS-LINKS|", ...args)
 }
 
+function hashLinkExpression(link: Expression): number {
+    const mash = JSON.stringify(link.data, Object.keys(link.data). sort()) +
+                JSON.stringify(link.author) + link.timestamp
+    var hash = 0, i, chr;
+    for (i = 0; i < mash.length; i++) {
+        chr   = mash.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+
 export class IpfsLinksAdapter implements LinksAdapter {
     #callbacks: NewLinksObserver[];
     #IPFS: any
@@ -130,7 +142,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         debug(`links=${linksOfPeer}`)
         if(linksOfPeer) {
             //@ts-ignore
-            this.#callbacks.forEach(cb => cb(linksOfPeer.links))
+            this.#callbacks.forEach(cb => cb(Object.values(linksOfPeer.links)))
         }
     }
 
@@ -198,7 +210,8 @@ export class IpfsLinksAdapter implements LinksAdapter {
         console.log("IPFS-LINKS| getRootLinks - allLinksOfAllPeers =", allLinksOfallPeers)
 
         //@ts-ignore
-        const merged = [].concat.apply([], allLinksOfallPeers.map(e => e.links))
+        const merged = [].concat.apply([], allLinksOfallPeers.map(e => Object.values(e.links)))
+        debug("merged:", merged)
         return merged
     }
 
@@ -214,22 +227,23 @@ export class IpfsLinksAdapter implements LinksAdapter {
         await this.#initialized
 
         let linksObject
-        let myHash = this.myLatestHash
+        let myHash = this.myLatestHash()
         if(myHash) {
             linksObject = await this.getLinksOfPeer("me", myHash)
         } 
         //@ts-ignore
         if(!linksObject || !linksObject.links || !linksObject.rootLinks) {
             linksObject = {
-                links: [],
+                links: {},
                 rootLinks: []
             }
         }
+        const linkHash = hashLinkExpression(link)
         //@ts-ignore
-        linksObject.links.push(link)
+        linksObject.links[linkHash] = link
         if(root) {
             //@ts-ignore
-            linksObject.rootLinks.push(linksObject.links.length - 1)
+            linksObject.rootLinks.push(linkHash)
         }
         await this.publish(linksObject)
     }
