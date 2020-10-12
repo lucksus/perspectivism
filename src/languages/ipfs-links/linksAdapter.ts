@@ -59,6 +59,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
         this.#room = new Room(this.#IPFS, this.#roomName)
         this.#room.on('message', message => this.handlePubSubMessage(message))
+        this.#room.on('peer joined', peer => this.handlePubSubPeerJoined(peer))
         this.#initialized = this.init()
         
     }
@@ -132,6 +133,17 @@ export class IpfsLinksAdapter implements LinksAdapter {
         this.rememberPeer(from, cid)
         //this.checkUpdateLinksOfPeer(from, ipnsCid)
         this.notify(from)
+    }
+
+    private handlePubSubPeerJoined(peer) {
+        debug("Peer joind:", peer, "Sending my latest hash...")
+        const myHash = this.myLatestHash()
+        if(!myHash) {
+            debug("Nothing to send :/")
+        } else {
+            this.#room.broadcast(myHash)
+        }
+        
     }
 
     private async notify(peer) {
@@ -211,7 +223,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
         //@ts-ignore
         const merged = [].concat.apply([], allLinksOfallPeers.map(e => Object.values(e.links)))
-        debug("merged:", merged)
         return merged
     }
 
