@@ -3,10 +3,8 @@
 <script lang="ts">
     export let settings: object
     import Switch from '@smui/switch';
-    import FormField from '@smui/form-field';
 
-    customElements.define("mdc-switch", Switch)
-    customElements.define("mdc-form-field", FormField)
+    customElements.define("notes-ipfs-mdc-switch", Switch)
 
     if(!settings) {
         settings = {

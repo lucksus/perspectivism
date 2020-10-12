@@ -15,7 +15,6 @@
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.0.0",
-    "@smui/form-field": "^1.0.0",
     "@smui/switch": "^1.0.0",
     "@tsconfig/svelte": "^1.0.0",
     "@types/node": "^14.11.2",
