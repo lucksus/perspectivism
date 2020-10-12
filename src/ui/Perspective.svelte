@@ -117,6 +117,18 @@
         })
     }
 
+    function linkTo2D(link) {
+        const origin = {x: 0, y: 0}
+        if(!link.data.predicate)
+            return origin
+        const pred = link.data.predicate
+        if(!pred.startsWith("coord2d://"))
+            return origin
+        
+        const [x,y] = pred.subStr(10).split('_')
+        return {x,y}
+    }
+
 </script>
 
 
@@ -130,7 +142,9 @@
     <div class="perspective-content" bind:this={content}>
         <ul>
             {#each $rootLinks as link}
-                <ExpressionIcon expressionURL={link.data.target} {languageController}></ExpressionIcon>
+                <li style={`transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}>
+                    <ExpressionIcon expressionURL={link.data.target} {languageController}></ExpressionIcon>
+                </li>
             {/each}
         </ul>
         
