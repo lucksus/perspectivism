@@ -103,8 +103,14 @@ export class IpfsLinksAdapter implements LinksAdapter {
     private paths() {
         return {
             peers: path.join(this.#storage, 'peers.json'),
-            myLinks: path.join(this.#storage, 'myLinks.json')
+            myLatestHash: path.join(this.#storage, 'myLatestHash.json')
         }
+    }
+
+    private myLatestHash(): void|string {
+        if(!fs.existsSync(this.paths().myLatestHash))
+            return null
+        return JSON.parse(fs.readFileSync(this.paths().myLatestHash).toString())
     }
 
     private handlePubSubMessage(message) {
@@ -134,6 +140,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         console.log("IPFS-LINKS| published:", result, content)
         //const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
         //console.log("IPFS-LINKS: updated IPNS:", publishResult)
+        fs.writeFileSync(this.paths().myLatestHash, JSON.stringify(result.cid.toString()))
         this.#room.broadcast(result.cid.toString())
         return result.cid
     }
@@ -206,7 +213,11 @@ export class IpfsLinksAdapter implements LinksAdapter {
     private async _addLink(link: Expression, root: boolean) {
         await this.#initialized
 
-        let linksObject = await this.getLinksOfPeer("me", await this.myResolvedIPNSObject())
+        let linksObject
+        let myHash = this.myLatestHash
+        if(myHash) {
+            linksObject = await this.getLinksOfPeer("me", myHash)
+        } 
         //@ts-ignore
         if(!linksObject || !linksObject.links || !linksObject.rootLinks) {
             linksObject = {
