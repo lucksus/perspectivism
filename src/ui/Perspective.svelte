@@ -50,20 +50,45 @@
     }
 
     function handleMouseWheel(event) {
-        zoom += event.deltaY * 0.05
+        let factor = 0.05
+        const normalized = Math.abs(zoom/10)
+        if(zoom < 0 && normalized > 2) {
+            factor = 0.1 * Math.log2(normalized)    
+        } 
+
+        zoom -= event.deltaY * factor
+
+        if(zoom > 45) zoom = 45
         console.log("zoom:", zoom)
     }
 
+    function zoomNormalizedMouseMove(event) {
+        let factor
+        if(zoom < 0) {
+            const dist = -zoom
+            factor = 1 + (dist/100)
+        } else {
+            const dist = zoom
+            factor = 1 - (dist/100)
+        }
+
+        return {
+            x: event.movementX * factor,
+            y: event.movementY * factor,
+        }
+    }
+
     function handleMouseMove(event) {
+        const d = zoomNormalizedMouseMove(event)
         if(isPanning) {
-            translateX += event.movementX
-            translateY += event.movementY
+            translateX += d.x
+            translateY += d.y
         }
 
         if(isMovingExpression) {
             let point = linkTo2D(movingLink)
-            point.x += event.movementX
-            point.y += event.movementY
+            point.x += d.x
+            point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
             rootLinks.update(movingLink)
         }
