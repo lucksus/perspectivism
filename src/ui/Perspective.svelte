@@ -67,10 +67,10 @@
         let factor
         if(zoom < 0) {
             const dist = -zoom
-            factor = 1 + (dist/250)
+            factor = 1 + (dist/1000)
         } else {
             const dist = zoom
-            factor = 1 - (dist/250)
+            factor = 1 - (dist/1000)
         }
 
         return {
@@ -241,7 +241,7 @@
 <style>
     .perspective-container {
         height: 100%;
-        perspective: 250px;
+        perspective: 1000px;
         transform-style: preserve-3d;
     }
 
