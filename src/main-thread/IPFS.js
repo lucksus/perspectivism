@@ -13,7 +13,11 @@ const uint8ArrayConcat = function(chunks) {
 }
 
 export async function init () {
-    const node = await IPFS.create()
+    const node = await IPFS.create({
+        EXPERIMENTAL: {
+            pubsub: true
+        }
+    })
     const version = await node.version()
 
     console.log('Version:', version.version)
