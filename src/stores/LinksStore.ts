@@ -38,10 +38,34 @@ export default class LinksStore {
         if(isExpression(link) && isLink(link.data)) {
             this.#update(storedLinks => {
                 if(!storedLinks.find(l => equal(l, link))) {
+                    //@ts-ignore
+                    if(!link.id) {
+                        //@ts-ignore
+                        link.id = storedLinks.length
+                    }
                     storedLinks.push(link)
                 }
                 return storedLinks
             })
+        }
+    }
+
+    update(link: Expression) {
+        //@ts-ignore
+        if(isExpression(link) && isLink(link.data) && link.id != undefined) {
+            this.#update(storedLinks => {
+                //@ts-ignore
+                const index = storedLinks.findIndex(l => l.id == link.id)
+                if(index != -1) {
+                    storedLinks[index] = link
+                } else {
+                    //@ts-ignore
+                    console.error("LinsStore| Couldn't find link with ID", link.id)
+                }
+                return storedLinks
+            })
+        } else {
+            console.error("LinsStore| Can't update link without ID:", JSON.stringify(link))
         }
     }
 }

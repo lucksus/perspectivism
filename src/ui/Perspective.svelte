@@ -28,14 +28,25 @@
     let expressions = {}
 
     let content
+    let container
     let zoom = 0
     let translateX = 0
     let translateY = 0
-    let mousedown = false
+    let isPanning = false
+    let isMovingExpression = false
+    let movingLink
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
-        content.setAttribute("style", `transform: translateX(${translateX}px) translateY(${translateY}px) translateZ(${zoom}px);`)
+        content.setAttribute("style", calcPerspectiveContentStyle())
+    }
+
+    function calcPerspectiveContentStyle() {
+        return `
+            position: absolute; 
+            width: 100%; height: 100%; 
+            transform: translateX(${translateX}px) translateY(${translateY}px) translateZ(${zoom}px);
+        `
     }
 
     function handleMouseWheel(event) {
@@ -44,18 +55,51 @@
     }
 
     function handleMouseMove(event) {
-        if(mousedown) {
+        if(isPanning) {
             translateX += event.movementX
             translateY += event.movementY
         }
+
+        if(isMovingExpression) {
+            let point = linkTo2D(movingLink)
+            point.x += event.movementX
+            point.y += event.movementY
+            movingLink.data.predicate = coordToPredicate(point)
+            rootLinks.update(movingLink)
+        }
+    }
+
+    function getLinkIdFromPath(event) {
+        for(const i in event.path) {
+            console.log(event.path[i])
+            if(event.path[i].dataset && event.path[i].dataset.linkId !== undefined)
+                return event.path[i].dataset.linkId
+        }
+        return undefined
     }
 
     function handleMouseDown(event) {
-        mousedown = true
+        console.log(event.target)
+        if(event.target == content || event.target == container)
+            isPanning = true
+        else {
+            console.log("clicked something else:", event.path)
+            const linkId = getLinkIdFromPath(event)
+            console.log("link id:", linkId)
+            if(linkId) {
+                movingLink = $rootLinks.find(l => l.id == linkId)
+                if(movingLink)
+                    isMovingExpression = true
+                else
+                    console.error("Couldn't find link with ID", linkId)
+                
+            }
+        }
     }
 
     function handleMouseUp(event) {
-        mousedown = false
+        isPanning = false
+        isMovingExpression = false
     }
 
     languageController.getLanguagesWithExpressionUI().then( installedLanguages => {
@@ -125,8 +169,12 @@
         if(!pred.startsWith("coord2d://"))
             return origin
         
-        const [x,y] = pred.subStr(10).split('_')
+        const [x,y] = pred.substr(10).split('_').map(s => parseInt(s))
         return {x,y}
+    }
+
+    function coordToPredicate(coords) {
+        return `coord2d://${coords.x}_${coords.y}`
     }
 
 </script>
@@ -137,13 +185,17 @@
     on:mousemove={handleMouseMove}
     on:mousedown={handleMouseDown}
     on:mouseup={handleMouseUp}
+    bind:this={container}
 >
     <h2 class="debug">Root links: {JSON.stringify(rootLinks)}</h2>
     <div class="perspective-content" bind:this={content}>
-        <ul>
+        <ul class="inline">
             {#each $rootLinks as link}
-                <li style={`transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}>
-                    <ExpressionIcon expressionURL={link.data.target} {languageController}></ExpressionIcon>
+                <li class="inline expression-list-container" 
+                    style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
+                    data-link-id={link.id}
+                    >
+                    <ExpressionIcon class="inline" expressionURL={link.data.target} {languageController}></ExpressionIcon>
                 </li>
             {/each}
         </ul>
@@ -170,5 +222,9 @@
         position: fixed;
         width: 100%;
         z-index: -10;
+    }
+
+    .inline {
+        display: inline;
     }
 </style>
