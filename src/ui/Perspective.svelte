@@ -46,6 +46,7 @@
             position: absolute; 
             width: 100%; height: 100%; 
             transform: translateX(${translateX}px) translateY(${translateY}px) translateZ(${zoom}px);
+            transform-style: preserve-3d;
         `
     }
 
@@ -66,10 +67,10 @@
         let factor
         if(zoom < 0) {
             const dist = -zoom
-            factor = 1 + (dist/100)
+            factor = 1 + (dist/250)
         } else {
             const dist = zoom
-            factor = 1 - (dist/100)
+            factor = 1 - (dist/250)
         }
 
         return {
@@ -240,7 +241,8 @@
 <style>
     .perspective-container {
         height: 100%;
-        perspective: 100px;
+        perspective: 250px;
+        transform-style: preserve-3d;
     }
 
     .debug {
@@ -251,5 +253,6 @@
 
     .inline {
         display: inline;
+        transform-style: preserve-3d;
     }
 </style>

@@ -78,6 +78,15 @@
         container.appendChild(icon)
     }
 
+    let width
+    let height
+    let depth = 30
+
+    $: if(container) {
+        width = container.offsetWidth
+        height = container.offsetHeight
+    }
+
 </script>
 
 {#if loading}
@@ -87,13 +96,33 @@
     Loading failed!
 {/if}
 
-<div class="container" bind:this={container}/>
+<div class="box">
+    <div class="box__face container" bind:this={container}/>
+    <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>back</div>
+    <div class="box__face right" style={`transform:  translateX(${width-depth/2}px)  translateZ(-${depth/2}px) rotateY(90deg); width: ${depth}px; height: ${height}px;`}>right</div>
+    <div class="box__face left" style={`transform:  translateX(-${depth/2}px) rotateY(-90deg) translateX(-${depth/2}px); width: ${depth}px; height: ${height}px;`}>left</div>
+    <!--<div class="box__face top" style={`transform:  rotateX(90deg) translateZ(${height}px); width: ${width}px; height: ${depth}px;`}>top</div>
+    <div class="box__face bottom" style={`transform:  rotateX(-90deg) translateZ(${height}px); width: ${width}px; height: ${depth}px;`}>bottom</div>-->
+</div>
+
 
 <style>
     .container {
         display: inline-block;
         border: 2px solid;
-        border-radius: 5px;
         overflow: hidden;
+    }
+
+    .box {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+    }
+
+    .box__face {
+        position: absolute;
+        background-color:rgb(27, 32, 32);
+        border: 1px solid rgb(127, 129, 255);
     }
 </style>
