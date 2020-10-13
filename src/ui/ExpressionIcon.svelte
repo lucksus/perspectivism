@@ -87,4 +87,13 @@
     Loading failed!
 {/if}
 
-<div bind:this={container}/>
+<div class="container" bind:this={container}/>
+
+<style>
+    .container {
+        display: inline-block;
+        border: 2px solid;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+</style>
