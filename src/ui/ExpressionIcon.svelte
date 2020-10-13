@@ -87,6 +87,12 @@
         height = container.offsetHeight
     }
 
+    let rotated = false
+
+    function rightClick() {
+        rotated = !rotated
+    }
+
 </script>
 
 {#if loading}
@@ -96,9 +102,20 @@
     Loading failed!
 {/if}
 
-<div class="box">
+<div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg) translateX(-${width/2}px);`}>
     <div class="box__face container" bind:this={container}/>
-    <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>back</div>
+    <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
+        <div class="backside-content">
+            <div>
+                <span class="header">Author:</span><span class="value">{expression?.author.did}</span>
+            </div>
+            <div>
+                <span class="header">Timestamp:</span><span class="value">{expression?.timestamp}</span>
+            </div>
+            <hr>
+            {expression?.data}
+        </div>
+    </div>
     <div class="box__face right" style={`transform:  translateX(${width-depth/2}px)  translateZ(-${depth/2}px) rotateY(90deg); width: ${depth}px; height: ${height}px;`}>right</div>
     <div class="box__face left" style={`transform:  translateX(-${depth/2}px) rotateY(-90deg) translateX(-${depth/2}px); width: ${depth}px; height: ${height}px;`}>left</div>
     <!--<div class="box__face top" style={`transform:  rotateX(90deg) translateZ(${height}px); width: ${width}px; height: ${depth}px;`}>top</div>
@@ -118,11 +135,25 @@
         height: 100%;
         position: relative;
         transform-style: preserve-3d;
+        transition: transform 0.5s;
     }
 
     .box__face {
         position: absolute;
         background-color:rgb(27, 32, 32);
         border: 1px solid rgb(127, 129, 255);
+    }
+
+    .backside-content {
+        overflow: auto;
+        color: white;
+    }
+
+    .backside-content .header {
+        color: rgb(127, 129, 255)
+    }
+
+    .backside-content .value {
+        color: rgb(127, 219, 255)
     }
 </style>
