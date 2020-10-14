@@ -57,6 +57,7 @@
 	}
 
 	function editPerspectiveSubmit() {
+		linkRepoController.syncWithSharingAdapter($perspectiveStore[selectedMainView.edit])
 		selectedMainView.perspective = null
 		selectedMainView.settings = null
 		selectedMainView.edit = null
