@@ -53,10 +53,10 @@ import type { add_render_callback } from 'svelte/internal';
     }
 
     function handleMouseWheel(event) {
-        let factor = 0.05
-        const normalized = Math.abs(zoom/10)
+        let factor = 0.3
+        const normalized = Math.abs(zoom/3)
         if(zoom < 0 && normalized > 2) {
-            factor = 0.1 * Math.log2(normalized)    
+            factor = 0.3 * Math.log2(normalized)    
         } 
 
         zoom -= event.deltaY * factor
