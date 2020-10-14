@@ -7,6 +7,7 @@ import type ExpressionRef from "../../acai/ExpressionRef";
 import Room from 'ipfs-pubsub-room'
 import path from 'path'
 import fs from 'fs'
+import type { runInNewContext } from "vm";
 
 const _appendBuffer = (buffer1, buffer2) => {
     const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -222,9 +223,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         await this._addLink(link, false)
     }
 
-    private async _addLink(link: Expression, root: boolean) {
-        await this.#initialized
-
+    private async getMyLinks(): Promise<object> {
         let linksObject
         let myHash = this.myLatestHash()
         if(myHash) {
@@ -237,6 +236,13 @@ export class IpfsLinksAdapter implements LinksAdapter {
                 rootLinks: []
             }
         }
+        return linksObject
+    }
+
+    private async _addLink(link: Expression, root: boolean) {
+        await this.#initialized
+
+        const linksObject = await this.getMyLinks()
         const linkHash = hashLinkExpression(link)
         //@ts-ignore
         linksObject.links[linkHash] = link
@@ -244,6 +250,36 @@ export class IpfsLinksAdapter implements LinksAdapter {
             //@ts-ignore
             linksObject.rootLinks.push(linkHash)
         }
+        await this.publish(linksObject)
+    }
+
+    async updateLink(oldLinkExpression: Expression, newLinkExpression: Expression) {
+        await this.#initialized
+
+        const linksObject = await this.getMyLinks()
+        const oldLinkHash = hashLinkExpression(oldLinkExpression)
+        const newLinkHash = hashLinkExpression(newLinkExpression)
+
+        //@ts-ignore
+        if(!linksObject.links[oldLinkHash]) {
+            throw new Error("Can't update link. Not found in my links.\nMy links: "+JSON.stringify(linksObject))
+        }
+
+        //@ts-ignore
+        linksObject.links[newLinkHash] = newLinkExpression
+
+        //@ts-ignore
+        const index = linksObject.rootLinks.findIndex(e => e === oldLinkHash)
+        if(-1 != index) {
+            //@ts-ignore
+            linksObject.rootLinks.splice(index, 1)
+            //@ts-ignore
+            linksObject.rootLinks.push(newLinkHash)
+        }
+
+        //@ts-ignore
+        delete linksObject.links[oldLinkHash]
+
         await this.publish(linksObject)
     }
 
