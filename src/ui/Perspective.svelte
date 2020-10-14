@@ -15,14 +15,16 @@
     import iconComponentFromString from './iconComponentFromString';
     import type LinkRepoController from '../main-thread/LinkRepoController';
     import LinksStore from '../stores/LinksStore'
-import type { add_render_callback } from 'svelte/internal';
+    import ConstructionMenu from './ConstructionMenu.svelte'
     
     let rootLinks = new LinksStore()
     let rootExpressions = []
 
+    let constructionMenu
     let languages = []
     let languageIcons = {
-        'note-ipfs': 'note'
+        'note-ipfs': 'note',
+        'url-iframe': 'link'
     }
     let constructorIconComponents = {}
     let iconComponents = {}
@@ -139,6 +141,12 @@ import type { add_render_callback } from 'svelte/internal';
         isMovingExpression = false
     }
 
+    function contextMenu(event) {
+        isPanning = false
+        isMovingExpression = false
+        constructionMenu.open(event.clientX, event.clientY)
+    }
+
     languageController.getLanguagesWithExpressionUI().then( installedLanguages => {
         console.log("Got installed languages:", JSON.stringify(installedLanguages))
         languages = installedLanguages
@@ -226,6 +234,7 @@ import type { add_render_callback } from 'svelte/internal';
     on:mousemove={handleMouseMove}
     on:mousedown={handleMouseDown}
     on:mouseup={handleMouseUp}
+    on:contextmenu={contextMenu}
     bind:this={container}
 >
     <h2 class="debug">Root links: {JSON.stringify(rootLinks)}</h2>
@@ -239,20 +248,16 @@ import type { add_render_callback } from 'svelte/internal';
                     <ExpressionIcon class="inline" expressionURL={link.data.target} {languageController}></ExpressionIcon>
                 </li>
             {/each}
-        </ul>
-        
-
         <div id="constructor-container"></div>
-
-        {#each languages as lang}
-            <Fab extended on:click={() => createExpression(lang)}>
-                <Icon class="material-icons">{languageIcons[lang.name]}</Icon>
-                <Label>Create {lang.name} expression</Label>
-            </Fab>
-        {/each}
+        </ul>        
     </div>
 </div>
 
+<ConstructionMenu bind:this={constructionMenu} 
+    languages={languages} 
+    languageIcons={languageIcons}
+    on:language-clicked={({detail: lang}) => createExpression(lang)}
+></ConstructionMenu>
 <style>
     .perspective-container {
         height: 100%;
