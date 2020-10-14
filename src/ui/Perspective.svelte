@@ -9,7 +9,7 @@
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
-    import Link from '../acai/Links';
+    import Link, { linkEqual } from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
@@ -129,7 +129,7 @@ import type { add_render_callback } from 'svelte/internal';
     }
 
     function handleMouseUp(event) {
-        if(isMovingExpression) {
+        if(isMovingExpression && !linkEqual(movingLinkOriginal, movingLinkOriginal)) {
             const newLinkObject = JSON.parse(JSON.stringify(movingLink))
             delete newLinkObject.id
             console.debug("Updating link:", movingLinkOriginal, newLinkObject)
