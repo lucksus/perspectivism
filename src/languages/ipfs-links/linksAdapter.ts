@@ -7,7 +7,7 @@ import type ExpressionRef from "../../acai/ExpressionRef";
 import Room from 'ipfs-pubsub-room'
 import path from 'path'
 import fs from 'fs'
-import type { runInNewContext } from "vm";
+import { Mutex } from 'async-mutex'
 
 const _appendBuffer = (buffer1, buffer2) => {
     const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -39,11 +39,13 @@ export class IpfsLinksAdapter implements LinksAdapter {
     #initialized: Promise<void>
     #room: any
     #peerList: object
+    #mutex: Mutex
 
     constructor(context: LanguageContext) {
         this.#callbacks = []
         this.#IPFS = context.IPFS
         this.#storage = context.storageDirectory
+        this.#mutex = new Mutex()
         //@ts-ignore
         this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
         this.#room = new Room(this.#IPFS, this.#roomName)
@@ -251,6 +253,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
     private async _addLink(link: Expression, root: boolean) {
         await this.#initialized
 
+        const release = await this.#mutex.acquire()
         const linksObject = await this.getMyLinks()
         const linkHash = hashLinkExpression(link)
         //@ts-ignore
@@ -260,11 +263,13 @@ export class IpfsLinksAdapter implements LinksAdapter {
             linksObject.rootLinks.push(linkHash)
         }
         await this.publish(linksObject)
+        release()
     }
 
     async updateLink(oldLinkExpression: Expression, newLinkExpression: Expression) {
         await this.#initialized
 
+        const release = await this.#mutex.acquire()
         const linksObject = await this.getMyLinks()
         const oldLinkHash = hashLinkExpression(oldLinkExpression)
         const newLinkHash = hashLinkExpression(newLinkExpression)
@@ -293,6 +298,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             removeLink: oldLinkExpression
         }))
         await this.publish(linksObject)
+        release()
     }
 
     async getLinksFrom(source: ExpressionRef): Promise<Expression[]> {
