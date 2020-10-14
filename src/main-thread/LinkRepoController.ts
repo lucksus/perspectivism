@@ -176,6 +176,7 @@ export default class LinkRepoController {
         console.debug("hash:", addr)
         this.getPerspective(p).get('links').get(addr).put(newLink)
         this.getPerspective(p).get('links').get(addr).load(loaded => console.log("loaded:", loaded))
+        this.callLinksAdapter(p, 'updateLink', oldLink, newLink)
     }
 
     removeLink(p: Perspective, link: Link) {
