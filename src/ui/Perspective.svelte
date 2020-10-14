@@ -15,6 +15,7 @@
     import iconComponentFromString from './iconComponentFromString';
     import type LinkRepoController from '../main-thread/LinkRepoController';
     import LinksStore from '../stores/LinksStore'
+import type { add_render_callback } from 'svelte/internal';
     
     let rootLinks = new LinksStore()
     let rootExpressions = []
@@ -189,10 +190,14 @@
         loadRootLinks()
     }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
-        languageController.addLinkObserver(perspective.linksSharingLanguage, links => {
-            console.log("LINK OBSERVER got links:", links)
-            links.forEach(l => {
+        languageController.addLinkObserver(perspective.linksSharingLanguage, (added, removed) => {
+            console.log("LINK OBSERVER got links to add:", added)
+            console.log("LINK OBSERVER got links to remove:", removed)
+            added?.forEach(l => {
                 rootLinks.add(l)
+            })
+            removed?.forEach(l => {
+                rootLinks.remove(l)
             })
         })
     }

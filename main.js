@@ -22,8 +22,8 @@ IPFS.init().then((IPFS) => {
 
   app.whenReady().then(() => {
     const win = createWindow()
-    languageController.addLinkObserver((links, langRef) => {
-      win.webContents.send("links-incoming", links, langRef)
+    languageController.addLinkObserver((added, removed, langRef) => {
+      win.webContents.send("links-incoming", added, removed, langRef)
     })
   })
 })

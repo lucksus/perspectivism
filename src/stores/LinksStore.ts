@@ -55,4 +55,23 @@ export default class LinksStore {
             console.error("LinsStore| Can't update link without ID:", JSON.stringify(link))
         }
     }
+
+    remove(link: Expression) {
+         //@ts-ignore
+         if(isExpression(link) && isLink(link.data)) {
+            console.log("links store removing link:", link)
+            this.#update(storedLinks => {
+                //@ts-ignore
+                const index = storedLinks.findIndex(l => equal(l, link))
+                if(index != -1) {
+                    //@ts-ignore
+                    link.id = hashLinkExpression(link)
+                    storedLinks[index] = link
+                } else {
+                    console.debug("LinksStore| tried to remove non-existant link", link)
+                }
+                return storedLinks
+            })
+        }
+    }
 }

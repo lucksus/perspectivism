@@ -117,10 +117,19 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
     private handlePubSubMessage(message) {
         const { from, data } = message
+        console.log("IPFS-LINKS| PubSub message from", from, data)
+        try {
+            const op = JSON.parse(data)
+            if(typeof(op.removeLink) === 'object') {
+                this.#callbacks.forEach(cb => cb([], [op.removeLink]))    
+                return 
+            } 
+        } catch(e) {
+
+        }
+
         const cid = data.toString()
-        console.log("IPFS-LINKS| PubSub message from", from, cid)
         this.rememberPeer(from, cid)
-        //this.checkUpdateLinksOfPeer(from, ipnsCid)
         this.notify(from)
     }
 
@@ -280,6 +289,9 @@ export class IpfsLinksAdapter implements LinksAdapter {
         //@ts-ignore
         delete linksObject.links[oldLinkHash]
 
+        this.#room.broadcast(JSON.stringify({
+            removeLink: oldLinkExpression
+        }))
         await this.publish(linksObject)
     }
 

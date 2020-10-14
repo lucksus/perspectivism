@@ -25,7 +25,7 @@ const aliases = {
     'https': 'url-iframe'
 }
 
-type LinkObservers = (links: Expression[], lang: LanguageRef)=>void;
+type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;
 
 export class LanguageController {
     #languages: Map<string, Language>
@@ -57,9 +57,9 @@ export class LanguageController {
             })
 
             if(language.linksAdapter) {
-                language.linksAdapter.addCallback(links => {
+                language.linksAdapter.addCallback((added, removed) => {
                     this.#linkObservers.forEach(o => {
-                        o(links, {name, address: hash} as LanguageRef)
+                        o(added, removed, {name, address: hash} as LanguageRef)
                     })
                 })
             }

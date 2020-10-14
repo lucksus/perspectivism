@@ -91,7 +91,7 @@ export interface GetAllAdapter {
     getAll(filter: any, count: number, page: number): Promise<void | Expression[]>;
 }
 
-export type NewLinksObserver = (links: Expression[])=>void;
+export type NewLinksObserver = (added: Expression[], removed: Expression[])=>void;
 
 // Implement this if your Language can share Links between Agents' Perspectives
 export interface LinksAdapter {
