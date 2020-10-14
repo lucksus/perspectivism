@@ -64,9 +64,7 @@ export default class LinksStore {
                 //@ts-ignore
                 const index = storedLinks.findIndex(l => equal(l, link))
                 if(index != -1) {
-                    //@ts-ignore
-                    link.id = hashLinkExpression(link)
-                    storedLinks[index] = link
+                    storedLinks.splice(index, 1)
                 } else {
                     console.debug("LinksStore| tried to remove non-existant link", link)
                 }
