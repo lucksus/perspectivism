@@ -1,4 +1,4 @@
-import type Link from "../acai/Links";
+import Link, { linkEqual } from "../acai/Links";
 import type ExpressionRef from "../acai/ExpressionRef";
 import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
@@ -89,15 +89,26 @@ export default class LinkRepoController {
 
     }
 
+    private async getLinkByAddress(p: Perspective, addr: string): Promise<Expression> {
+        return new Promise(resolve => {
+            console.debug("getLinkByAddress:", addr)
+            this.getPerspective(p).get('links').get(addr).load(link => resolve(link))
+        })
+    }
+
     private getRootLinksLocalAndRemote(p: Perspective): Promise<Expression[][]> {
         const localLinks = new Promise((resolve) => {
             setTimeout(()=>resolve([]), 200)
             this.getPerspective(p)
                 .get('root-links')
                 .load(linksObject => {
-                    const links = Object.values(linksObject) as Link[]
-                    console.log("LINK REPO: Found root links:", links)
-                    resolve(links)
+                    console.debug("root-links:", linksObject)
+                    const linkAddrs = Object.values(linksObject) as string[]
+                    Promise.all(linkAddrs.map(addr => this.getLinkByAddress(p, addr)))
+                        .then(links => {
+                            console.log("LINK REPO: Found root links:", links)
+                            resolve(links)
+                        })
                 }, {wait:1})
         })
 
@@ -119,8 +130,8 @@ export default class LinkRepoController {
         console.log("LINK REPO: Adding root link:", link)
         const expression = this.linkToExpression(link)
         this.callLinksAdapter(p, 'addRootLink', expression)
-        const linkNode = this.addLink(p, expression)
-        this.getPerspective(p).get('root-links').set(linkNode)
+        const linkAddr = this.addLink(p, expression)
+        this.getPerspective(p).get('root-links').set(linkAddr)
     }
 
     addLink(p: Perspective, link: Link | Expression) {
@@ -131,15 +142,40 @@ export default class LinkRepoController {
         const addr = hash.digest('hex');
 
         link = linkExpression.data as Link
-        const linkNode = this.getPerspective(p).get('links').get(addr).put(linkExpression)
+        this.getPerspective(p).get('links').get(addr).put(linkExpression)
 
         // store link in both directions:
         // 1. from source to target
-        this.getPerspective(p).get('sources').get(link.source).set(linkNode)
+        this.getPerspective(p).get('sources').get(link.source).set(addr)
         // 2. from target to source
-        this.getPerspective(p).get('targets').get(link.target).set(linkNode)
+        this.getPerspective(p).get('targets').get(link.target).set(addr)
 
-        return linkNode
+        return addr
+    }
+
+
+
+    private async findLink(p: Perspective, link: Expression): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.getPerspective(p).get('links').load(allLinks => {
+                console.log("all links:", allLinks)
+                for(const addr in allLinks) {
+                    if(linkEqual(allLinks[addr], link)) {
+                        resolve(addr)
+                        return
+                    }
+                }
+                reject(`Link not found in perspective "${p.name}": ${JSON.stringify(link)}`)
+            })    
+        })
+    }
+
+    async updateLink(p: Perspective, oldLink: Expression, newLink: Expression) {
+        console.debug("LINK REPO: updating link:", oldLink, newLink)
+        const addr = await this.findLink(p, oldLink)
+        console.debug("hash:", addr)
+        this.getPerspective(p).get('links').get(addr).put(newLink)
+        this.getPerspective(p).get('links').get(addr).load(loaded => console.log("loaded:", loaded))
     }
 
     removeLink(p: Perspective, link: Link) {
@@ -180,6 +216,7 @@ export function init(context: any): LinkRepoController {
     ipcMain.handle('links-add', (e, p: Perspective, link: Link) => linkRepoController.addLink(p, link))
     ipcMain.handle('links-remove', (e, p: Perspective, link: Link) => linkRepoController.removeLink(p, link))
     ipcMain.handle('links-sync', (e, p: Perspective) => linkRepoController.syncWithSharingAdapter(p))
+    ipcMain.handle('links-update', (e, p: Perspective, oldLink: Expression, newLink: Expression) => linkRepoController.updateLink(p, oldLink, newLink))
 
     return linkRepoController
 }

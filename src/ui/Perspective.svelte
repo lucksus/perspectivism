@@ -35,6 +35,7 @@
     let isPanning = false
     let isMovingExpression = false
     let movingLink
+    let movingLinkOriginal
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -114,16 +115,25 @@
             console.log("link id:", linkId)
             if(linkId) {
                 movingLink = $rootLinks.find(l => l.id == linkId)
-                if(movingLink)
+                if(movingLink) {
+                    movingLinkOriginal = JSON.parse(JSON.stringify(movingLink))
                     isMovingExpression = true
+                }
                 else
                     console.error("Couldn't find link with ID", linkId)
+                    console.error("have linkd", $rootLinks)
                 
             }
         }
     }
 
     function handleMouseUp(event) {
+        if(isMovingExpression) {
+            const newLinkObject = JSON.parse(JSON.stringify(movingLink))
+            delete newLinkObject.id
+            console.debug("Updating link:", movingLinkOriginal, newLinkObject)
+            linkRepoController.updateLink(perspective, movingLinkOriginal, newLinkObject)
+        }
         isPanning = false
         isMovingExpression = false
     }

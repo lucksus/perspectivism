@@ -24,7 +24,7 @@ export default class LinksStore {
                     //@ts-ignore
                     if(!link.id) {
                         //@ts-ignore
-                        link.id = storedLinks.length
+                        link.id = hashLinkExpression(link)
                     }
                     storedLinks.push(link)
                 }
@@ -36,14 +36,18 @@ export default class LinksStore {
     update(link: Expression) {
         //@ts-ignore
         if(isExpression(link) && isLink(link.data) && link.id != undefined) {
+            console.log("links store updating link:", link)
             this.#update(storedLinks => {
                 //@ts-ignore
                 const index = storedLinks.findIndex(l => l.id == link.id)
                 if(index != -1) {
+                    //@ts-ignore
+                    link.id = hashLinkExpression(link)
                     storedLinks[index] = link
                 } else {
                     //@ts-ignore
-                    console.error("LinsStore| Couldn't find link with ID", link.id)
+                    console.error("LinksStore| Couldn't find link with ID", link.id)
+                    console.error("LinksStore| have links:", storedLinks)
                 }
                 return storedLinks
             })

@@ -8,4 +8,5 @@ module.exports =  {
     addLink: (perspective, link) => ipcRenderer.invoke('links-add', perspective, link),
     removeLink: (perspective, link) => ipcRenderer.invoke('links-remove', perspective, link),
     syncWithSharingAdapter: (perspective) => ipcRenderer.invoke('links-sync', perspective),
+    updateLink: (perspective, oldLink, newLink) => ipcRenderer.invoke('links-update', perspective, oldLink, newLink),
 }
