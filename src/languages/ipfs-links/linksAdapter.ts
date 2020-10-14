@@ -1,6 +1,6 @@
 import type Expression from "../../acai/Expression";
 import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
-import type Link from "../../acai/Links";
+import { hashLinkExpression } from "../../acai/Links";
 import type LanguageContext from "../../acai/LanguageContext";
 import { SHA3 } from "sha3";
 import type ExpressionRef from "../../acai/ExpressionRef";
@@ -27,18 +27,6 @@ const example = {
 
 function debug(...args) {
     console.debug("IPFS-LINKS|", ...args)
-}
-
-function hashLinkExpression(link: Expression): number {
-    const mash = JSON.stringify(link.data, Object.keys(link.data). sort()) +
-                JSON.stringify(link.author) + link.timestamp
-    var hash = 0, i, chr;
-    for (i = 0; i < mash.length; i++) {
-        chr   = mash.charCodeAt(i);
-        hash  = ((hash << 5) - hash) + chr;
-        hash |= 0; // Convert to 32bit integer
-    }
-    return hash;
 }
 
 export class IpfsLinksAdapter implements LinksAdapter {

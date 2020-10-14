@@ -1,24 +1,7 @@
 import { writable } from 'svelte/store'
 import type Expression from '../acai/Expression';
-
-function isExpression(e: any): boolean {
-    return e && e.author && e.timestamp && e.data
-}
-
-function isLink(l: any): boolean {
-    return l && l.source && l.target
-}
-
-function equal(l1: Expression, l2: Expression): boolean {
-    return JSON.stringify(l1.author) == JSON.stringify(l2.author) &&
-        l1.timestamp == l2.timestamp &&
-        //@ts-ignore
-        l1.data.source == l2.data.source &&
-        //@ts-ignore
-        l1.data.predicate == l2.data.predicate &&
-        //@ts-ignore
-        l1.data.target == l2.data.target
-}
+import { isExpression } from '../acai/Expression';
+import { linkEqual as equal, isLink, hashLinkExpression } from '../acai/Links'
 
 export default class LinksStore {
     #subscribe

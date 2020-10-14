@@ -11,3 +11,7 @@ export default class Expression {
         this.data = {}
     }
 }
+
+export function isExpression(e: any): boolean {
+    return e && e.author && e.timestamp && e.data
+}
