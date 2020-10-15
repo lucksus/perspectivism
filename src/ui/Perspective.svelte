@@ -136,7 +136,7 @@
     }
 
     function handleMouseUp(event) {
-        if(isMovingExpression && !linkEqual(movingLinkOriginal, movingLinkOriginal)) {
+        if(isMovingExpression && !linkEqual(movingLink, movingLinkOriginal)) {
             const newLinkObject = JSON.parse(JSON.stringify(movingLink))
             delete newLinkObject.id
             console.debug("Updating link:", movingLinkOriginal, newLinkObject)
