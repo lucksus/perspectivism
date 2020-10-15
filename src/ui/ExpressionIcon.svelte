@@ -89,7 +89,8 @@
 
     let rotated = false
 
-    function rightClick() {
+    function rightClick(e) {
+        e.stopPropagation()
         rotated = !rotated
     }
 
