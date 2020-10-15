@@ -9,6 +9,7 @@
     export let expressionURL: string
     export let componentConstructor
     export let languageController: LanguageController
+    export let selected: boolean
 
     let loading = true
     let failed = false
@@ -107,7 +108,7 @@
 {/if}
 
 <div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg) translateX(-${width/2}px);`}>
-    <div class="box__face container" bind:this={container}/>
+    <div class="box__face container" class:selected bind:this={container}/>
     <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
         <div class="backside-content">
             <div>
@@ -132,6 +133,10 @@
         display: inline-block;
         border: 2px solid;
         overflow: hidden;
+    }
+
+    .selected {
+        border: 10px solid yellow !important;
     }
 
     .box {

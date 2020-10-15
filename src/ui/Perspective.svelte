@@ -42,6 +42,9 @@
     let isMovingExpression = false
     let movingLink
     let movingLinkOriginal
+    let isLinking = false
+    let linkingSource
+    let linkingCursor = {}
 
     let showSettings = false
 
@@ -102,6 +105,14 @@
             movingLink.data.predicate = coordToPredicate(point)
             rootLinks.update(movingLink)
         }
+
+        if(isLinking) {
+            linkingCursor = {
+                x: event.offsetX,
+                y: event.offsetY
+            }
+            console.log("linking cursor:", JSON.stringify(linkingCursor))
+        }
     }
 
     function getLinkIdFromPath(event) {
@@ -122,14 +133,25 @@
             const linkId = getLinkIdFromPath(event)
             console.log("link id:", linkId)
             if(linkId) {
-                movingLink = $rootLinks.find(l => l.id == linkId)
-                if(movingLink) {
-                    movingLinkOriginal = JSON.parse(JSON.stringify(movingLink))
-                    isMovingExpression = true
+                const hoveredLink = $rootLinks.find(l => l.id == linkId)
+                if(isLinking) {
+                    const newLink = {
+                        source: linkingSource,
+                        target: hoveredLink.data.target,
+                    }
+                    linkRepoController.addLink(perspective, newLink)
+                } else {
+                    movingLink = hoveredLink
+                    if(movingLink) {
+                        movingLinkOriginal = JSON.parse(JSON.stringify(movingLink))
+                        isMovingExpression = true
+                    }
+                    else {
+                        console.error("Couldn't find link with ID", linkId)
+                        console.error("have linkd", $rootLinks)
+                    }
                 }
-                else
-                    console.error("Couldn't find link with ID", linkId)
-                    console.error("have linkd", $rootLinks)
+                
                 
             }
         }
@@ -142,8 +164,11 @@
             console.debug("Updating link:", movingLinkOriginal, newLinkObject)
             linkRepoController.updateLink(perspective, movingLinkOriginal, newLinkObject)
         }
+
         isPanning = false
         isMovingExpression = false
+        isLinking = false
+        linkingSource = false
     }
 
     function contextMenu(event) {
@@ -261,6 +286,12 @@
         })
     }
 
+    function onLinkExpression(event) {
+        const expression = event.detail
+        isLinking = true
+        linkingSource = expression
+    }
+
 </script>
 
 
@@ -272,6 +303,11 @@
     on:contextmenu={contextMenu}
     bind:this={container}
 >
+    {#if isLinking && linkingCursor.x && linkingCursor.y}
+        <svg class="link-path" width="1000" height="1000">
+            <path d={`M0,0 C100,100 400,100 ${linkingCursor.x-5},${linkingCursor.y-5}`} stroke="red" stroke-width="3" fill="none"/>
+        </svg>
+    {/if}
     <div class="perspective-content" bind:this={content}>
         <ul class="inline">
             {#each $rootLinks as link}
@@ -283,7 +319,9 @@
                         expressionURL={link.data.target} 
                         on:context-menu={onExpressionContextMenu} 
                         rotated={iconStates[link.data.target] === 'rotated'}
-                        {languageController}></ExpressionIcon>
+                        selected={linkingSource === link.data.target}
+                        {languageController}>
+                    </ExpressionIcon>
                 </li>
             {/each}
         <div id="constructor-container"></div>
@@ -323,8 +361,12 @@
 <ExpressionContextMenu bind:this={expressionContextMenu}
     on:switch-header-content={onExpressionSwitchHeaderContent}
     on:delete={onDeleteExpression}
+    on:link={onLinkExpression}
 >
 </ExpressionContextMenu>
+
+
+
 <style>
     .perspective-container {
         height: 100%;
@@ -383,5 +425,11 @@
     .inline {
         display: inline;
         transform-style: preserve-3d;
+    }
+
+    .link-path {
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 </style>

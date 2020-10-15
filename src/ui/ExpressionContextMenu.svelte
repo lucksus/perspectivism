@@ -32,7 +32,7 @@
                 <Graphic class="material-icons">add_circle_outline</Graphic>
                 <Text>Create new expression as child</Text>
             </Item>
-            <Item on:SMUI:action={() => dispatch('link')}>
+            <Item on:SMUI:action={() => dispatch('link', expression)}>
                 <Graphic class="material-icons">link</Graphic>
                 <Text>Create link to other expression</Text>
             </Item>
