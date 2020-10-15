@@ -301,6 +301,37 @@ export class IpfsLinksAdapter implements LinksAdapter {
         release()
     }
 
+    async removeLink(link: Expression) {
+        await this.#initialized
+
+        debug(`removeLink(${JSON.stringify(link)})`)
+        const release = await this.#mutex.acquire()
+        const linksObject = await this.getMyLinks()
+        const hash = hashLinkExpression(link)
+
+        //@ts-ignore
+        if(!linksObject.links[hash]) {
+            throw new Error("Can't remove link. Not found in my links.\nMy links: "+JSON.stringify(linksObject))
+        }
+
+        //@ts-ignore
+        const index = linksObject.rootLinks.findIndex(e => e === hash)
+        if(-1 != index) {
+            //@ts-ignore
+            linksObject.rootLinks.splice(index, 1)
+        }
+
+        //@ts-ignore
+        delete linksObject.links[hash]
+
+        this.#room.broadcast(JSON.stringify({
+            removeLink: link
+        }))
+        await this.publish(linksObject)
+        release()
+    }
+
+
     async getLinksFrom(source: ExpressionRef): Promise<Expression[]> {
         return []
     }

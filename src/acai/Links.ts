@@ -35,7 +35,7 @@ export function isLink(l: any): boolean {
 }
 
 export function hashLinkExpression(link: Expression): number {
-    const mash = JSON.stringify(link.data, Object.keys(link.data). sort()) +
+    const mash = JSON.stringify(link.data, Object.keys(link.data).sort()) +
                 JSON.stringify(link.author) + link.timestamp
     var hash = 0, i, chr;
     for (i = 0; i < mash.length; i++) {

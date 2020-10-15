@@ -103,6 +103,7 @@ export interface LinksAdapter {
     addRootLink(link: Expression) ;
     addLink(linkExpression: Expression);
     updateLink(oldLinkExpression: Expression, newLinkExpression: Expression);
+    removeLink(link: Expression);
     getLinksFrom(source: ExpressionRef): Promise<Expression[]>;
     getLinksTo(target: ExpressionRef): Promise<Expression[]>;
 

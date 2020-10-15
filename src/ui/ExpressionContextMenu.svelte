@@ -36,7 +36,7 @@
                 <Graphic class="material-icons">link</Graphic>
                 <Text>Create link to other expression</Text>
             </Item>
-            <Item on:SMUI:action={() => dispatch('delete')}>
+            <Item on:SMUI:action={() => dispatch('delete', expression)}>
                 <Graphic class="material-icons">delete_forever</Graphic>
                 <Text>Unlink expression</Text>
             </Item>

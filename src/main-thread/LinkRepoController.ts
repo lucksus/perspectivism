@@ -179,9 +179,16 @@ export default class LinkRepoController {
         this.callLinksAdapter(p, 'updateLink', oldLink, newLink)
     }
 
-    removeLink(p: Perspective, link: Link) {
-        this.getPerspective(p).get('sources').get(link.source).unset(link)
-        this.getPerspective(p).get('targets').get(link.target).unset(link)
+    async removeLink(p: Perspective, linkExpression: Expression) {
+        const addr = await this.findLink(p, linkExpression)
+        const link = linkExpression.data
+        //@ts-ignore
+        this.getPerspective(p).get('sources').get(link.sources)?.unset(addr)
+        //@ts-ignore
+        this.getPerspective(p).get('targets').get(link.target)?.unset(addr)
+        this.getPerspective(p).get('root-links').unset(addr)
+        this.getPerspective(p).get('links').get(addr)?.put({})
+        this.callLinksAdapter(p, 'removeLink', linkExpression)
     }
 
     async getLinksFrom(p: Perspective, source: ExpressionRef): Promise<Link[]> {
@@ -214,8 +221,8 @@ export function init(context: any): LinkRepoController {
     ipcMain.handle('links-addRoot', (e, p: Perspective, link: Link) => linkRepoController.addRootLink(p, link))
     ipcMain.handle('links-getFrom', async (e, p: Perspective, source: ExpressionRef) => await linkRepoController.getLinksFrom(p, source))
     ipcMain.handle('links-getTo', async (e, p: Perspective, target: ExpressionRef) => await linkRepoController.getLinksTo(p, target))
-    ipcMain.handle('links-add', (e, p: Perspective, link: Link) => linkRepoController.addLink(p, link))
-    ipcMain.handle('links-remove', (e, p: Perspective, link: Link) => linkRepoController.removeLink(p, link))
+    ipcMain.handle('links-add', (e, p: Perspective, link: Expression) => linkRepoController.addLink(p, link))
+    ipcMain.handle('links-remove', (e, p: Perspective, link: Expression) => linkRepoController.removeLink(p, link))
     ipcMain.handle('links-sync', (e, p: Perspective) => linkRepoController.syncWithSharingAdapter(p))
     ipcMain.handle('links-update', (e, p: Perspective, oldLink: Expression, newLink: Expression) => linkRepoController.updateLink(p, oldLink, newLink))
 

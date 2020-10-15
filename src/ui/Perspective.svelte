@@ -241,7 +241,6 @@
     }
 
     function onExpressionSwitchHeaderContent(event) {
-        console.log("switch header content:", event)
         const expression = event.detail
         if(iconStates[expression] != 'rotated') {
             iconStates[expression] = 'rotated'
@@ -250,6 +249,16 @@
         }
         isPanning = false
         isMovingExpression = false
+    }
+
+    function onDeleteExpression(event) {
+        const expression = event.detail
+        $rootLinks.forEach(l => {
+            if(l.data.target === expression) {
+                rootLinks.remove(l)
+                linkRepoController.removeLink(perspective, l)
+            }
+        })
     }
 
 </script>
@@ -313,6 +322,7 @@
 ></ConstructionMenu>
 <ExpressionContextMenu bind:this={expressionContextMenu}
     on:switch-header-content={onExpressionSwitchHeaderContent}
+    on:delete={onDeleteExpression}
 >
 </ExpressionContextMenu>
 <style>
