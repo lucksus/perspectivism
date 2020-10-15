@@ -259,9 +259,10 @@
 
 <div id="side-bar-container">
     <div id="settings-panel" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <Fab on:click={() => showSettings = !showSettings}>
-            <Icon class="material-icons">settings</Icon>
-        </Fab>
+        <div class="button" on:click={() => showSettings = !showSettings}>
+            <span class="float-right"><Icon class="material-icons">settings</Icon></span>
+            <Label>Perspective Settings</Label>
+        </div>
         <div id="settings">
             <PerspectiveSettings perspective={perspective} 
                 languageController={languageController}
@@ -303,13 +304,31 @@
     #settings-panel {
         position: absolute;
         right: 0;
-        top: 55px;
+        top: 100px;
         transform-style: preserve-3d;
         transition: transform 0.5s;
     }
 
-    #settings {
+    .button {
         position: absolute;
+        width: 230px;
+        height: 45px;
+        padding: 10px 50px 0 25px;
+        transform-origin: right bottom;
+        transform: rotate(-90deg) translateX(115px);
+        right: 0;
+        background-color: white;
+        border: 1px solid rgb(127, 129, 255);
+        color:   rgb(127, 129, 255);
+        cursor: pointer;
+    }
+
+    .float-right {
+        float: right;
+    }
+
+    #settings {
+        position: relative;
         transform: rotateY(-90deg) translateX(-400px);
         padding: 40px;
         border: 1px solid rgb(127, 129, 255);
