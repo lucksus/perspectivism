@@ -17,6 +17,7 @@
     import LinksStore from '../stores/LinksStore'
     import ConstructionMenu from './ConstructionMenu.svelte'
     import PerspectiveSettings from './PerspectiveSettings.svelte';
+    import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     
@@ -30,8 +31,7 @@
         'url-iframe': 'link'
     }
     let constructorIconComponents = {}
-    let iconComponents = {}
-    let expressions = {}
+    let iconStates = {}
 
     let content
     let container
@@ -231,6 +231,27 @@
         return `coord2d://${coords.x}_${coords.y}`
     }
 
+    let expressionContextMenu
+
+    function onExpressionContextMenu(event) {
+        const { expressionURL, mouseEvent } = event.detail
+        expressionContextMenu.open(mouseEvent.clientX, mouseEvent.clientY, expressionURL)
+        isPanning = false
+        isMovingExpression = false
+    }
+
+    function onExpressionSwitchHeaderContent(event) {
+        console.log("switch header content:", event)
+        const expression = event.detail
+        if(iconStates[expression] != 'rotated') {
+            iconStates[expression] = 'rotated'
+        } else {
+            iconStates[expression] = ''
+        }
+        isPanning = false
+        isMovingExpression = false
+    }
+
 </script>
 
 
@@ -249,7 +270,11 @@
                     style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
                     data-link-id={link.id}
                     >
-                    <ExpressionIcon class="inline" expressionURL={link.data.target} {languageController}></ExpressionIcon>
+                    <ExpressionIcon class="inline" 
+                        expressionURL={link.data.target} 
+                        on:context-menu={onExpressionContextMenu} 
+                        rotated={iconStates[link.data.target] === 'rotated'}
+                        {languageController}></ExpressionIcon>
                 </li>
             {/each}
         <div id="constructor-container"></div>
@@ -286,6 +311,10 @@
     languageIcons={languageIcons}
     on:language-clicked={({detail: lang}) => createExpression(lang)}
 ></ConstructionMenu>
+<ExpressionContextMenu bind:this={expressionContextMenu}
+    on:switch-header-content={onExpressionSwitchHeaderContent}
+>
+</ExpressionContextMenu>
 <style>
     .perspective-container {
         height: 100%;

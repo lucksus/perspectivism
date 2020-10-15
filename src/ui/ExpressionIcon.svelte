@@ -3,6 +3,8 @@
     import ExpressionRef, { parseExprURL } from "../acai/ExpressionRef";
     import type { LanguageController } from "../main-thread/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 
     export let expressionURL: string
     export let componentConstructor
@@ -87,12 +89,13 @@
         height = container.offsetHeight
     }
 
-    let rotated = false
+    export let rotated = false
 
-    function rightClick(e) {
-        e.stopPropagation()
-        rotated = !rotated
+    function rightClick(mouseEvent) {
+        mouseEvent.stopPropagation()
+        dispatch('context-menu', {expressionURL , mouseEvent})
     }
+
 
 </script>
 
