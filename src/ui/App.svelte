@@ -56,11 +56,17 @@
 		selectedMainView.edit = perspective
 	}
 
-	function editPerspectiveSubmit() {
-		linkRepoController.syncWithSharingAdapter($perspectiveStore[selectedMainView.edit])
-		selectedMainView.perspective = null
-		selectedMainView.settings = null
-		selectedMainView.edit = null
+	function editPerspectiveSubmit(event) {
+		const uuid = event.detail
+		console.log(uuid)
+		const perspective = $perspectiveStore[uuid]
+		perspectiveStore.update(perspective)
+		linkRepoController.syncWithSharingAdapter(perspective)
+		if(selectedMainView.perspective == null) {
+			selectedMainView.perspective = uuid
+			selectedMainView.settings = null
+			selectedMainView.edit = null
+		}
 	}
 
 </script>
@@ -167,13 +173,19 @@
 	</TopAppBar>
 
 	{#if selectedMainView.perspective}
-		<Perspective perspective={$perspectiveStore[selectedMainView.perspective]} {...$$props}></Perspective>
+		<Perspective perspective={$perspectiveStore[selectedMainView.perspective]} 
+			on:settings-changed={editPerspectiveSubmit}
+			{...$$props} 
+		></Perspective>
 	{:else if selectedMainView.settings }
 		{#if selectedMainView.settings == 'languages'}
 			<LanguagesSettings languageController={languageController}></LanguagesSettings>
 		{/if}
 	{:else if selectedMainView.edit }
-		<PerspectiveSettings perspectiveId={selectedMainView.edit} {...$$props} on:submit={editPerspectiveSubmit}></PerspectiveSettings>
+		<PerspectiveSettings perspectiveId={selectedMainView.edit} 
+			on:submit={editPerspectiveSubmit}
+			{...$$props}
+		></PerspectiveSettings>
 	{:else}
 		<h1>Welcome to Perspectivism!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>

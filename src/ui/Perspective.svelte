@@ -16,6 +16,9 @@
     import type LinkRepoController from '../main-thread/LinkRepoController';
     import LinksStore from '../stores/LinksStore'
     import ConstructionMenu from './ConstructionMenu.svelte'
+    import PerspectiveSettings from './PerspectiveSettings.svelte';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
     
     let rootLinks = new LinksStore()
     let rootExpressions = []
@@ -39,6 +42,8 @@
     let isMovingExpression = false
     let movingLink
     let movingLinkOriginal
+
+    let showSettings = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -237,7 +242,6 @@
     on:contextmenu={contextMenu}
     bind:this={container}
 >
-    <h2 class="debug">Root links: {JSON.stringify(rootLinks)}</h2>
     <div class="perspective-content" bind:this={content}>
         <ul class="inline">
             {#each $rootLinks as link}
@@ -253,6 +257,29 @@
     </div>
 </div>
 
+<div id="side-bar-container">
+    <div id="settings-panel" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
+        <Fab on:click={() => showSettings = !showSettings}>
+            <Icon class="material-icons">settings</Icon>
+        </Fab>
+        <div id="settings">
+            <PerspectiveSettings perspective={perspective} 
+                languageController={languageController}
+                on:submit={()=> {
+                    console.log(perspective)
+                    dispatch('settings-changed', perspective.uuid)
+                    showSettings = false
+                }}
+                on:cancel={()=> {
+                    showSettings = false
+                }}>
+            </PerspectiveSettings>
+        </div>
+    </div>
+</div>
+
+
+
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
     languageIcons={languageIcons}
@@ -263,6 +290,30 @@
         height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
+    }
+
+    #side-bar-container {
+        position: absolute;
+        right: 0;
+        top: 0;
+        perspective: 1000px;
+        perspective-origin: rightpo;
+    }
+
+    #settings-panel {
+        position: absolute;
+        right: 0;
+        top: 55px;
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+    }
+
+    #settings {
+        position: absolute;
+        transform: rotateY(-90deg) translateX(-400px);
+        padding: 40px;
+        border: 1px solid rgb(127, 129, 255);
+        background-color: white;
     }
 
     .debug {

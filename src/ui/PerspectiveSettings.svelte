@@ -1,4 +1,5 @@
 <script lang="ts">
+    export let perspective
     export let perspectiveId
     export let perspectiveStore
     export let languageController
@@ -11,7 +12,8 @@
     const dispatch = createEventDispatcher();
 
 
-    let perspective = $perspectiveStore[perspectiveId]
+    if(!perspective && perspectiveId && perspectiveStore)
+        perspective = $perspectiveStore[perspectiveId]
     let linkLanguages = []
     let linkLanguagesLoadingDone = false
     
@@ -24,8 +26,7 @@
     
 
     function save() {
-        perspectiveStore.update(perspective)
-        dispatch('submit')
+        dispatch('submit', perspective.uuid)
     }
 </script>
 
