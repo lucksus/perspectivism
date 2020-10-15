@@ -297,7 +297,7 @@
         position: absolute;
         right: 0;
         top: 0;
-        perspective: 1000px;
+        perspective: 100px;
         perspective-origin: rightpo;
     }
 
@@ -328,8 +328,8 @@
     }
 
     #settings {
-        position: relative;
-        transform: rotateY(-90deg) translateX(-400px);
+        position: absolute;
+        transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
         padding: 40px;
         border: 1px solid rgb(127, 129, 255);
         background-color: white;
