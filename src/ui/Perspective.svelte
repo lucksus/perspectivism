@@ -21,8 +21,7 @@
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     
-    let rootLinks = new LinksStore()
-    let rootExpressions = []
+    let linksStore = new LinksStore()
 
     let constructionMenu
     let languages = []
@@ -103,7 +102,7 @@
             point.x += d.x
             point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
-            rootLinks.update(movingLink)
+            linksStore.update(movingLink)
         }
 
         if(isLinking) {
@@ -133,7 +132,7 @@
             const linkId = getLinkIdFromPath(event)
             console.log("link id:", linkId)
             if(linkId) {
-                const hoveredLink = $rootLinks.find(l => l.id == linkId)
+                const hoveredLink = $linksStore.find(l => l.id == linkId)
                 if(isLinking) {
                     const newLink = {
                         source: linkingSource,
@@ -148,7 +147,7 @@
                     }
                     else {
                         console.error("Couldn't find link with ID", linkId)
-                        console.error("have linkd", $rootLinks)
+                        console.error("have links", $linksStore)
                     }
                 }
                 
@@ -185,7 +184,7 @@
     async function loadRootLinks() {
         const rootExpressions = await linkRepoController.getLinks(perspective)
         console.debug("rootExpressions:", rootExpressions)
-        rootExpressions.forEach(e => rootLinks.add(e))
+        rootExpressions.forEach(e => linksStore.add(e))
     }
 
     async function commitExpression(lang, content, container) {
@@ -225,7 +224,7 @@
     }
 
     $: if(perspective) {
-        rootLinks = new LinksStore()
+        linksStore = new LinksStore()
         loadRootLinks()
     }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
@@ -233,10 +232,10 @@
             console.log("LINK OBSERVER got links to add:", added)
             console.log("LINK OBSERVER got links to remove:", removed)
             added?.forEach(l => {
-                rootLinks.add(l)
+                linksStore.add(l)
             })
             removed?.forEach(l => {
-                rootLinks.remove(l)
+                linksStore.remove(l)
             })
         })
     }
@@ -279,18 +278,18 @@
 
     function onDeleteExpression(event) {
         const expression = event.detail
-        $rootLinks.forEach(l => {
+        $linksStore.forEach(l => {
             if(l.data.target === expression) {
-                rootLinks.remove(l)
+                linksStore.remove(l)
                 linkRepoController.removeLink(perspective, l)
             }
         })
     }
 
     function onLinkExpression(event) {
-        const expression = event.detail
+        const link = event.detail
         isLinking = true
-        linkingSource = expression
+        linkingSource = link
     }
 
 </script>
@@ -303,30 +302,34 @@
     on:mouseup={handleMouseUp}
     on:contextmenu={contextMenu}
     bind:this={container}
->
-    {#if isLinking && linkingCursor.x && linkingCursor.y}
-        <svg class="link-path" width="1000" height="1000">
-            <path d={`M0,0 C100,100 400,100 ${linkingCursor.x-5},${linkingCursor.y-5}`} stroke="red" stroke-width="3" fill="none"/>
-        </svg>
-    {/if}
+    >
     <div class="perspective-content" bind:this={content}>
         <ul class="inline">
-            {#each $rootLinks as link}
-                <li class="inline expression-list-container" 
-                    style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
-                    data-link-id={link.id}
-                    >
-                    <ExpressionIcon class="inline" 
-                        expressionURL={link.data.target} 
-                        on:context-menu={onExpressionContextMenu} 
-                        rotated={iconStates[link.data.target] === 'rotated'}
-                        selected={linkingSource === link.data.target}
-                        {languageController}>
-                    </ExpressionIcon>
-                </li>
+            {#each $linksStore as link}
+                {#if link.data.source === 'root'}
+                    <li class="inline expression-list-container" 
+                        style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
+                        data-link-id={link.id}
+                        >
+                        <ExpressionIcon class="inline" 
+                            expressionURL={link.data.target}
+                            parentLink={link}
+                            on:context-menu={onExpressionContextMenu} 
+                            rotated={iconStates[link.data.target] === 'rotated'}
+                            selected={linkingSource === link.data.target}
+                            {languageController}>
+                        </ExpressionIcon>
+                    </li>
+                {/if}
             {/each}
-        <div id="constructor-container"></div>
         </ul>        
+        <div id="constructor-container"></div>
+
+        {#if isLinking && linkingSource && linkingCursor.x && linkingCursor.y}
+            <svg class="link-path" width="1000" height="1000">
+                <path d={`M${linkTo2D(linkingSource).x},${linkTo2D(linkingSource).y} C100,100 400,100 ${linkingCursor.x-5},${linkingCursor.y-5}`} stroke="red" stroke-width="3" fill="none"/>
+            </svg>
+        {/if}
     </div>
 </div>
 
@@ -363,8 +366,7 @@
     on:switch-header-content={onExpressionSwitchHeaderContent}
     on:delete={onDeleteExpression}
     on:link={onLinkExpression}
->
-</ExpressionContextMenu>
+></ExpressionContextMenu>
 
 
 
