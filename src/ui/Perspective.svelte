@@ -135,7 +135,7 @@
                 const hoveredLink = $linksStore.find(l => l.id == linkId)
                 if(isLinking) {
                     const newLink = {
-                        source: linkingSource,
+                        source: linkingSource.data.target,
                         target: hoveredLink.data.target,
                     }
                     linkRepoController.addLink(perspective, newLink)
@@ -259,8 +259,8 @@
     let expressionContextMenu
 
     function onExpressionContextMenu(event) {
-        const { expressionURL, mouseEvent } = event.detail
-        expressionContextMenu.open(mouseEvent.clientX, mouseEvent.clientY, expressionURL)
+        const { expressionURL, mouseEvent, parentLink } = event.detail
+        expressionContextMenu.open(mouseEvent.clientX, mouseEvent.clientY, expressionURL, parentLink)
         isPanning = false
         isMovingExpression = false
     }

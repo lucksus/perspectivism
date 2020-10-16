@@ -7,6 +7,7 @@
     const dispatch = createEventDispatcher();
 
     export let expressionURL: string
+    export let parentLink: Expression
     export let componentConstructor
     export let languageController: LanguageController
     export let selected: boolean
@@ -94,7 +95,7 @@
 
     function rightClick(mouseEvent) {
         mouseEvent.stopPropagation()
-        dispatch('context-menu', {expressionURL , mouseEvent})
+        dispatch('context-menu', {expressionURL , mouseEvent, parentLink})
     }
 
 

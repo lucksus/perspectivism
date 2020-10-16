@@ -10,10 +10,12 @@
     let anchorY
 
     let expression
+    let parentLink
 
-    export function open(x, y, e) {
+    export function open(x, y, e, p) {
         console.log("expression:", e)
         expression = e
+        parentLink = p
         anchorX = x
         anchorY = y
         menu.setOpen(true)
@@ -32,7 +34,7 @@
                 <Graphic class="material-icons">add_circle_outline</Graphic>
                 <Text>Create new expression as child</Text>
             </Item>
-            <Item on:SMUI:action={() => dispatch('link', expression)}>
+            <Item on:SMUI:action={() => dispatch('link', parentLink)}>
                 <Graphic class="material-icons">link</Graphic>
                 <Text>Create link to other expression</Text>
             </Item>
