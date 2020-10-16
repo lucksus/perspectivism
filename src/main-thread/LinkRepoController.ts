@@ -70,7 +70,8 @@ export default class LinkRepoController {
     }
 
     async syncWithSharingAdapter(p: Perspective) {
-        const [localLinks, remoteLinks] = await this.getRootLinksLocalAndRemote(p)
+        const localLinks = this.getLinksPath(p, 'links')
+        const remoteLinks = this.callLinksAdapter(p, 'getRootLinks')
         const includes = (link, list) => {
             return undefined != list.find(e => 
                 JSON.stringify(e.author) == JSON.stringify(link.author) &&
@@ -96,22 +97,30 @@ export default class LinkRepoController {
         })
     }
 
-    private getRootLinksLocalAndRemote(p: Perspective): Promise<Expression[][]> {
-        const localLinks = new Promise((resolve) => {
-            setTimeout(()=>resolve([]), 200)
-            this.getPerspective(p)
-                .get('root-links')
-                .load(linksObject => {
-                    console.debug("root-links:", linksObject)
-                    const linkAddrs = Object.values(linksObject) as string[]
-                    Promise.all(linkAddrs.map(addr => this.getLinkByAddress(p, addr)))
-                        .then(links => {
-                            console.log("LINK REPO: Found root links:", links)
-                            resolve(links)
-                        })
-                }, {wait:1})
+    private async getLinksPath(p: Perspective, ...args: string[]): Promise<Expression[]> {
+        return new Promise((resolve) => {
+            //setTimeout(()=>resolve([]), 200)
+            let context = this.getPerspective(p)
+            for(const i in args) {
+                context = context.get(args[i])
+            }
+            context.load(linksObject => {
+                console.debug("linksObject:", linksObject)
+                const values = Object.values(linksObject) as string[]
+                Promise.all(values.map(value => {
+                    if(typeof(value) === 'object') {
+                        return Promise.resolve(value)
+                    } else {
+                        return this.getLinkByAddress(p, value)
+                    }
+                })).then(links => resolve(links))
+            })
         })
+    }
 
+    private getRootLinksLocalAndRemote(p: Perspective): Promise<Expression[][]> {
+        throw "DEPRECATED"
+        const localLinks = this.getLinksPath(p, 'root-links')
         const remoteLinks = this.callLinksAdapter(p, 'getRootLinks')
 
         return Promise.all([localLinks, remoteLinks])
@@ -191,24 +200,13 @@ export default class LinkRepoController {
         this.callLinksAdapter(p, 'removeLink', linkExpression)
     }
 
-    async getLinksFrom(p: Perspective, source: ExpressionRef): Promise<Link[]> {
-        return await new Promise((resolve) => {
-            this.getPerspective(p)
-                .get('sources')
-                .get(source)
-                .load()
-                .once(links => resolve(links))
-        })
+    async getLinksFrom(p: Perspective, source: string): Promise<Expression[]> {
+        console.debug("LinkRepoController.getLinksFrom(",source,")")
+        return await this.getLinksPath(p, 'sources', source)
     }
 
-    async getLinksTo(p: Perspective, target: ExpressionRef): Promise<Link[]>{
-        return await new Promise((resolve) => {
-            this.getPerspective(p)
-                .get('sources')
-                .get(target)
-                .load()
-                .once(links => resolve(links))
-        })
+    async getLinksTo(p: Perspective, target: string): Promise<Expression[]>{
+        return await this.getLinksPath(p, 'targets', target)
     }
 
 
@@ -219,8 +217,8 @@ export function init(context: any): LinkRepoController {
 
     ipcMain.handle('links-getRoot', async (e, p: Perspective) => await linkRepoController.getRootLinks(p))
     ipcMain.handle('links-addRoot', (e, p: Perspective, link: Link) => linkRepoController.addRootLink(p, link))
-    ipcMain.handle('links-getFrom', async (e, p: Perspective, source: ExpressionRef) => await linkRepoController.getLinksFrom(p, source))
-    ipcMain.handle('links-getTo', async (e, p: Perspective, target: ExpressionRef) => await linkRepoController.getLinksTo(p, target))
+    ipcMain.handle('links-getFrom', async (e, p: Perspective, source: string) => await linkRepoController.getLinksFrom(p, source))
+    ipcMain.handle('links-getTo', async (e, p: Perspective, target: string) => await linkRepoController.getLinksTo(p, target))
     ipcMain.handle('links-add', (e, p: Perspective, link: Expression) => linkRepoController.addLink(p, link))
     ipcMain.handle('links-remove', (e, p: Perspective, link: Expression) => linkRepoController.removeLink(p, link))
     ipcMain.handle('links-sync', (e, p: Perspective) => linkRepoController.syncWithSharingAdapter(p))

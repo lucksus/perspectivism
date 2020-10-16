@@ -183,7 +183,8 @@
     })
 
     async function loadRootLinks() {
-        const rootExpressions = await linkRepoController.getRootLinks(perspective)
+        const rootExpressions = await linkRepoController.getLinksFrom(perspective, 'root')
+        console.debug("rootExpressions:", rootExpressions)
         rootExpressions.forEach(e => rootLinks.add(e))
     }
 
@@ -193,7 +194,7 @@
         const exprURL = exprRef2String(expressionRef)
         console.log("Created new expression:", exprURL)
         
-        const link = new Link({source: exprURL, target: exprURL})
+        const link = new Link({source: 'root', target: exprURL})
         linkRepoController.addRootLink(perspective, link)
         loadRootLinks()
 
