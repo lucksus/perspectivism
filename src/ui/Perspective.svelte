@@ -56,6 +56,7 @@
         return `
             position: absolute; 
             width: 100%; height: 100%; 
+            top: 0; left: 0;
             transform: translateX(${translateX}px) translateY(${translateY}px) translateZ(${zoom}px);
             transform-style: preserve-3d;
         `
@@ -74,7 +75,7 @@
         console.log("zoom:", zoom)
     }
 
-    function zoomNormalizedMouseMove(event) {
+    function zoomNormalizedMouseMove(coords) {
         let factor
         if(zoom < 0) {
             const dist = -zoom
@@ -85,13 +86,13 @@
         }
 
         return {
-            x: event.movementX * factor,
-            y: event.movementY * factor,
+            x: coords.x * factor,
+            y: coords.y * factor,
         }
     }
 
     function handleMouseMove(event) {
-        const d = zoomNormalizedMouseMove(event)
+        const d = zoomNormalizedMouseMove({x: event.movementX, y: event.movementY })
         if(isPanning) {
             translateX += d.x
             translateY += d.y
@@ -106,10 +107,10 @@
         }
 
         if(isLinking) {
-            linkingCursor = {
+            linkingCursor = zoomNormalizedMouseMove({
                 x: event.clientX,
                 y: event.clientY
-            }
+            })
             console.log("linking cursor:", JSON.stringify(linkingCursor))
         }
     }
@@ -315,7 +316,7 @@
                             parentLink={link}
                             on:context-menu={onExpressionContextMenu} 
                             rotated={iconStates[link.data.target] === 'rotated'}
-                            selected={linkingSource === link.data.target}
+                            selected={linkingSource?.data?.target === link.data.target}
                             {languageController}>
                         </ExpressionIcon>
                     </li>
@@ -325,8 +326,8 @@
         <div id="constructor-container"></div>
 
         {#if isLinking && linkingSource && linkingCursor.x && linkingCursor.y}
-            <svg class="link-path" width="1000" height="1000">
-                <path d={`M${linkTo2D(linkingSource).x},${linkTo2D(linkingSource).y} C100,100 400,100 ${linkingCursor.x-5},${linkingCursor.y-5}`} stroke="red" stroke-width="3" fill="none"/>
+            <svg class="link-path" width="100000" height="100000">
+                <path d={`M${linkTo2D(linkingSource).x+10000+400},${linkTo2D(linkingSource).y+10000} L${linkingCursor.x-5+10000},${linkingCursor.y-5+10000} Z`} stroke="red" stroke-width="3" fill="none"/>
             </svg>
         {/if}
     </div>
@@ -433,5 +434,6 @@
         position: absolute;
         top: 0;
         left: 0;
+        transform: translateX(-10000px) translateY(-10000px);
     }
 </style>
