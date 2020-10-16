@@ -1,4 +1,4 @@
-import Link, { linkEqual } from "../acai/Links";
+import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
 import type ExpressionRef from "../acai/ExpressionRef";
 import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
@@ -70,8 +70,8 @@ export default class LinkRepoController {
     }
 
     async syncWithSharingAdapter(p: Perspective) {
-        const localLinks = this.getLinksPath(p, 'links')
-        const remoteLinks = this.callLinksAdapter(p, 'getRootLinks')
+        const localLinks = await this.getLinksPath(p, 'links')
+        const remoteLinks = await this.callLinksAdapter(p, 'getLinks')
         const includes = (link, list) => {
             return undefined != list.find(e => 
                 JSON.stringify(e.author) == JSON.stringify(link.author) &&
@@ -84,7 +84,7 @@ export default class LinkRepoController {
         for(const i in localLinks) {
             const l = localLinks[i]
             if(!includes(l, remoteLinks)) {
-                await this.callLinksAdapter(p, "addRootLink", l)
+                await this.callLinksAdapter(p, "addLink", l)
             }
         }
 
@@ -99,7 +99,7 @@ export default class LinkRepoController {
 
     private async getLinksPath(p: Perspective, ...args: string[]): Promise<Expression[]> {
         return new Promise((resolve) => {
-            //setTimeout(()=>resolve([]), 200)
+            setTimeout(()=>resolve([]), 200)
             let context = this.getPerspective(p)
             for(const i in args) {
                 context = context.get(args[i])
@@ -116,31 +116,6 @@ export default class LinkRepoController {
                 })).then(links => resolve(links))
             })
         })
-    }
-
-    private getRootLinksLocalAndRemote(p: Perspective): Promise<Expression[][]> {
-        throw "DEPRECATED"
-        const localLinks = this.getLinksPath(p, 'root-links')
-        const remoteLinks = this.callLinksAdapter(p, 'getRootLinks')
-
-        return Promise.all([localLinks, remoteLinks])
-    } 
-
-    async getRootLinks(p: Perspective): Promise<Expression[]> {
-        const both = await this.getRootLinksLocalAndRemote(p)
-        const merged = [].concat.apply([], both)
-
-        console.log("MERGED LINKS:", merged)
-
-        return merged
-
-    }
-    addRootLink(p: Perspective, link: Link) {
-        console.log("LINK REPO: Adding root link:", link)
-        const expression = this.linkToExpression(link)
-        this.callLinksAdapter(p, 'addRootLink', expression)
-        const linkAddr = this.addLink(p, expression)
-        this.getPerspective(p).get('root-links').set(linkAddr)
     }
 
     addLink(p: Perspective, link: Link | Expression) {
@@ -200,6 +175,51 @@ export default class LinkRepoController {
         this.callLinksAdapter(p, 'removeLink', linkExpression)
     }
 
+    private async getLinksLocal(p: Perspective, query: LinkQuery): Promise<Expression[]> {
+        console.debug("getLinks 1")
+        if(!query || !query.source && !query.predicate && !query.target) {
+            return await this.getLinksPath(p, 'links')
+        }
+
+        console.debug("getLinks 2")
+
+        if(query.source) {
+            let result = await this.getLinksPath(p, 'sources', query.source)
+            //@ts-ignore
+            if(query.target) result = result.filter(l => l.data.target === query.target)
+            //@ts-ignore
+            if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
+            return result
+        }
+
+        console.debug("getLinks 3")
+
+        if(query.target) {
+            let result = await this.getLinksPath(p, 'targets', query.target)
+            //@ts-ignore
+            if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
+            return result
+        }
+
+        console.debug("getLinks 4")
+
+        return await this.getLinksPath(p, 'predicates', query.predicate)
+    }
+
+    async getLinks(p: Perspective, query: LinkQuery): Promise<Expression[]> {
+        console.debug("getLinks local...")
+        const localLinks = await this.getLinksLocal(p, query)
+        console.debug("getLinks local", localLinks)
+        console.debug("getLinks remote...")
+        const remoteLinks = await this.callLinksAdapter(p, 'getLinks', query)
+        console.debug("getLinks remote", remoteLinks)
+        const mergedLinks = {}
+        localLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
+        remoteLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
+
+        return Object.values(mergedLinks)
+    }
+
     async getLinksFrom(p: Perspective, source: string): Promise<Expression[]> {
         console.debug("LinkRepoController.getLinksFrom(",source,")")
         return await this.getLinksPath(p, 'sources', source)
@@ -215,8 +235,7 @@ export default class LinkRepoController {
 export function init(context: any): LinkRepoController {
     const linkRepoController = new LinkRepoController(context)
 
-    ipcMain.handle('links-getRoot', async (e, p: Perspective) => await linkRepoController.getRootLinks(p))
-    ipcMain.handle('links-addRoot', (e, p: Perspective, link: Link) => linkRepoController.addRootLink(p, link))
+    ipcMain.handle('links-get', async (e, p: Perspective, query: LinkQuery) => await linkRepoController.getLinks(p, query))
     ipcMain.handle('links-getFrom', async (e, p: Perspective, source: string) => await linkRepoController.getLinksFrom(p, source))
     ipcMain.handle('links-getTo', async (e, p: Perspective, target: string) => await linkRepoController.getLinksTo(p, target))
     ipcMain.handle('links-add', (e, p: Perspective, link: Expression) => linkRepoController.addLink(p, link))

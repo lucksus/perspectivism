@@ -1,6 +1,6 @@
 import type Expression from "../../acai/Expression";
 import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
-import { hashLinkExpression } from "../../acai/Links";
+import Link, { hashLinkExpression, LinkQuery } from "../../acai/Links";
 import type LanguageContext from "../../acai/LanguageContext";
 import { SHA3 } from "sha3";
 import type ExpressionRef from "../../acai/ExpressionRef";
@@ -169,27 +169,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return result.cid
     }
 
-    private async resolveIPNS(ipns: string): Promise<string> {
-        let resolved
-        for await (const name of this.#IPFS.name.resolve(ipns)) {
-            resolved = name
-        }
-        return resolved
-    }
-
-    private async myResolvedIPNSObject(): Promise<string> {
-        let resolved
-        try {
-            debug("resolving #key:", this.#key)
-            resolved = this.resolveIPNS(this.#key.id)
-        } catch(e) {
-            debug("Couldn't get resolve my IPNS name. Publishing...")
-            resolved = await this.publish({links:[], rootLinks:[]})
-        }
-
-        return resolved
-    }
-
     writable() {
         return true
     }
@@ -202,38 +181,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return []
     }
 
-    async getRootLinks(): Promise<Expression[]> {
-        await this.#initialized
-
-        //const resolved = await this.myResolvedIPNSObject()
-        //let requestList = [{peer: 'me', cid: resolved}]
-        let requestList = []
-
-        Object.keys(this.#peerList).forEach(peer => {
-            requestList.push({peer, cid: this.#peerList[peer]})
-        })
-            
-        const allLinksOfallPeers = await Promise.all(
-            requestList.map(r => {
-                return this.getLinksOfPeer(r.peer, r.cid)
-            })
-        )
-
-        console.log("IPFS-LINKS| getRootLinks - allLinksOfAllPeers =", allLinksOfallPeers)
-
-        //@ts-ignore
-        const merged = [].concat.apply([], allLinksOfallPeers.map(e => Object.values(e.links)))
-        return merged
-    }
-
-    async addRootLink(link: Expression) {
-        await this._addLink(link, true)
-    }
-
-    async addLink(link: Expression) {
-        await this._addLink(link, false)
-    }
-
     private async getMyLinks(): Promise<object> {
         let linksObject
         let myHash = this.myLatestHash()
@@ -241,16 +188,13 @@ export class IpfsLinksAdapter implements LinksAdapter {
             linksObject = await this.getLinksOfPeer("me", myHash)
         } 
         //@ts-ignore
-        if(!linksObject || !linksObject.links || !linksObject.rootLinks) {
-            linksObject = {
-                links: {},
-                rootLinks: []
-            }
+        if(!linksObject || !linksObject.links ) {
+            linksObject = { links: {} }
         }
         return linksObject
     }
 
-    private async _addLink(link: Expression, root: boolean) {
+    async addLink(link: Expression) {
         await this.#initialized
 
         const release = await this.#mutex.acquire()
@@ -258,10 +202,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const linkHash = hashLinkExpression(link)
         //@ts-ignore
         linksObject.links[linkHash] = link
-        if(root) {
-            //@ts-ignore
-            linksObject.rootLinks.push(linkHash)
-        }
         await this.publish(linksObject)
         release()
     }
@@ -281,15 +221,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
         //@ts-ignore
         linksObject.links[newLinkHash] = newLinkExpression
-
-        //@ts-ignore
-        const index = linksObject.rootLinks.findIndex(e => e === oldLinkHash)
-        if(-1 != index) {
-            //@ts-ignore
-            linksObject.rootLinks.splice(index, 1)
-            //@ts-ignore
-            linksObject.rootLinks.push(newLinkHash)
-        }
 
         //@ts-ignore
         delete linksObject.links[oldLinkHash]
@@ -315,13 +246,6 @@ export class IpfsLinksAdapter implements LinksAdapter {
         }
 
         //@ts-ignore
-        const index = linksObject.rootLinks.findIndex(e => e === hash)
-        if(-1 != index) {
-            //@ts-ignore
-            linksObject.rootLinks.splice(index, 1)
-        }
-
-        //@ts-ignore
         delete linksObject.links[hash]
 
         this.#room.broadcast(JSON.stringify({
@@ -331,13 +255,31 @@ export class IpfsLinksAdapter implements LinksAdapter {
         release()
     }
 
+    async getLinks(query: LinkQuery): Promise<Expression[]> {
+        await this.#initialized
 
-    async getLinksFrom(source: ExpressionRef): Promise<Expression[]> {
-        return []
-    }
+        //const resolved = await this.myResolvedIPNSObject()
+        //let requestList = [{peer: 'me', cid: resolved}]
+        let requestList = []
+        query = new LinkQuery(query)
 
-    async getLinksTo(target: ExpressionRef): Promise<Expression[]>{
-        return []
+        Object.keys(this.#peerList).forEach(peer => {
+            requestList.push({peer, cid: this.#peerList[peer]})
+        })
+            
+        const allLinksOfallPeers = await Promise.all(
+            requestList.map(r => {
+                return this.getLinksOfPeer(r.peer, r.cid)
+            })
+        )
+
+        console.log("IPFS-LINKS| getRootLinks - allLinksOfAllPeers =", allLinksOfallPeers)
+
+        //@ts-ignore
+        const merged = allLinksOfallPeers.map(o => o.links).reduce((agregated, current) => Object.assign(agregated, current), {})
+        const list = Object.values(merged) as Expression[]
+
+        return list.filter(link => query.isMatch(link.data as Link))
     }
 
     addCallback(callback: NewLinksObserver) {

@@ -2,9 +2,9 @@ import type Expression from './Expression';
 import type ExpressionRef from './ExpressionRef'
 
 export default class Link {
-    source: ExpressionRef;
-    target: ExpressionRef;
-    predicate?: ExpressionRef;
+    source: string;
+    target: string;
+    predicate?: string;
 
     constructor(obj) {
         this.source = obj.source ? obj.source : ''
@@ -13,10 +13,28 @@ export default class Link {
     }
 }
 
-export interface LinkQuery {
-    source?: ExpressionRef;
-    target?: ExpressionRef;
-    predicate?: ExpressionRef;
+export class LinkQuery {
+    source?: string;
+    target?: string;
+    predicate?: string;
+
+    constructor(obj: object) {
+        if(obj) {
+            //@ts-ignore
+            this.source = obj.source
+            //@ts-ignore
+            this.predicate = obj.predicate
+            //@ts-ignore
+            this.target = obj.target
+        }
+    }
+
+    isMatch(l: Link): boolean {
+        for(const prop in ['source', 'predicate', 'target'])
+            if(this[prop] && this[prop] != l[prop]) return false
+
+        return true
+    }
 }
 
 export function linkEqual(l1: Expression, l2: Expression): boolean {

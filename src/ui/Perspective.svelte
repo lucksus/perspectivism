@@ -108,8 +108,8 @@
 
         if(isLinking) {
             linkingCursor = {
-                x: event.offsetX,
-                y: event.offsetY
+                x: event.clientX,
+                y: event.clientY
             }
             console.log("linking cursor:", JSON.stringify(linkingCursor))
         }
@@ -183,7 +183,7 @@
     })
 
     async function loadRootLinks() {
-        const rootExpressions = await linkRepoController.getLinksFrom(perspective, 'root')
+        const rootExpressions = await linkRepoController.getLinks(perspective)
         console.debug("rootExpressions:", rootExpressions)
         rootExpressions.forEach(e => rootLinks.add(e))
     }
@@ -195,7 +195,7 @@
         console.log("Created new expression:", exprURL)
         
         const link = new Link({source: 'root', target: exprURL})
-        linkRepoController.addRootLink(perspective, link)
+        linkRepoController.addLink(perspective, link)
         loadRootLinks()
 
         container.innerHTML = ''
