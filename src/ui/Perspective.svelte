@@ -181,10 +181,9 @@
         languages = installedLanguages
     })
 
-    async function loadRootLinks() {
-        const rootExpressions = await linkRepoController.getLinks(perspective)
-        console.debug("rootExpressions:", rootExpressions)
-        rootExpressions.forEach(e => linksStore.add(e))
+    async function loadLinks() {
+        const allLink = await linkRepoController.getLinks(perspective)
+        allLink.forEach(e => linksStore.add(e))
     }
 
     async function commitExpression(lang, content, container) {
@@ -195,7 +194,7 @@
         
         const link = new Link({source: 'root', target: exprURL})
         linkRepoController.addLink(perspective, link)
-        loadRootLinks()
+        loadLinks()
 
         container.innerHTML = ''
     }
@@ -225,7 +224,7 @@
 
     $: if(perspective) {
         linksStore = new LinksStore()
-        loadRootLinks()
+        loadLinks()
     }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
         languageController.addLinkObserver(perspective.linksSharingLanguage, (added, removed) => {
