@@ -20,7 +20,10 @@
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
-    
+    import { query } from "svelte-apollo";
+    import { gql } from '@apollo/client';
+
+    let hello = query(gql`{ hello }`)
     let linksStore = new LinksStore()
 
     let constructionMenu
@@ -294,6 +297,7 @@
 
 </script>
 
+<h1>{JSON.stringify($hello)}</h1>
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}

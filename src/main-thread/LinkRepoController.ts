@@ -7,6 +7,16 @@ import type Expression from "../acai/Expression";
 import type Agent from "../acai/Agent";
 import type { LanguageController } from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
+import { createGraphQLExecutor } from 'electron-graphql'
+import { buildSchema } from 'graphql'
+
+var schema = buildSchema(`
+  type Query {
+    hello: String
+  }
+`);
+
+var rootValue = { hello: () => 'Hello world!' };
 
 
 export default class LinkRepoController {
@@ -18,6 +28,18 @@ export default class LinkRepoController {
         this.#root = gun.get('link-repositories')
         this.#agent = agent
         this.#languageController = languageController
+
+        // create GraphQL executor
+        const gqlExecutor = createGraphQLExecutor({
+            // electron IPC channel (base name)
+            channel: 'graphql-electron',
+            schema,
+            rootValue,
+            contextValue: {}
+        })
+        
+        // init GraphQL executor
+        gqlExecutor.init()
     }
 
     private getPerspective(perspective: Perspective): any {

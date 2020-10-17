@@ -15,6 +15,16 @@
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import type LinkRepoController from '../main-thread/LinkRepoController';
+	import { ApolloClient, InMemoryCache } from "@apollo/client";
+	import { setClient } from "svelte-apollo";
+	const { createElectronLink } = require("apollo-link-electron");
+
+	const link = createElectronLink({ channel: "graphql-electron" });
+	const client = new ApolloClient({
+		link,
+		cache: new InMemoryCache()
+  	});
+  	setClient(client);
 
 	let collapsed = false;
 	let collapsing = false;
