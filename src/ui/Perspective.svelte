@@ -24,6 +24,23 @@
     import { gql } from '@apollo/client';
 
     let hello = query(gql`{ hello }`)
+
+    $: ALL_LINKS_QUERY = gql`{ 
+        links(perspectiveUUID: "${perspective.uuid}", query: { }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }`
+
+    $: UPDATE_LINK = gql`{
+        mutation updateLink(perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink)
+    }`
+
     let linksStore
     let constructionMenu
     let languages = []
@@ -169,11 +186,12 @@
     }
 
     function handleMouseUp(event) {
+        console.debug(isMovingExpression, movingLink, movingLinkOriginal)
         if(isMovingExpression && !linkEqual(movingLink, movingLinkOriginal)) {
             const newLinkObject = JSON.parse(JSON.stringify(movingLink))
             delete newLinkObject.id
             console.debug("Updating link:", movingLinkOriginal, newLinkObject)
-            linkRepoController.updateLink(perspective, movingLinkOriginal, newLinkObject)
+            query(UPDATE_LINK, {oldLink: movingLinkOriginal, newLink: newLinkObject})
         }
 
         isPanning = false
@@ -230,17 +248,6 @@
     }
 
     $: if(perspective) {
-        const ALL_LINKS_QUERY = gql`{ 
-            links(perspectiveUUID: "${perspective.uuid}", query: { }) {
-                author { did }
-                timestamp
-                data {
-                    source
-                    predicate
-                    target
-                }
-            }
-        }`
         linksStore = query(ALL_LINKS_QUERY)
     }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {

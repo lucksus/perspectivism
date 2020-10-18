@@ -57,6 +57,24 @@ export default class LinkRepoController {
             expression: (url: String) => {
                 const ref = parseExprURL(url.toString())
                 return this.#languageController.getExpression(ref)
+            },
+            addLink: (params) => {
+                const { perspectiveUUID, link } = params
+                const perspective = { uuid: perspectiveUUID } as Perspective
+                return this.addLink(perspective, link)
+            },
+            updateLink: (params) => {
+                const { perspectiveUUID, oldLink, newLink } = params
+                const perspective = { uuid: perspectiveUUID } as Perspective
+                console.log("GQL| updateLink:", perspective, oldLink, newLink)
+                this.updateLink(perspective, oldLink, newLink)
+                return newLink
+            },
+            removeLink: (params) => {
+                const { perspectiveUUID, link } = params
+                const perspective = { uuid: perspectiveUUID } as Perspective
+                this.removeLink(perspective, link)
+                return true
             }
         }
     }
@@ -159,7 +177,7 @@ export default class LinkRepoController {
         })
     }
 
-    addLink(p: Perspective, link: Link | Expression) {
+    addLink(p: Perspective, link: Link | Expression): Expression {
         const linkExpression = this.ensureLinkExpression(link)
         this.callLinksAdapter(p, 'addLink', linkExpression)
         const hash = new SHA3(256);
@@ -175,7 +193,7 @@ export default class LinkRepoController {
         // 2. from target to source
         this.getPerspective(p).get('targets').get(link.target).set(addr)
 
-        return addr
+        return linkExpression
     }
 
 
