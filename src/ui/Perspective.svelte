@@ -24,9 +24,7 @@
     import { gql } from '@apollo/client';
 
     let hello = query(gql`{ hello }`)
-    const ALL_LINKS_QUERY = gql`{ links(perspectiveUUID: "${perspective.uuid}", query: { }) }`
-    let linksStore = query(ALL_LINKS_QUERY)
-
+    let linksStore
     let constructionMenu
     let languages = []
     let languageIcons = {
@@ -186,10 +184,6 @@
         languages = installedLanguages
     })
 
-    async function loadLinks() {
-        const allLink = await linkRepoController.getLinks(perspective)
-        allLink.forEach(e => linksStore.add(e))
-    }
 
     async function commitExpression(lang, content, container) {
         const expressionRef = await languageController.createPublicExpression(lang, content)
@@ -199,7 +193,6 @@
         
         const link = new Link({source: 'root', target: exprURL})
         linkRepoController.addLink(perspective, link)
-        loadLinks()
 
         container.innerHTML = ''
     }
@@ -228,8 +221,18 @@
     }
 
     $: if(perspective) {
-        linksStore = new LinksStore()
-        loadLinks()
+        const ALL_LINKS_QUERY = gql`{ 
+            links(perspectiveUUID: "${perspective.uuid}", query: { }) {
+                author
+                timestamp
+                data {
+                    source
+                    predicate
+                    target
+                }
+            }
+        }`
+        linksStore = query(ALL_LINKS_QUERY)
     }
     $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
         languageController.addLinkObserver(perspective.linksSharingLanguage, (added, removed) => {
@@ -310,23 +313,29 @@
     >
     <div class="perspective-content" bind:this={content}>
         <ul class="inline">
-            {#each $linksStore as link}
-                {#if link.data.source === 'root'}
-                    <li class="inline expression-list-container" 
-                        style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
-                        data-link-id={link.id}
-                        >
-                        <ExpressionIcon class="inline" 
-                            expressionURL={link.data.target}
-                            parentLink={link}
-                            on:context-menu={onExpressionContextMenu} 
-                            rotated={iconStates[link.data.target] === 'rotated'}
-                            selected={linkingSource?.data?.target === link.data.target}
-                            {languageController}>
-                        </ExpressionIcon>
-                    </li>
-                {/if}
-            {/each}
+            {#if $linksStore.loading}
+                <li>Loading...</li>
+            {:else if $linksStore.error}
+                <li>ERROR: {$linksStore.error.message}</li>
+            {:else}
+                {#each $linksStore.data.links as link}
+                    {#if link.data.source === 'root'}
+                        <li class="inline expression-list-container" 
+                            style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
+                            data-link-id={link.id}
+                            >
+                            <ExpressionIcon class="inline" 
+                                expressionURL={link.data.target}
+                                parentLink={link}
+                                on:context-menu={onExpressionContextMenu} 
+                                rotated={iconStates[link.data.target] === 'rotated'}
+                                selected={linkingSource?.data?.target === link.data.target}
+                                {languageController}>
+                            </ExpressionIcon>
+                        </li>
+                    {/if}
+                {/each}
+            {/if}
         </ul>        
         <div id="constructor-container"></div>
 
