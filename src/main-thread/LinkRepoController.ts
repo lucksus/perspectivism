@@ -48,9 +48,11 @@ export default class LinkRepoController {
     private graphQlResolver(): object {
         return {
             hello: () => 'Hello world!',
-            links: (perspectiveUUID: String, query: LinkQuery) => {
-                const perspective = this.#root.get(perspectiveUUID)
-                return this.getLinks(perspective, query)
+            links: async (params) => {
+                const { perspectiveUUID, query } = params
+                const perspective = { uuid: perspectiveUUID } as Perspective
+                const result = await this.getLinks(perspective, query)
+                return result
             },
             expression: (url: String) => {
                 const ref = parseExprURL(url.toString())
