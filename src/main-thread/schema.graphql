@@ -1,0 +1,13 @@
+# import LinkExpression, Expression from "../acai/acai.graphql"
+
+input LinkQuery {
+    source: String
+    predicate: String
+    target: String
+}
+
+type Query {
+    hello: String
+    links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
+    expression(url: String): Expression
+}

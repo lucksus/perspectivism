@@ -1,5 +1,5 @@
 import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
-import type ExpressionRef from "../acai/ExpressionRef";
+import ExpressionRef, { parseExprURL } from "../acai/ExpressionRef";
 import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
@@ -9,12 +9,13 @@ import type { LanguageController } from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import { createGraphQLExecutor } from 'electron-graphql'
 import { buildSchema } from 'graphql'
+import { loadSchema } from '@graphql-tools/load'
+import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 
-var schema = buildSchema(`
-  type Query {
-    hello: String
-  }
-`);
+const schemaPromise = loadSchema('./src/main-thread/schema.graphql', {
+    loaders: [ new GraphQLFileLoader ]
+})
+
 
 var rootValue = { hello: () => 'Hello world!' };
 
@@ -29,17 +30,33 @@ export default class LinkRepoController {
         this.#agent = agent
         this.#languageController = languageController
 
-        // create GraphQL executor
-        const gqlExecutor = createGraphQLExecutor({
-            // electron IPC channel (base name)
-            channel: 'graphql-electron',
-            schema,
-            rootValue,
-            contextValue: {}
+        schemaPromise.then(schema => {
+            // create GraphQL executor
+            const gqlExecutor = createGraphQLExecutor({
+                // electron IPC channel (base name)
+                channel: 'graphql-electron',
+                schema,
+                rootValue: this.graphQlResolver(),
+                contextValue: {}
+            })
+            
+            // init GraphQL executor
+            gqlExecutor.init()
         })
-        
-        // init GraphQL executor
-        gqlExecutor.init()
+    }
+
+    private graphQlResolver(): object {
+        return {
+            hello: () => 'Hello world!',
+            links: (perspectiveUUID: String, query: LinkQuery) => {
+                const perspective = this.#root.get(perspectiveUUID)
+                return this.getLinks(perspective, query)
+            },
+            expression: (url: String) => {
+                const ref = parseExprURL(url.toString())
+                return this.#languageController.getExpression(ref)
+            }
+        }
     }
 
     private getPerspective(perspective: Perspective): any {

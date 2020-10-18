@@ -24,7 +24,8 @@
     import { gql } from '@apollo/client';
 
     let hello = query(gql`{ hello }`)
-    let linksStore = new LinksStore()
+    const ALL_LINKS_QUERY = gql`{ links(perspectiveUUID: "${perspective.uuid}", query: { }) }`
+    let linksStore = query(ALL_LINKS_QUERY)
 
     let constructionMenu
     let languages = []
@@ -297,7 +298,7 @@
 
 </script>
 
-<h1>{JSON.stringify($hello)}</h1>
+<h1>{JSON.stringify($linksStore)}</h1>
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
