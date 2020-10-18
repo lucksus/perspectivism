@@ -9,7 +9,7 @@
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
-    import Link, { linkEqual } from '../acai/Links';
+    import Link, { hashLinkExpression, linkEqual } from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
@@ -105,7 +105,7 @@
             point.x += d.x
             point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
-            linksStore.update(movingLink)
+            //linksStore.update(movingLink)
         }
 
         if(isLinking) {
@@ -135,7 +135,7 @@
             const linkId = getLinkIdFromPath(event)
             console.log("link id:", linkId)
             if(linkId) {
-                const hoveredLink = $linksStore.find(l => l.id == linkId)
+                const hoveredLink = $linksStore.data.links.find(l => hashLinkExpression(l) == linkId)
                 if(isLinking) {
                     const newLink = {
                         source: linkingSource.data.target,
@@ -143,10 +143,19 @@
                     }
                     linkRepoController.addLink(perspective, newLink)
                 } else {
-                    movingLink = hoveredLink
-                    if(movingLink) {
+                    if(hoveredLink) {
+                        movingLink = {
+                            author: { did: hoveredLink.author.did },
+                            timestamp: hoveredLink.timestamp,
+                            data: {
+                                source: hoveredLink.data.source,
+                                predicate: hoveredLink.data.predicate,
+                                target: hoveredLink.data.target,
+                            }
+                        }
                         movingLinkOriginal = JSON.parse(JSON.stringify(movingLink))
                         isMovingExpression = true
+                        console.log("MOVING")
                     }
                     else {
                         console.error("Couldn't find link with ID", linkId)
@@ -223,7 +232,7 @@
     $: if(perspective) {
         const ALL_LINKS_QUERY = gql`{ 
             links(perspectiveUUID: "${perspective.uuid}", query: { }) {
-                author
+                author { did }
                 timestamp
                 data {
                     source
@@ -301,7 +310,6 @@
 
 </script>
 
-<h1>{JSON.stringify($linksStore)}</h1>
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
@@ -320,9 +328,20 @@
             {:else}
                 {#each $linksStore.data.links as link}
                     {#if link.data.source === 'root'}
+                        {#if isMovingExpression && movingLink && linkEqual(link, movingLinkOriginal)}
+                        <li class="inline expression-list-container" 
+                            style={`position: absolute; transform: translateX(${linkTo2D(movingLink).x}px) translateY(${linkTo2D(movingLink).y}px);`}
+                            data-link-id={hashLinkExpression(link)}
+                            >
+                            <ExpressionIcon class="inline" 
+                                expressionURL={link.data.target}
+                                {languageController}>
+                            </ExpressionIcon>
+                        </li>
+                        {:else}
                         <li class="inline expression-list-container" 
                             style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
-                            data-link-id={link.id}
+                            data-link-id={hashLinkExpression(link)}
                             >
                             <ExpressionIcon class="inline" 
                                 expressionURL={link.data.target}
@@ -333,6 +352,7 @@
                                 {languageController}>
                             </ExpressionIcon>
                         </li>
+                        {/if}
                     {/if}
                 {/each}
             {/if}
