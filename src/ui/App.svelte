@@ -22,7 +22,13 @@
 	const link = createElectronLink({ channel: "graphql-electron" });
 	const client = new ApolloClient({
 		link,
-		cache: new InMemoryCache()
+		cache: new InMemoryCache(),
+		defaultOptions: {
+			watchQuery: {
+				fetchPolicy: 'no-cache',
+				nextFetchPolicy: 'standby'
+			},
+		},
   	});
   	setClient(client);
 
