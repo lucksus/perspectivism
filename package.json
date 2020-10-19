@@ -48,6 +48,7 @@
     "electron-graphql": "^0.2.1",
     "esm": "^3.2.25",
     "graphql": "^15.3.0",
+    "graphql-subscriptions": "^1.1.0",
     "graphql-tools": "^6.2.4",
     "gun": "^0.2020.520",
     "gun-file": "^1.0.123",

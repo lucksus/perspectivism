@@ -36,5 +36,6 @@ type Mutation {
 }
 
 type Subscription {
-    linksAdded(perspectiveUUID: String): [LinkExpression]
+    linkAdded(perspectiveUUID: String): LinkExpression
+    linkRemove(perspectiveUUID: String): LinkExpression
 }

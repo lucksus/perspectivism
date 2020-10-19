@@ -20,10 +20,31 @@
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
-    import { query, mutation } from "svelte-apollo";
+    import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from '@apollo/client';
 
-    let hello = query(gql`{ hello }`)
+    $: if(perspective) {
+        console.log("SUBSCRIBING...")
+        getClient().subscribe({
+        query: gql`
+            subscription LinkAdded($perspectiveUUID: String) {
+                linkAdded(perspectiveUUID: $perspectiveUUID) {
+                    author { did }
+                    timestamp
+                    data {
+                        source
+                        predicate
+                        target
+                    }
+                }
+            }
+        `, 
+        variables: {perspectiveUUID: perspective.uuid}
+        }).subscribe({
+            next: ({ data }) => { console.log("GQL| LINK ADDED", data) },
+            error: (e) => console.error(e)
+        })
+    }
 
     $: ALL_LINKS_QUERY = gql`{ 
         links(perspectiveUUID: "${perspective.uuid}", query: { }) {

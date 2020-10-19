@@ -11,6 +11,10 @@ import { createGraphQLExecutor } from 'electron-graphql'
 import { buildSchema } from 'graphql'
 import { loadSchema } from '@graphql-tools/load'
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
+import { PubSub, withFilter } from 'graphql-subscriptions';
+
+const LINK_ADDED_TOPIC = 'link-added-topic'
+const LINK_REMOVED_TOPIC = 'link-removed-topic'
 
 const schemaPromise = loadSchema('./src/main-thread/schema.graphql', {
     loaders: [ new GraphQLFileLoader ]
@@ -24,11 +28,13 @@ export default class LinkRepoController {
     #root: any;
     #agent: Agent;
     #languageController: LanguageController
+    #pubsub: PubSub
 
     constructor({gun, languageController, agent}) {
         this.#root = gun.get('link-repositories')
         this.#agent = agent
         this.#languageController = languageController
+        this.#pubsub = new PubSub();
 
         schemaPromise.then(schema => {
             // create GraphQL executor
@@ -81,6 +87,23 @@ export default class LinkRepoController {
                 link = JSON.parse(link)
                 this.removeLink(perspective, link)
                 return true
+            },
+            linkAdded: {
+                subscribe: perspectiveUUID => {
+                    console.log("NEW SUBSCRIPETION", perspectiveUUID)
+                    return withFilter(
+                        () => this.#pubsub.asyncIterator(LINK_ADDED_TOPIC), 
+                        payload => payload.perspective.uuid === perspectiveUUID
+                    )
+                },
+                resolve: payload => payload.link
+            },
+            linkRemoved: {
+                subscribe: perspectiveUUID => withFilter(
+                    () => this.#pubsub.asyncIterator(LINK_REMOVED_TOPIC), 
+                    payload => payload.perspective.uuid === perspectiveUUID
+                ),
+                resolve: payload => payload.link
             }
         }
     }
@@ -199,6 +222,8 @@ export default class LinkRepoController {
         // 2. from target to source
         this.getPerspective(p).get('targets').get(link.target).set(addr)
 
+        this.#pubsub.publish(LINK_ADDED_TOPIC, { perspective: p, link: linkExpression })
+
         return linkExpression
     }
 
@@ -226,6 +251,8 @@ export default class LinkRepoController {
         this.getPerspective(p).get('links').get(addr).put(newLink)
         this.getPerspective(p).get('links').get(addr).load(loaded => console.log("loaded:", loaded))
         this.callLinksAdapter(p, 'updateLink', oldLink, newLink)
+        this.#pubsub.publish(LINK_ADDED_TOPIC, { perspective: p, link: newLink })
+        this.#pubsub.publish(LINK_REMOVED_TOPIC, { perspective: p, link: oldLink })
     }
 
     async removeLink(p: Perspective, linkExpression: Expression) {
@@ -238,6 +265,7 @@ export default class LinkRepoController {
         this.getPerspective(p).get('root-links').unset(addr)
         this.getPerspective(p).get('links').get(addr)?.put({})
         this.callLinksAdapter(p, 'removeLink', linkExpression)
+        this.#pubsub.publish(LINK_REMOVED_TOPIC, { perspective: p, link })
     }
 
     private async getLinksLocal(p: Perspective, query: LinkQuery): Promise<Expression[]> {
