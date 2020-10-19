@@ -38,8 +38,8 @@
     }`
 
     $: UPDATE_LINK = mutation(gql`
-        mutation UpdateLink($oldLink: LinkExpressionInput, $newLink: LinkExpresssionInput){
-            updateLink(perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink)
+        mutation UpdateLink($oldLink: String, $newLink: String){
+            updateLink(input: { perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink }) 
         }
     `)
 
@@ -192,8 +192,13 @@
         if(isMovingExpression && !linkEqual(movingLink, movingLinkOriginal)) {
             const newLinkObject = JSON.parse(JSON.stringify(movingLink))
             delete newLinkObject.id
-            console.debug("Updating link:", movingLinkOriginal, newLinkObject)
-            UPDATE_LINK({variables: {oldLink: movingLinkOriginal, newLink: newLinkObject}})
+            console.debug("Updating link:", JSON.stringify(movingLinkOriginal), JSON.stringify(movingLinkOriginal))
+            UPDATE_LINK({
+                variables: {
+                    oldLink: JSON.stringify(movingLinkOriginal), 
+                    newLink: JSON.stringify(newLinkObject)
+                }
+            })
         }
 
         isPanning = false

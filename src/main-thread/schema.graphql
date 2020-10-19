@@ -28,8 +28,13 @@ type Query {
     expression(url: String): Expression
 }
 
+input UpdateLinkInput {
+    perspectiveUUID: String
+    oldLink: String
+    newLink: String
+}
 type Mutation {
     addLink(perspectiveUUID: String, link: LinkInput): LinkExpression
-    updateLink(perspectiveUUID: String, oldLink: LinkExpressionInput, newLink: LinkExpressionInput): LinkExpression
+    updateLink(input: UpdateLinkInput): LinkExpression
     removeLink(perspectiveUUID: String, oldLink: LinkExpressionInput): Boolean
 }
