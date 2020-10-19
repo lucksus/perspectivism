@@ -60,8 +60,9 @@ export default class LinkRepoController {
             },
             addLink: (params) => {
                 console.log("GQL| addLink:", params)
-                const { perspectiveUUID, link } = params
+                let { perspectiveUUID, link } = params.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
+                link = JSON.parse(link)
                 return this.addLink(perspective, link)
             },
             updateLink: (params) => {
@@ -70,14 +71,14 @@ export default class LinkRepoController {
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 oldLink = JSON.parse(oldLink)
                 newLink = JSON.parse(newLink)
-                console.log("GQL| updateLink:", perspective, oldLink, newLink)
                 this.updateLink(perspective, oldLink, newLink)
                 return newLink
             },
             removeLink: (params) => {
                 console.log("GQL| removeLink:", params)
-                const { perspectiveUUID, link } = params
+                let { perspectiveUUID, link } = params.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
+                link = JSON.parse(link)
                 this.removeLink(perspective, link)
                 return true
             }

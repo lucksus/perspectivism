@@ -6,26 +6,16 @@ input LinkQuery {
     target: String
 }
 
-input LinkInput {
-    source: String
-    predicate: String
-    target: String
-}
-
-input AgentInput {
-    did: String
-}
-
-input LinkExpressionInput {
-    author: AgentInput
-    timestamp: String
-    data: LinkInput
-}
-
 type Query {
     hello: String
     links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
     expression(url: String): Expression
+}
+
+
+input AddLinkInput {
+    perspectiveUUID: String
+    link: String
 }
 
 input UpdateLinkInput {
@@ -33,8 +23,18 @@ input UpdateLinkInput {
     oldLink: String
     newLink: String
 }
+
+input RemoveLinkInput {
+    perspectiveUUID: String
+    link: String
+}
+
 type Mutation {
-    addLink(perspectiveUUID: String, link: LinkInput): LinkExpression
+    addLink(input: AddLinkInput): LinkExpression
     updateLink(input: UpdateLinkInput): LinkExpression
-    removeLink(perspectiveUUID: String, oldLink: LinkExpressionInput): Boolean
+    removeLink(input: RemoveLinkInput): Boolean
+}
+
+type Subscription {
+    linksAdded(perspectiveUUID: String): [LinkExpression]
 }

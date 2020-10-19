@@ -37,9 +37,25 @@
         }
     }`
 
+    $: ADD_LINK = mutation(gql`
+        mutation AddLink($link: String){
+            addLink(input: { perspectiveUUID: "${perspective.uuid}", link: $link }) {
+                author
+                timestamp
+                data
+            }
+        }
+    `)
+
     $: UPDATE_LINK = mutation(gql`
         mutation UpdateLink($oldLink: String, $newLink: String){
             updateLink(input: { perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink }) 
+        }
+    `)
+
+    $: REMOVE_LINK = mutation(gql`
+        mutation RemoveLink($link: String){
+            removeLink(input: { perspectiveUUID: "${perspective.uuid}", link: $link }) 
         }
     `)
 
@@ -146,7 +162,7 @@
     }
 
     function handleMouseDown(event) {
-        console.log(event.target)
+        if(event.button === 2) return
         if(event.target == content || event.target == container)
             isPanning = true
         else {
@@ -160,7 +176,11 @@
                         source: linkingSource.data.target,
                         target: hoveredLink.data.target,
                     }
-                    linkRepoController.addLink(perspective, newLink)
+                    ADD_LINK({
+                        variables: {
+                            link: JSON.stringify(newLink)
+                        }
+                    })
                 } else {
                     if(hoveredLink) {
                         movingLink = {
@@ -225,8 +245,11 @@
         const exprURL = exprRef2String(expressionRef)
         console.log("Created new expression:", exprURL)
         
-        const link = new Link({source: 'root', target: exprURL})
-        linkRepoController.addLink(perspective, link)
+        ADD_LINK({
+            variables: {
+                link: JSON.stringify(new Link({source: 'root', target: exprURL}))
+            }
+        })
 
         container.innerHTML = ''
     }
@@ -308,10 +331,13 @@
 
     function onDeleteExpression(event) {
         const expression = event.detail
-        $linksStore.forEach(l => {
+        $linksStore.data.links.forEach(l => {
             if(l.data.target === expression) {
-                linksStore.remove(l)
-                linkRepoController.removeLink(perspective, l)
+                REMOVE_LINK({
+                    variables: {
+                        link: JSON.stringify(l)
+                    }
+                })
             }
         })
     }
