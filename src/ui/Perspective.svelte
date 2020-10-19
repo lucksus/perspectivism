@@ -20,7 +20,7 @@
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
-    import { query } from "svelte-apollo";
+    import { query, mutation } from "svelte-apollo";
     import { gql } from '@apollo/client';
 
     let hello = query(gql`{ hello }`)
@@ -37,9 +37,11 @@
         }
     }`
 
-    $: UPDATE_LINK = gql`{
-        mutation updateLink(perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink)
-    }`
+    $: UPDATE_LINK = mutation(gql`
+        mutation UpdateLink($oldLink: LinkExpressionInput, $newLink: LinkExpresssionInput){
+            updateLink(perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink)
+        }
+    `)
 
     let linksStore
     let constructionMenu
@@ -191,7 +193,7 @@
             const newLinkObject = JSON.parse(JSON.stringify(movingLink))
             delete newLinkObject.id
             console.debug("Updating link:", movingLinkOriginal, newLinkObject)
-            query(UPDATE_LINK, {oldLink: movingLinkOriginal, newLink: newLinkObject})
+            UPDATE_LINK({variables: {oldLink: movingLinkOriginal, newLink: newLinkObject}})
         }
 
         isPanning = false
