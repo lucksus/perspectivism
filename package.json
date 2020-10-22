@@ -45,6 +45,7 @@
     "@smui/list": "^1.0.0",
     "@smui/select": "^1.0.0",
     "apollo-link-electron": "file:../apollo-link-electron",
+    "apollo-server": "^2.18.2",
     "electron-graphql": "^0.2.1",
     "esm": "^3.2.25",
     "graphql": "^15.3.0",

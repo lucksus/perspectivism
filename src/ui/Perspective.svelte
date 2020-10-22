@@ -61,16 +61,22 @@
     $: ADD_LINK = mutation(gql`
         mutation AddLink($link: String){
             addLink(input: { perspectiveUUID: "${perspective.uuid}", link: $link }) {
-                author
+                author { did }
                 timestamp
-                data
+                data {
+                    source
+                    predicate
+                    target
+                }
             }
         }
     `)
 
     $: UPDATE_LINK = mutation(gql`
         mutation UpdateLink($oldLink: String, $newLink: String){
-            updateLink(input: { perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink }) 
+            updateLink(input: { perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink }) {
+                timestamp
+            }
         }
     `)
 

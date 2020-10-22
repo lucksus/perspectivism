@@ -21,7 +21,7 @@
 
 	const link = createElectronLink({ channel: "graphql-electron" });
 	const client = new ApolloClient({
-		link,
+		uri: 'http://localhost:4000',
 		cache: new InMemoryCache(),
 		defaultOptions: {
 			watchQuery: {
