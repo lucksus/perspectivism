@@ -1,5 +1,6 @@
-import { ApolloServer, gql } from 'apollo-server'
+import { ApolloServer, gql, withFilter } from 'apollo-server'
 import type Perspective from '../acai/Perspective'
+import * as PubSub from './PubSub'
 
 const typeDefs = gql`
 type Agent {
@@ -60,12 +61,14 @@ type Mutation {
 
 type Subscription {
     linkAdded(perspectiveUUID: String): LinkExpression
-    linkRemove(perspectiveUUID: String): LinkExpression
+    linkRemoved(perspectiveUUID: String): LinkExpression
 }
 `
 
 
 function createResolvers(linkRepoController) {
+    const pubsub = PubSub.get()
+
     return {
         Query: {
             hello: () => 'Hello world!',
@@ -107,26 +110,26 @@ function createResolvers(linkRepoController) {
                 return true
             }
         },
-        /*
+        
         Subscription: {   
             linkAdded: {
-                subscribe: perspectiveUUID => {
-                    console.log("NEW SUBSCRIPETION", perspectiveUUID)
+                subscribe: (parent, args, context, info) => {
+                    //console.log("NEW SUBSCRIPETION", perspectiveUUID)
                     return withFilter(
-                        () => this.#pubsub.asyncIterator(LINK_ADDED_TOPIC), 
-                        payload => payload.perspective.uuid === perspectiveUUID
-                    )
+                        () => pubsub.asyncIterator(PubSub.LINK_ADDED_TOPIC), 
+                        (payload, args) => payload.perspective.uuid === args.perspectiveUUID
+                    )(undefined, args)
                 },
                 resolve: payload => payload.link
             },
             linkRemoved: {
-                subscribe: perspectiveUUID => withFilter(
-                    () => this.#pubsub.asyncIterator(LINK_REMOVED_TOPIC), 
-                    payload => payload.perspective.uuid === perspectiveUUID
-                ),
+                subscribe: (parent, args, context, info) => withFilter(
+                    () => pubsub.asyncIterator(PubSub.LINK_REMOVED_TOPIC), 
+                    (payload, variables) => payload.perspective.uuid === variables.perspectiveUUID
+                )(undefined, args),
                 resolve: payload => payload.link
             }
-        }*/
+        }
     }
 }
 
@@ -134,6 +137,6 @@ function createResolvers(linkRepoController) {
 export async function startServer(linkRepoController) {
     const resolvers = createResolvers(linkRepoController)
     const server = new ApolloServer({ typeDefs, resolvers });
-    const { url } = await server.listen()
-    return url
+    const { url, subscriptionsUrl } = await server.listen()
+    return { url, subscriptionsUrl }
 }

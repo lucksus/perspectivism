@@ -7,6 +7,7 @@
 /src/main-thread/LanguageController.js
 /src/main-thread/LinkRepoController.js
 /src/main-thread/GraphQL.js
+/src/main-thread/PubSub.js
 /src/**/*.js.map
 /src/languages/**/*.js
 /src/languages/**/*.js.map

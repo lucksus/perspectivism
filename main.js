@@ -18,7 +18,10 @@ IPFS.init().then((IPFS) => {
   const context = { agent, IPFS }
   const languageController = LanguageController.init(context)
   const linkRepoController = LinkRepoController.init({gun, languageController, agent})
-  GraphQL.startServer(linkRepoController).then(url => console.log(`🚀  Server ready at ${url}`))
+  GraphQL.startServer(linkRepoController).then(({ url, subscriptionsUrl }) => {
+    console.log(`🚀  GraphQL Server ready at ${url}`)
+    console.log(`🚀  GraphQL subscriptions ready at ${subscriptionsUrl}`)
+  })
 
   console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
 

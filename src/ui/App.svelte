@@ -16,12 +16,19 @@
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import type LinkRepoController from '../main-thread/LinkRepoController';
 	import { ApolloClient, InMemoryCache } from "@apollo/client";
+	import { WebSocketLink } from '@apollo/client/link/ws';
 	import { setClient } from "svelte-apollo";
-	const { createElectronLink } = require("apollo-link-electron");
 
-	const link = createElectronLink({ channel: "graphql-electron" });
+	const wsLink = new WebSocketLink({
+		uri: `ws://localhost:4000/graphql`,
+		options: {
+			reconnect: true
+		}
+	});
+
 	const client = new ApolloClient({
-		uri: 'http://localhost:4000',
+		//uri: 'http://localhost:4000',
+		link: wsLink,
 		cache: new InMemoryCache(),
 		defaultOptions: {
 			watchQuery: {

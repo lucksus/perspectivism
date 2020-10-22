@@ -24,24 +24,27 @@
     import { gql } from '@apollo/client';
 
     $: if(perspective) {
-        console.log("SUBSCRIBING...")
         getClient().subscribe({
         query: gql`
-            subscription LinkAdded($perspectiveUUID: String) {
-                linkAdded(perspectiveUUID: $perspectiveUUID) {
-                    author { did }
+            subscription {
+                linkAdded(perspectiveUUID: "${perspective.uuid}") {
                     timestamp
-                    data {
-                        source
-                        predicate
-                        target
-                    }
                 }
-            }
-        `, 
-        variables: {perspectiveUUID: perspective.uuid}
-        }).subscribe({
-            next: ({ data }) => { console.log("GQL| LINK ADDED", data) },
+            }   
+        `}).subscribe({
+            next: () => linksStore.fetchMore({}),
+            error: (e) => console.error(e)
+        })
+
+        getClient().subscribe({
+        query: gql`
+            subscription {
+                linkRemoved(perspectiveUUID: "${perspective.uuid}") {
+                    timestamp
+                }
+            }   
+        `}).subscribe({
+            next: () => linksStore.refetch({}),
             error: (e) => console.error(e)
         })
     }
