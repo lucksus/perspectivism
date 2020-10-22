@@ -1,5 +1,4 @@
 import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
-import ExpressionRef, { parseExprURL } from "../acai/ExpressionRef";
 import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
@@ -7,10 +6,6 @@ import type Expression from "../acai/Expression";
 import type Agent from "../acai/Agent";
 import type { LanguageController } from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
-import { createGraphQLExecutor } from 'electron-graphql'
-import { buildSchema } from 'graphql'
-import { loadSchema } from '@graphql-tools/load'
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 import * as PubSub from './PubSub'
 
 export default class LinkRepoController {
@@ -25,65 +20,6 @@ export default class LinkRepoController {
         this.#languageController = languageController
         this.#pubsub = PubSub.get()
     }
-
-    /*
-    private graphQlResolver(): object {
-        return {
-            hello: () => 'Hello world!',
-            links: async (params) => {
-                const { perspectiveUUID, query } = params
-                const perspective = { uuid: perspectiveUUID } as Perspective
-                const result = await this.getLinks(perspective, query)
-                return result
-            },
-            expression: (url: String) => {
-                const ref = parseExprURL(url.toString())
-                return this.#languageController.getExpression(ref)
-            },
-            addLink: (params) => {
-                console.log("GQL| addLink:", params)
-                let { perspectiveUUID, link } = params.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
-                link = JSON.parse(link)
-                return this.addLink(perspective, link)
-            },
-            updateLink: (params) => {
-                console.log("GQL| updateLink:", params)
-                let { perspectiveUUID, oldLink, newLink } = params.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
-                oldLink = JSON.parse(oldLink)
-                newLink = JSON.parse(newLink)
-                this.updateLink(perspective, oldLink, newLink)
-                return newLink
-            },
-            removeLink: (params) => {
-                console.log("GQL| removeLink:", params)
-                let { perspectiveUUID, link } = params.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
-                link = JSON.parse(link)
-                this.removeLink(perspective, link)
-                return true
-            },
-            linkAdded: {
-                subscribe: perspectiveUUID => {
-                    console.log("NEW SUBSCRIPETION", perspectiveUUID)
-                    return withFilter(
-                        () => this.#pubsub.asyncIterator(LINK_ADDED_TOPIC), 
-                        payload => payload.perspective.uuid === perspectiveUUID
-                    )
-                },
-                resolve: payload => payload.link
-            },
-            linkRemoved: {
-                subscribe: perspectiveUUID => withFilter(
-                    () => this.#pubsub.asyncIterator(LINK_REMOVED_TOPIC), 
-                    payload => payload.perspective.uuid === perspectiveUUID
-                ),
-                resolve: payload => payload.link
-            }
-        }
-    }
-    */
 
     private getPerspective(perspective: Perspective): any {
         return this.#root.get(perspective.uuid)

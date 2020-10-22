@@ -4,8 +4,6 @@
 
     export let perspective: Perspective
     export let languageController: LanguageController
-    export let linkRepoController: LinkRepoController
-    export let IPFS: object
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
@@ -13,8 +11,6 @@
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
-    import type LinkRepoController from '../main-thread/LinkRepoController';
-    import LinksStore from '../stores/LinksStore'
     import ConstructionMenu from './ConstructionMenu.svelte'
     import PerspectiveSettings from './PerspectiveSettings.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";

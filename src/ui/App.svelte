@@ -3,7 +3,6 @@
 	export let perspectiveStore: object;
 	export let languageController: LanguageController;
 	export let linkRepoController: LinkRepoController;
-	export let IPFS: object;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
