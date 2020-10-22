@@ -1,31 +1,40 @@
 <script lang="ts">
     import type Expression from "../acai/Expression"
     import ExpressionRef, { parseExprURL } from "../acai/ExpressionRef";
-    import type { LanguageController } from "../main-thread/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
+    import { query, mutation, getClient } from "svelte-apollo";
 
     export let expressionURL: string
     export let parentLink: Expression
     export let componentConstructor
-    export let languageController: LanguageController
     export let selected: boolean
 
     let loading = true
     let failed = false
 
-    let expressionRef: void | ExpressionRef = null
-    let expression: void | Expression = null
+    $: expression = query(gql`
+        { 
+            expression(url: ${expressionURL}) {
+                author
+                timestamp
+                data
+                icon {
+                    code
+                }
+                language {
+                    address
+                }
+            }
+        }
+    `)
+
+    //let expression: void | Expression = null
     let customElementName: void | string = null
 
     let container
 
-    try {
-        expressionRef = parseExprURL(expressionURL)
-    } catch(e) {
-        console.error(e)
-    }
 
     function iconComponentName(languageAddress: string): string {
         const onlyLetters = languageAddress
@@ -64,8 +73,8 @@
         }
     }
 
-    $: if(expressionRef) {
-        customElementName = iconComponentName(expressionRef.language.address)
+    $: if(!$expression.loading) {
+        customElementName = iconComponentName($expression.data.language.address)
         loadExpression()
     }
 

@@ -1,4 +1,5 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
+import { parseExprURL } from '../acai/ExpressionRef'
 import type Perspective from '../acai/Perspective'
 import * as PubSub from './PubSub'
 
@@ -7,10 +8,19 @@ type Agent {
     did: String
 }
 
+type Icon {
+    code: String
+}
+
 type Expression {
+    url: String
+
     author: Agent
     timestamp: String
     data: String
+
+    icon: Icon
+    language: Language
 }
 
 type Link {
@@ -30,10 +40,17 @@ input LinkQuery {
     target: String
 }
 
+type Language {
+    name: String
+    address: String
+    constructorIcon: Icon
+}
+
 type Query {
     hello: String
     links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
     expression(url: String): Expression
+    languages(filter: String): [String]
 }
 
 
@@ -66,7 +83,7 @@ type Subscription {
 `
 
 
-function createResolvers(linkRepoController) {
+function createResolvers(languageController, linkRepoController) {
     const pubsub = PubSub.get()
 
     return {
@@ -79,10 +96,15 @@ function createResolvers(linkRepoController) {
                 const result = await linkRepoController.getLinks(perspective, query)
                 return result
             },
-            //expression: ({args}) => {
-            //    const ref = parseExprURL(args.url.toString())
-            //    return this.#languageController.getExpression(ref)
-            //}
+            expression: (parent, args, context, info) => {
+                const ref = parseExprURL(args.url.toString())
+                return languageController.getExpression(ref)
+            },
+            languages: (parent, args, context, info) => {
+                let filter
+                if(args.filter && args.filter != '') filter = args.filter
+                return languageController.filteredLanguageRefs(filter)
+            }
         },
         Mutation: {
             addLink: (parent, args, context, info) => {
@@ -114,7 +136,6 @@ function createResolvers(linkRepoController) {
         Subscription: {   
             linkAdded: {
                 subscribe: (parent, args, context, info) => {
-                    //console.log("NEW SUBSCRIPETION", perspectiveUUID)
                     return withFilter(
                         () => pubsub.asyncIterator(PubSub.LINK_ADDED_TOPIC), 
                         (payload, args) => payload.perspective.uuid === args.perspectiveUUID
@@ -128,6 +149,19 @@ function createResolvers(linkRepoController) {
                     (payload, variables) => payload.perspective.uuid === variables.perspectiveUUID
                 )(undefined, args),
                 resolve: payload => payload.link
+            }
+        },
+
+        Icon: {
+            code(parent) {
+                if(parent.url) {
+                    // We're inside an expression -> get expression icon
+                    const ref = parseExprURL(parent.url.toString())
+                    return languageController.getIcon(ref.language)
+                } else if(parent.address) {
+                    // Wer're inside a language -> get constructor icon
+                    return languageController.getConstructorIcon(parent)
+                }
             }
         }
     }

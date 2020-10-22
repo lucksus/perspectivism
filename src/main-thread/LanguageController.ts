@@ -89,7 +89,7 @@ export class LanguageController {
         }
     }
 
-    private filteredLanguageRefs(propertyFilter: void | string): LanguageRef[] {
+    filteredLanguageRefs(propertyFilter: void | string): LanguageRef[] {
         let refs: LanguageRef[] = []
         this.#languages.forEach((language, hash) => {
             if(!propertyFilter || Object.keys(language).includes(propertyFilter)) {
