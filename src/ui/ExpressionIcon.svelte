@@ -5,6 +5,7 @@
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
     import { query, mutation, getClient } from "svelte-apollo";
+    import { gql } from "@apollo/client"
 
     export let expressionURL: string
     export let parentLink: Expression
@@ -13,22 +14,24 @@
 
     let loading = true
     let failed = false
+    let expression = null
+    let queryResult = null
+    let expressionRef = null
 
-    $: expression = query(gql`
+    
+    $: if(expressionURL) queryResult = query(gql`
         { 
-            expression(url: ${expressionURL}) {
-                author
+            expression(url: "${expressionURL}") {
+                author { did }
                 timestamp
                 data
-                icon {
-                    code
-                }
                 language {
                     address
                 }
             }
         }
     `)
+    
 
     //let expression: void | Expression = null
     let customElementName: void | string = null
@@ -47,24 +50,28 @@
         return 'icon-'+short
     }
 
-    async function loadExpression() {
-        loading = true
-        console.debug("ExpressionIcon loading expression with ref:", JSON.stringify(expressionRef))
-        expression = await languageController.getExpression(expressionRef)
-        if(!expression) {
-            failed = true
-        } else {
-            console.debug("ExpressionIcon got expression:", JSON.stringify(expression))
-        }
-        loading = false
-    }
 
     async function getComponentConstructor() {
         componentConstructor = customElements.get(customElementName)
         if(!componentConstructor) {
             try {
-                console.debug("ExpressionIcon loading icon with ref:", JSON.stringify(expressionRef))
-                const code = await languageController.getIcon(expressionRef.language)
+                console.debug("ExpressionIcon loading icon for:", expressionURL)
+                const gqlClient = getClient()
+                console.debug(gqlClient)
+                const { data } = await gqlClient.query({
+                    query: gql`
+                    { 
+                        expression(url: "${expressionURL}") {
+                            icon {
+                                code
+                            }
+                        }
+                    }
+                    `
+                })
+                console.log("GOT:", data)
+                const code = data.expression.icon.code
+                console.log("GOT CODE:", code)
                 componentConstructor = iconComponentFromString(code, "icon")
                 customElements.define(customElementName, componentConstructor)
             } catch (e) {
@@ -73,9 +80,12 @@
         }
     }
 
-    $: if(!$expression.loading) {
-        customElementName = iconComponentName($expression.data.language.address)
-        loadExpression()
+    $: if(!$queryResult.loading) {
+        expression = $queryResult.data.expression
+    }
+
+    $: if(expression) {
+        customElementName = iconComponentName(expression.language.address)
     }
 
     $: if(customElementName) {
@@ -84,10 +94,11 @@
         }
     }
     
+    
     $: if(container && componentConstructor && expression) {
-        container.inner_HTML = ''
         const icon = new componentConstructor()
         icon.expression = expression
+        container.inner_HTML = ''
         container.appendChild(icon)
     }
 
@@ -110,19 +121,21 @@
 
 </script>
 
-{#if loading}
-    Loading...
-    {JSON.stringify(expressionRef)}
-{:else if failed}
-    Loading failed!
-{/if}
+
 
 <div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg) translateX(-${width/2}px);`}>
+    {#if $queryResult.loading}
+        Loading...
+        {JSON.stringify(expressionRef)}
+    {:else if $queryResult.error}
+        Loading failed!
+        {$queryResult.error}
+    {/if}
     <div class="box__face container" class:selected bind:this={container}/>
     <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
         <div class="backside-content">
             <div>
-                <span class="header">Author:</span><span class="value">{expression?.author.did}</span>
+                <span class="header">Author:</span><span class="value">{expression?.author?.did}</span>
             </div>
             <div>
                 <span class="header">Timestamp:</span><span class="value">{expression?.timestamp}</span>

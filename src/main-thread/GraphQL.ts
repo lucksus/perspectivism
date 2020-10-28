@@ -96,9 +96,13 @@ function createResolvers(languageController, linkRepoController) {
                 const result = await linkRepoController.getLinks(perspective, query)
                 return result
             },
-            expression: (parent, args, context, info) => {
+            expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
-                return languageController.getExpression(ref)
+                let expression = await languageController.getExpression(ref)
+                expression.ref = ref
+                expression.url = args.url.toString()
+                console.log("Query.expression:", expression)
+                return expression
             },
             languages: (parent, args, context, info) => {
                 let filter
@@ -152,24 +156,30 @@ function createResolvers(languageController, linkRepoController) {
             }
         },
 
-        Icon: {
-            code(parent) {
-                if(parent.url) {
-                    // We're inside an expression -> get expression icon
-                    const ref = parseExprURL(parent.url.toString())
-                    return languageController.getIcon(ref.language)
-                } else if(parent.address) {
-                    // Wer're inside a language -> get constructor icon
-                    return languageController.getConstructorIcon(parent)
-                }
+        Expression: {
+            language: async (expression) => {
+                console.log("GQL EXPRESSION", expression)
+                let lang = await languageController.languageForExpression(expression.ref)
+                lang.address = expression.ref.language.address
+                return lang
+            },
+
+            icon: (expression) => {
+                return { code: languageController.getIcon(expression.ref.language) }
+            }
+        },
+
+        Language: {
+            constructorIcon: (language) => {
+                return { code: languageController.getConstructorIcon(language) }
             }
         }
     }
 }
 
 
-export async function startServer(linkRepoController) {
-    const resolvers = createResolvers(linkRepoController)
+export async function startServer(languageController, linkRepoController) {
+    const resolvers = createResolvers(languageController, linkRepoController)
     const server = new ApolloServer({ typeDefs, resolvers });
     const { url, subscriptionsUrl } = await server.listen()
     return { url, subscriptionsUrl }
