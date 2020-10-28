@@ -79,7 +79,7 @@ export class LanguageController {
         }
     }
 
-    private languageByRef(ref: LanguageRef): Language {
+    languageByRef(ref: LanguageRef): Language {
         let address = aliases[ref.address] ? aliases[ref.address] : ref.address
         let language = this.#languages.get(address)
         if(language) {

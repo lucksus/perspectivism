@@ -50,7 +50,8 @@ type Query {
     hello: String
     links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
     expression(url: String): Expression
-    languages(filter: String): [String]
+    language(address: String): Language
+    languages(filter: String): [Language]
 }
 
 
@@ -103,6 +104,12 @@ function createResolvers(languageController, linkRepoController) {
                 expression.url = args.url.toString()
                 console.log("Query.expression:", expression)
                 return expression
+            },
+            language: (parent, args, context, info) => {
+                const { address } = args
+                let lang = languageController.languageByRef({address})
+                lang.address = address
+                return lang
             },
             languages: (parent, args, context, info) => {
                 let filter

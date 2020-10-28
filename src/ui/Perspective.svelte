@@ -259,9 +259,18 @@
         constructionMenu.open(event.clientX, event.clientY)
     }
 
-    languageController.getLanguagesWithExpressionUI().then( installedLanguages => {
-        console.log("Got installed languages:", JSON.stringify(installedLanguages))
-        languages = installedLanguages
+    getClient().query({
+        query: gql`
+        {
+            languages(filter: "expressionUI") {
+                name
+                address
+            }
+        }
+        `
+    }).then( expressionUILanguages => {
+        console.log("Got installed languages:", JSON.stringify(expressionUILanguages))
+        languages = expressionUILanguages.data.languages
     })
 
 
@@ -283,7 +292,18 @@
     async function createExpression(lang) {
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
-            const code = await languageController.getConstructorIcon(lang)
+            const { data } = await getClient().query({
+                query: gql`
+                { 
+                    language(address: "${lang.address}") {
+                        constructorIcon {
+                            code
+                        }
+                    }
+                }
+                `
+            })
+            const code = data.language.constructorIcon.code
             const ConstructorIcon = iconComponentFromString(code, lang.name)
             constructorIconComponents[lang.name] = ConstructorIcon
             customElements.define(lang.name+"-constructor", ConstructorIcon);
