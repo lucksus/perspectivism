@@ -1,9 +1,7 @@
 <script lang="ts">
     import type Perspective from '../acai/Perspective'
-    import type { LanguageController } from '../main-thread/LanguageController';
 
     export let perspective: Perspective
-    export let languageController: LanguageController
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
@@ -18,6 +16,7 @@
     const dispatch = createEventDispatcher();
     import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from '@apollo/client';
+    import { LANGUAGES } from './graphql_queries'
 
     $: if(perspective) {
         getClient().subscribe({
@@ -266,14 +265,8 @@
     }
 
     getClient().query({
-        query: gql`
-        {
-            languages(filter: "expressionUI") {
-                name
-                address
-            }
-        }
-        `
+        query: LANGUAGES,
+        variables: { filter: "expressionUI" }
     }).then( expressionUILanguages => {
         console.log("Got installed languages:", JSON.stringify(expressionUILanguages))
         languages = expressionUILanguages.data.languages
@@ -287,7 +280,7 @@
                 content
             }
         })
-        
+
         const exprURL = creationResult.data.createExpression
         console.log("Created new expression:", exprURL)
         
@@ -395,6 +388,7 @@
 
 </script>
 
+<h1>${perspective.uuid}</h1>
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
@@ -456,7 +450,6 @@
         </div>
         <div id="settings">
             <PerspectiveSettings perspective={perspective} 
-                languageController={languageController}
                 on:submit={()=> {
                     console.log(perspective)
                     dispatch('settings-changed', perspective.uuid)

@@ -2,7 +2,6 @@
     export let perspective
     export let perspectiveId
     export let perspectiveStore
-    export let languageController
 
     import FormField from '@smui/form-field';
     import Textfield from '@smui/textfield'
@@ -10,22 +9,17 @@
     import Select, {Option} from '@smui/select';
     import { createEventDispatcher } from 'svelte';
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
+    import { LANGUAGES } from './graphql_queries'
+    import { query } from 'svelte-apollo'
 
     const dispatch = createEventDispatcher();
 
 
     if(!perspective && perspectiveId && perspectiveStore)
         perspective = $perspectiveStore[perspectiveId]
-    let linkLanguages = []
-    let linkLanguagesLoadingDone = false
-    
-    async function loadLinkLanguages() {
-        linkLanguages = await languageController.getLanguagesWithLinksAdapter()
-        linkLanguagesLoadingDone = true
-    }
-
-    loadLinkLanguages()
-    
+    let linkLanguages = query(LANGUAGES, {
+        variables: { filter: "linksAdapter" }
+    })   
 
     function save() {
         dispatch('submit', perspective.uuid)
@@ -48,10 +42,10 @@
             <Row>
                 <Cell>Link sharing language:</Cell>
                 <Cell>
-                    {#if linkLanguagesLoadingDone}
+                    {#if !$linkLanguages.loading}
                     <Select bind:value={perspective.linksSharingLanguage} label="Sharing Language">
                         <Option value=""></Option>
-                        {#each linkLanguages as lang}
+                        {#each $linkLanguages.data.languages as lang}
                         <Option value={lang.address} selected={lang.address == perspective.linksSharingLanguage}>{lang.name}</Option>
                         {/each}
                     </Select>
