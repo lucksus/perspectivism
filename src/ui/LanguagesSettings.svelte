@@ -4,14 +4,15 @@
     import type LanguageRef from "../acai/LanguageRef";
     import type { LanguageController } from "../main-thread/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
+    import { LANGUAGES_WITH_SETTINGS, SET_LANGUAGE_SETTINGS } from "./graphql_queries"
+    import { getClient, mutation } from "svelte-apollo"
 
-    export let languageController: LanguageController;
     let languages: LanguageRef[] = []
     let settingsIconConstructors = new Map()
     let settingsIcons = {}
 
-    languageController.getInstalledLanguages().then(async l => {
-        languages = l
+    getClient().query({query: LANGUAGES_WITH_SETTINGS}).then(async result => {
+        languages = result.data.languages
         await checkLanguagesForSettingsIcon()
         createCustomSettingsIcons()
     })
@@ -26,7 +27,7 @@
       await asyncForEach(languages, async lang => {
         const settingsComponentName = lang.name + '-settings'
         console.debug("CHecking for", settingsComponentName)
-        const code = await languageController.getSettingsIcon(lang)
+        const code = lang.settingsIcon?.code
         if(!code) {
           return
         }
@@ -52,7 +53,7 @@
         console.log("icon", icon)
         document.getElementById(langToSettingsContainer(lang)).appendChild(icon)
         settingsIcons[lang.address] = icon
-        icon.settings = await languageController.getSettings(lang)
+        icon.settings = JSON.parse(lang.settings)
       }
     }
 
@@ -62,7 +63,10 @@
     }
 
     function updateSettings(lang) {
-      languageController.putSettings(lang,settingsIcons[lang.address].settings )
+      mutation(SET_LANGUAGE_SETTINGS)({variables: {
+        languageAddress: lang.address,
+        settings: JSON.stringify(settingsIcons[lang.address].settings)
+      }})
     }
 </script>
 

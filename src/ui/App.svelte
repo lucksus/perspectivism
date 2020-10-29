@@ -201,7 +201,7 @@
 		></Perspective>
 	{:else if selectedMainView.settings }
 		{#if selectedMainView.settings == 'languages'}
-			<LanguagesSettings languageController={languageController}></LanguagesSettings>
+			<LanguagesSettings></LanguagesSettings>
 		{/if}
 	{:else if selectedMainView.edit }
 		<PerspectiveSettings perspectiveId={selectedMainView.edit} 

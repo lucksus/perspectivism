@@ -44,6 +44,8 @@ type Language {
     name: String
     address: String
     constructorIcon: Icon
+    settings: String
+    settingsIcon: Icon
 }
 
 type Query {
@@ -76,11 +78,17 @@ input CreateExpressionInput {
     content: String
 }
 
+input SetLanguageSettingsInput {
+    languageAddress: String
+    settings: String
+}
+
 type Mutation {
     addLink(input: AddLinkInput): LinkExpression
     updateLink(input: UpdateLinkInput): LinkExpression
     removeLink(input: RemoveLinkInput): Boolean
     createExpression(input: CreateExpressionInput): String
+    setLanguageSettings(input: SetLanguageSettingsInput): Boolean
 }
 
 type Subscription {
@@ -153,6 +161,15 @@ function createResolvers(languageController, linkRepoController) {
                 const langref = { address: languageAddress }
                 const expref = await languageController.createPublicExpression(langref, content)
                 return exprRef2String(expref)
+            },
+            setLanguageSettings: (parent, args, context, info) => {
+                console.log("GQL| settings", args)
+                const { languageAddress, settings } = args.input
+                let langref = { name: '', address: languageAddress }
+                const lang = languageController.languageByRef(langref)
+                langref.name = lang.name
+                languageController.putSettings(langref, JSON.parse(settings))
+                return true
             }
         },
         
@@ -191,6 +208,16 @@ function createResolvers(languageController, linkRepoController) {
         Language: {
             constructorIcon: (language) => {
                 return { code: languageController.getConstructorIcon(language) }
+            },
+            settings: (language) => {
+                return JSON.stringify(languageController.getSettings(language))
+            },
+            settingsIcon: (language) => {
+                const code =  languageController.getSettingsIcon(language)
+                if(code)
+                    return { code }
+                else
+                    return null
             }
         }
     }
