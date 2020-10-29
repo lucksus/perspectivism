@@ -56,9 +56,7 @@
         if(!componentConstructor) {
             try {
                 console.debug("ExpressionIcon loading icon for:", expressionURL)
-                const gqlClient = getClient()
-                console.debug(gqlClient)
-                const { data } = await gqlClient.query({
+                const { data } = await getClient().query({
                     query: gql`
                     { 
                         expression(url: "${expressionURL}") {
@@ -69,9 +67,7 @@
                     }
                     `
                 })
-                console.log("GOT:", data)
                 const code = data.expression.icon.code
-                console.log("GOT CODE:", code)
                 componentConstructor = iconComponentFromString(code, "icon")
                 customElements.define(customElementName, componentConstructor)
             } catch (e) {

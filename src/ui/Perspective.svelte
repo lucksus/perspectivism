@@ -326,18 +326,6 @@
     $: if(perspective) {
         linksStore = query(ALL_LINKS_QUERY)
     }
-    $: if(perspective && perspective.linksSharingLanguage && perspective.linksSharingLanguage != "") {
-        languageController.addLinkObserver(perspective.linksSharingLanguage, (added, removed) => {
-            console.log("LINK OBSERVER got links to add:", added)
-            console.log("LINK OBSERVER got links to remove:", removed)
-            added?.forEach(l => {
-                linksStore.add(l)
-            })
-            removed?.forEach(l => {
-                linksStore.remove(l)
-            })
-        })
-    }
 
     function linkTo2D(link) {
         const origin = {x: 0, y: 0}
@@ -419,10 +407,7 @@
                             style={`position: absolute; transform: translateX(${linkTo2D(movingLink).x}px) translateY(${linkTo2D(movingLink).y}px);`}
                             data-link-id={hashLinkExpression(link)}
                             >
-                            <ExpressionIcon class="inline" 
-                                expressionURL={link.data.target}
-                                {languageController}>
-                            </ExpressionIcon>
+                            <ExpressionIcon class="inline" expressionURL={link.data.target}/>
                         </li>
                         {:else}
                         <li class="inline expression-list-container" 
@@ -434,8 +419,7 @@
                                 parentLink={link}
                                 on:context-menu={onExpressionContextMenu} 
                                 rotated={iconStates[link.data.target] === 'rotated'}
-                                selected={linkingSource?.data?.target === link.data.target}
-                                {languageController}>
+                                selected={linkingSource?.data?.target === link.data.target}>
                             </ExpressionIcon>
                         </li>
                         {/if}
