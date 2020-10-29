@@ -85,6 +85,12 @@
         }
     `)
 
+    $: CREATE_EXPRESSION = mutation(gql`
+        mutation CreateExpression($languageAddress: String, $content: String) {
+            createExpression(input: { languageAddress: $languageAddress, content: $content})
+        }
+    `)
+
     let linksStore
     let constructionMenu
     let languages = []
@@ -275,9 +281,14 @@
 
 
     async function commitExpression(lang, content, container) {
-        const expressionRef = await languageController.createPublicExpression(lang, content)
-        console.log("Got ExpressionRef:", JSON.stringify(expressionRef))
-        const exprURL = exprRef2String(expressionRef)
+        const creationResult = await CREATE_EXPRESSION({
+            variables: {
+                languageAddress: lang.address,
+                content
+            }
+        })
+        
+        const exprURL = creationResult.data.createExpression
         console.log("Created new expression:", exprURL)
         
         ADD_LINK({

@@ -1,5 +1,5 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
-import { parseExprURL } from '../acai/ExpressionRef'
+import { exprRef2String, parseExprURL } from '../acai/ExpressionRef'
 import type Perspective from '../acai/Perspective'
 import * as PubSub from './PubSub'
 
@@ -71,10 +71,16 @@ input RemoveLinkInput {
     link: String
 }
 
+input CreateExpressionInput {
+    languageAddress: String
+    content: String
+}
+
 type Mutation {
     addLink(input: AddLinkInput): LinkExpression
     updateLink(input: UpdateLinkInput): LinkExpression
     removeLink(input: RemoveLinkInput): Boolean
+    createExpression(input: CreateExpressionInput): String
 }
 
 type Subscription {
@@ -141,6 +147,12 @@ function createResolvers(languageController, linkRepoController) {
                 link = JSON.parse(link)
                 linkRepoController.removeLink(perspective, link)
                 return true
+            },
+            createExpression: async (parent, args, context, info) => {
+                const { languageAddress, content } = args.input
+                const langref = { address: languageAddress }
+                const expref = await languageController.createPublicExpression(langref, content)
+                return exprRef2String(expref)
             }
         },
         
