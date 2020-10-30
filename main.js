@@ -71,22 +71,3 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
-
-ipcMain.handle('read-perspectives', (event) => {
-  const FILENAME = 'perspectives.json'
-  const FILEPATH = path.join(Config.rootConfigPath, FILENAME)
-  if(fs.existsSync(FILEPATH)) {
-    return JSON.parse(fs.readFileSync(FILEPATH))
-  } else {
-    return {}
-  }
-})
-
-ipcMain.handle('write-perspectives', (event, perspectives) => {
-  const FILENAME = 'perspectives.json'
-  const FILEPATH = path.join(Config.rootConfigPath, FILENAME)
-  fs.writeFileSync(FILEPATH, JSON.stringify(perspectives))
-})

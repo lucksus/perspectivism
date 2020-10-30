@@ -241,14 +241,5 @@ export default class LinkRepoController {
 
 export function init(context: any): LinkRepoController {
     const linkRepoController = new LinkRepoController(context)
-
-    ipcMain.handle('links-get', async (e, p: Perspective, query: LinkQuery) => await linkRepoController.getLinks(p, query))
-    ipcMain.handle('links-getFrom', async (e, p: Perspective, source: string) => await linkRepoController.getLinksFrom(p, source))
-    ipcMain.handle('links-getTo', async (e, p: Perspective, target: string) => await linkRepoController.getLinksTo(p, target))
-    ipcMain.handle('links-add', (e, p: Perspective, link: Expression) => linkRepoController.addLink(p, link))
-    ipcMain.handle('links-remove', (e, p: Perspective, link: Expression) => linkRepoController.removeLink(p, link))
-    ipcMain.handle('links-sync', (e, p: Perspective) => linkRepoController.syncWithSharingAdapter(p))
-    ipcMain.handle('links-update', (e, p: Perspective, oldLink: Expression, newLink: Expression) => linkRepoController.updateLink(p, oldLink, newLink))
-
     return linkRepoController
 }

@@ -13,19 +13,9 @@
 	<script defer src='build/bundle.js'></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', async function() {
-			const { remote, ipcRenderer } = require('electron')
-			const IPFS = require('../src/services/IPFS.js')
-			const languageController = require('../src/services/LanguageController.js')
-			const linkRepoController = require('../src/services/LinkRepoController.js')
-			const perspectiveStore = await require('../src/stores/PerspectivesStore.js')()
 			var app = new PerspectivismUi({
 				target: document.body,
-				props: {
-					perspectiveStore,
-					languageController,
-					linkRepoController,
-					IPFS,
-				}
+				props: {}
 			});
 		});
 	</script>

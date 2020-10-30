@@ -192,27 +192,5 @@ export class LanguageController {
 
 export function init(context: LanguageContext): LanguageController {
     const languageController = new LanguageController(context)
-
-    ipcMain.handle('languages-getInstalled', (e) => languageController.getInstalledLanguages())
-    ipcMain.handle('languages-getLanguagesWithExpressionUI', (e) => languageController.getLanguagesWithExpressionUI())
-    ipcMain.handle('languages-getLanguagesWithLinksAdapter', (e) => languageController.getLanguagesWithLinksAdapter())
-    ipcMain.handle('languages-getConstructorIcon', (e, languageRef) => languageController.getConstructorIcon(languageRef))
-    ipcMain.handle('languages-getSettingsIcon', (e, languageRef) => languageController.getSettingsIcon(languageRef))
-    ipcMain.handle('languages-getIcon', async (e, expressionRef) => {
-        let result
-        try {
-            result = await languageController.getIcon(expressionRef)
-        } catch(e) {
-            console.error("ERROR: exception during languageController.getIcon(expressionRef):", e)
-            result = null
-        }
-        return result
-    })
-    ipcMain.handle('languages-createPublicExpression', async (e, languageRef, content) => await languageController.createPublicExpression(languageRef, content))
-    ipcMain.handle('languages-getExpression', async (event, expressionRef) => await languageController.getExpression(expressionRef))
-    ipcMain.handle('languages-interact', async (event, expressionRef, interaction) => await languageController.interact(expressionRef, interaction))
-    ipcMain.handle('languages-getSettings', async (event, languageRef) => await languageController.getSettings(languageRef))
-    ipcMain.handle('languages-putSettings', async (event, languageRef, settings) => await languageController.putSettings(languageRef, settings))
-
     return languageController
 }
