@@ -1,8 +1,8 @@
 require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { app, BrowserWindow, ipcMain } = require('electron')
-const path = require('path')
-const fs = require('fs')
+const express = require('express')
+const expressApp = express()
 
 const Config = require('./src/main-thread/Config')
 const Gun = require('./src/main-thread/Gun')
@@ -55,6 +55,11 @@ function createWindow () {
   return win
 }
 
+function serveUI() {
+  expressApp.use(express.static(`${__dirname}/public`))
+  expressApp.listen(9090)
+}
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -71,3 +76,5 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+serveUI()
