@@ -114,6 +114,9 @@ type Mutation {
 }
 
 type Subscription {
+    perspectiveAdded: Perspective
+    perspectiveUpdated: Perspective
+    perspectiveRemoved: String
     linkAdded(perspectiveUUID: String): LinkExpression
     linkRemoved(perspectiveUUID: String): LinkExpression
 }
@@ -218,6 +221,18 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
         },
         
         Subscription: {   
+            perspectiveAdded: {
+                subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_ADDED_TOPIC),
+                resolve: payload => payload.perspective
+            },
+            perspectiveUpdated: {
+                subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_UPDATED_TOPIC),
+                resolve: payload => payload.perspective
+            },
+            perspectiveRemoved: {
+                subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_REMOVED_TOPIC),
+                resolve: payload => payload.uuid
+            },
             linkAdded: {
                 subscribe: (parent, args, context, info) => {
                     return withFilter(

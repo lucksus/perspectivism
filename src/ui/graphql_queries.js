@@ -73,3 +73,29 @@ export const REMOVE_PERSPECTIVE = gql`
         removePerspective(uuid: $uuid)
     }
 `
+
+export const PERSPECTIVE_ADDED = gql`
+    subscription {
+		perspectiveAdded {
+			uuid
+            name
+            linkSharingLanguage
+		}
+	}  
+`
+
+export const PERSPECTIVE_UPDATED = gql`
+    subscription {
+		perspectiveUpdated {
+			uuid
+            name
+            linkSharingLanguage
+		}
+	}  
+`
+
+export const PERSPECTIVE_REMOVED = gql`
+    subscription {
+		perspectiveRemoved
+	}  
+`

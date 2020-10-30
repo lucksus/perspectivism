@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { LanguageController } from '../main-thread/LanguageController';
-	export let linkRepoController: LinkRepoController;
 	import TopAppBar, {Row, Section, Title, FixedAdjust, ShortFixedAdjust} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {AppContent, Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -11,11 +9,10 @@
 	import Perspective from './Perspective.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
-	import type LinkRepoController from '../main-thread/LinkRepoController';
 	import { ApolloClient, InMemoryCache } from "@apollo/client";
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import { mutation, query, setClient } from "svelte-apollo";
-	import { ADD_PERSPECTIVE, PERSPECTIVES, REMOVE_PERSPECTIVE } from './graphql_queries';
+	import { ADD_PERSPECTIVE, PERSPECTIVES, PERSPECTIVE_ADDED, PERSPECTIVE_REMOVED, PERSPECTIVE_UPDATED, REMOVE_PERSPECTIVE } from './graphql_queries';
 
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:4000/graphql`,
@@ -50,6 +47,27 @@
 	//for(const pID in $perspectiveStore) {
 	//	linkRepoController.syncWithSharingAdapter($perspectiveStore[pID])
 	//}
+
+	client.subscribe({
+		query: PERSPECTIVE_ADDED
+	}).subscribe({
+		next: () => perspectives.fetchMore({}),
+		error: (e) => console.error(e)
+	})
+
+	client.subscribe({
+		query: PERSPECTIVE_UPDATED
+	}).subscribe({
+		next: () => perspectives.refetch({}),
+		error: (e) => console.error(e)
+	})
+
+	client.subscribe({
+		query: PERSPECTIVE_REMOVED
+	}).subscribe({
+		next: () => perspectives.refetch({}),
+		error: (e) => console.error(e)
+	})
 
 	let selectedMainView = {
 		perspective: null,
