@@ -41,8 +41,13 @@
 	let drawerOpen = false;
 	let drawer
 	let hovered
-	$: if(!$perspectives.loading && $perspectives.data)
-	 	hovered = JSON.parse(JSON.stringify($perspectives.data.perspectives))
+	$: if(!$perspectives.loading && $perspectives.data) {
+		hovered = {}
+		$perspectives.data.perspectives.forEach(p => {
+			hovered[p.uuid] = true
+		})
+	}
+	 	
 
 	//for(const pID in $perspectiveStore) {
 	//	linkRepoController.syncWithSharingAdapter($perspectiveStore[pID])
