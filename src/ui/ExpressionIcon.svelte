@@ -77,11 +77,7 @@
     }
 
     $: if(!$queryResult.loading) {
-        expression = $queryResult.data.expression
-    }
-
-    $: if(expression) {
-        customElementName = iconComponentName(expression.language.address)
+        customElementName = iconComponentName($queryResult.data.expression.language.address)
     }
 
     $: if(customElementName) {
@@ -91,10 +87,11 @@
     }
     
     
-    $: if(container && componentConstructor && expression) {
+    $: if(container && componentConstructor && !$queryResult.loading) {
         const icon = new componentConstructor()
-        icon.expression = expression
-        container.inner_HTML = ''
+        icon.expression = $queryResult.data.expression
+        while(container.lastChild)
+            container.removeChild(container.lastChild)
         container.appendChild(icon)
     }
 
