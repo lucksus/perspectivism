@@ -33,7 +33,7 @@ export const PERSPECTIVES = gql`
         perspectives {
             uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
         }
     }
 `
@@ -43,7 +43,7 @@ export const PERSPECTIVE = gql`
         perspective(uuid: $uuid) {
             uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
         }
     }
 `
@@ -53,17 +53,17 @@ export const ADD_PERSPECTIVE = gql`
         addPerspective(input: {name: $name}) {
             uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
         }
     }
 `
 
 export const UPDATE_PERSPECTIVE = gql`
-    mutation updatePerspective($uuid: String, $name: String, $linkSharingLanguage: String) {
-        updatePerspective(input: {uuid: $uuid, name: $name, linkSharingLanguage: $linkSharingLanguage}) {
+    mutation updatePerspective($uuid: String, $name: String, $linksSharingLanguage: String) {
+        updatePerspective(input: {uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage}) {
             uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
         }
     }
 `
@@ -79,7 +79,7 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
 		}
 	}  
 `
@@ -89,7 +89,7 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
-            linkSharingLanguage
+            linksSharingLanguage
 		}
 	}  
 `

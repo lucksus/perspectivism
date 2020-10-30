@@ -23,6 +23,7 @@
             perspective = {
                 name: p.name,
                 uuid: p.uuid,
+                linksSharingLanguage: p.linksSharingLanguage,
             }
         })
     }

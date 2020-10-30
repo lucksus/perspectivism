@@ -51,7 +51,7 @@ type Language {
 type Perspective {
     uuid: String
     name: String
-    linkSharingLanguage: String
+    linksSharingLanguage: String
     links(query: LinkQuery): [LinkExpression]
 }
 
@@ -99,7 +99,7 @@ input AddPerspectiveInput {
 input UpdatePerspectiveInput {
     uuid: String
     name: String
-    linkSharingLanguage: String
+    linksSharingLanguage: String
 }
 
 type Mutation {
