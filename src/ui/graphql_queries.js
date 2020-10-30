@@ -27,3 +27,49 @@ export const SET_LANGUAGE_SETTINGS = gql`
         setLanguageSettings(input: { languageAddress: $languageAddress, settings: $settings})
     }
 `
+
+export const PERSPECTIVES = gql`
+    query perspectives {
+        perspectives {
+            uuid
+            name
+            linkSharingLanguage
+        }
+    }
+`
+
+export const PERSPECTIVE = gql`
+    query perspective($uuid: String) {
+        perspective(uuid: $uuid) {
+            uuid
+            name
+            linkSharingLanguage
+        }
+    }
+`
+
+export const ADD_PERSPECTIVE = gql`
+    mutation updatePerspective($name: String) {
+        addPerspective(input: {name: $name}) {
+            uuid
+            name
+            linkSharingLanguage
+        }
+    }
+`
+
+export const UPDATE_PERSPECTIVE = gql`
+    mutation updatePerspective($uuid: String, $name: String, $linkSharingLanguage: String) {
+        updatePerspective(input: {uuid: $uuid, name: $name, linkSharingLanguage: $linkSharingLanguage}) {
+            uuid
+            name
+            linkSharingLanguage
+        }
+    }
+`
+
+export const REMOVE_PERSPECTIVE = gql`
+    mutation removePerspective($uuid: String) {
+        removePerspective(uuid: $uuid)
+    }
+`

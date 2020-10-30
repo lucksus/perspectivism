@@ -449,10 +449,8 @@
             <Label>Perspective Settings</Label>
         </div>
         <div id="settings">
-            <PerspectiveSettings perspective={perspective} 
+            <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
                 on:submit={()=> {
-                    console.log(perspective)
-                    dispatch('settings-changed', perspective.uuid)
                     showSettings = false
                 }}
                 on:cancel={()=> {

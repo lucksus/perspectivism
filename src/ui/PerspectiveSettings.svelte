@@ -9,19 +9,32 @@
     import Select, {Option} from '@smui/select';
     import { createEventDispatcher } from 'svelte';
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
-    import { LANGUAGES } from './graphql_queries'
-    import { query } from 'svelte-apollo'
+    import { LANGUAGES, PERSPECTIVE, UPDATE_PERSPECTIVE } from './graphql_queries'
+    import { getClient, mutation, query } from 'svelte-apollo'
 
     const dispatch = createEventDispatcher();
 
 
-    if(!perspective && perspectiveId && perspectiveStore)
-        perspective = $perspectiveStore[perspectiveId]
+    if(!perspective && perspectiveId) {
+        getClient().query({
+            query: PERSPECTIVE,
+            variables: { uuid: perspectiveId }
+        }).then(p => {
+            perspective = {
+                name: p.name,
+                uuid: p.uuid,
+            }
+        })
+    }
+
     let linkLanguages = query(LANGUAGES, {
         variables: { filter: "linksAdapter" }
     })   
 
     function save() {
+        mutation(UPDATE_PERSPECTIVE)({
+            variables: perspective
+        })
         dispatch('submit', perspective.uuid)
     }
 
@@ -30,7 +43,7 @@
     }
 </script>
 
-{#if perspective}
+{#if perspective.name}
 <div class="perspective-settings-container">
     <h1>Perspective Settings</h1>
     <DataTable>

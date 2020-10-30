@@ -48,12 +48,21 @@ type Language {
     settingsIcon: Icon
 }
 
+type Perspective {
+    uuid: String
+    name: String
+    linkSharingLanguage: String
+    links(query: LinkQuery): [LinkExpression]
+}
+
 type Query {
     hello: String
     links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
     expression(url: String): Expression
     language(address: String): Language
     languages(filter: String): [Language]
+    perspectives: [Perspective]
+    perspective(uuid: String): Perspective
 }
 
 
@@ -83,7 +92,20 @@ input SetLanguageSettingsInput {
     settings: String
 }
 
+input AddPerspectiveInput {
+    name: String
+}
+
+input UpdatePerspectiveInput {
+    uuid: String
+    name: String
+    linkSharingLanguage: String
+}
+
 type Mutation {
+    addPerspective(input: AddPerspectiveInput): Perspective
+    updatePerspective(input: UpdatePerspectiveInput): Perspective
+    removePerspective(uuid: String): Boolean
     addLink(input: AddLinkInput): LinkExpression
     updateLink(input: UpdateLinkInput): LinkExpression
     removeLink(input: RemoveLinkInput): Boolean
@@ -98,12 +120,21 @@ type Subscription {
 `
 
 
-function createResolvers(languageController, linkRepoController) {
+function createResolvers(perspectivesController, languageController, linkRepoController) {
     const pubsub = PubSub.get()
 
     return {
         Query: {
             hello: () => 'Hello world!',
+            perspective: (parent, args, context, info) => {
+                const { uuid } = args
+                return perspectivesController.get()[uuid]
+            },
+            perspectives: (parent, args, context, info) => {
+                const ps = Object.values(perspectivesController.get())
+                console.debug("PERSPECTIVES:", ps)
+                return ps
+            },
             links: async (parent, args, context, info) => {
                 console.log("GQL| links:", args)
                 const { perspectiveUUID, query } = args
@@ -170,6 +201,19 @@ function createResolvers(languageController, linkRepoController) {
                 langref.name = lang.name
                 languageController.putSettings(langref, JSON.parse(settings))
                 return true
+            },
+            addPerspective: (parent, args, context, info) => {
+                return perspectivesController.add(args.input)
+            },
+            updatePerspective: (parent, args, context, info) => {
+                const perspective = args.input
+                perspectivesController.update(perspective)
+                return perspective
+            },
+            removePerspective: (parent, args, context, info) => {
+                const { uuid } = args
+                perspectivesController.remove(uuid)
+                return true
             }
         },
         
@@ -224,8 +268,8 @@ function createResolvers(languageController, linkRepoController) {
 }
 
 
-export async function startServer(languageController, linkRepoController) {
-    const resolvers = createResolvers(languageController, linkRepoController)
+export async function startServer(perspectivesController, languageController, linkRepoController) {
+    const resolvers = createResolvers(perspectivesController, languageController, linkRepoController)
     const server = new ApolloServer({ typeDefs, resolvers });
     const { url, subscriptionsUrl } = await server.listen()
     return { url, subscriptionsUrl }

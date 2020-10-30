@@ -7,6 +7,7 @@ const fs = require('fs')
 const Config = require('./src/main-thread/Config')
 const Gun = require('./src/main-thread/Gun')
 const IPFS = require('./src/main-thread/IPFS')
+const PerspectivesController = require('./src/main-thread/PerspectivesController')
 const LinkRepoController = require('./src/main-thread/LinkRepoController')
 const LanguageController = require('./src/main-thread/LanguageController')
 const GraphQL = require('./src/main-thread/GraphQL')
@@ -16,9 +17,10 @@ const gun = Gun.init(Config.dataPath)
 IPFS.init().then((IPFS) => {
   const agent = { did: 'did:local-test-agent' }
   const context = { agent, IPFS }
+  const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
   const languageController = LanguageController.init(context)
   const linkRepoController = LinkRepoController.init({gun, languageController, agent})
-  GraphQL.startServer(languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
+  GraphQL.startServer(perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
     console.log(`🚀  GraphQL Server ready at ${url}`)
     console.log(`🚀  GraphQL subscriptions ready at ${subscriptionsUrl}`)
   })
