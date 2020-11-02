@@ -5,16 +5,20 @@
     const dispatch = createEventDispatcher();
     import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from "@apollo/client"
+    import { CHILD_LINKS_QUERY } from "./graphql_queries";
+    import { linkTo2D, coordToPredicate } from './uiUtils';
 
     export let expressionURL: string
     export let parentLink: Expression
     export let componentConstructor
     export let selected: boolean
+    export let perspectiveUUID: string
 
     let expression = null
     let queryResult = null
     let expressionRef = null
     let iconReady = false
+    let childLinks
 
     
     $: if(expressionURL) queryResult = query(gql`
@@ -29,6 +33,15 @@
             }
         }
     `)
+
+    $: if(expressionURL && perspectiveUUID) {
+        childLinks = query(CHILD_LINKS_QUERY, {
+            variables: {
+                perspectiveUUID,
+                source: expressionURL
+            }
+        })
+    }
     
 
     //let expression: void | Expression = null
@@ -146,6 +159,24 @@
     {/if}
 </div>
 </div>
+{#if childLinks}
+    {JSON.stringify($childLinks)}
+{/if}
+{#if childLinks && !$childLinks.loading && $childLinks.data?.links}
+    <ul class="child-plane">
+        {#each $childLinks.data.links as link}
+            <li class="inline expression-list-container" 
+            style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}>
+                <svelte:self 
+                    expressionURL={link.data.target}
+                    parentLink={link}
+                    perspectiveUUID={perspectiveUUID}>
+                </svelte:self>
+            </li>
+        {/each}    
+    </ul>
+    
+{/if}
 
 <style>
     .container {
@@ -187,6 +218,15 @@
     }
 
     .displacement-container {
+        transform-style: preserve-3d;
+    }
+
+    .child-plane {
+        transform: translateZ(-2000px);
+    }
+
+    .inline {
+        display: inline;
         transform-style: preserve-3d;
     }
 </style>

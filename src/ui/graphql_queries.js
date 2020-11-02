@@ -99,3 +99,31 @@ export const PERSPECTIVE_REMOVED = gql`
 		perspectiveRemoved
 	}  
 `
+
+export const ALL_LINKS_QUERY = gql`
+    query links($perspectiveUUID: String) {
+        links(perspectiveUUID: $perspectiveUUID, query: { }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
+`
+
+export const CHILD_LINKS_QUERY = gql`
+    query links($perspectiveUUID: String, $source: String) {
+        links(perspectiveUUID: $perspectiveUUID, query: { source: $source }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
+`

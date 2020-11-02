@@ -17,6 +17,7 @@
     import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from '@apollo/client';
     import { LANGUAGES } from './graphql_queries'
+    import { linkTo2D, coordToPredicate } from './uiUtils';
 
     $: if(perspective) {
         getClient().subscribe({
@@ -113,6 +114,7 @@
     let linkingSource
     let linkingCursor = {}
     let dropMove = false
+    let dropMoveTarget
 
     let showSettings = false
 
@@ -190,7 +192,8 @@
             point.x += d.x
             point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
-            if(hoveredLink(point, movingLink.data)) {
+            dropMoveTarget = hoveredLink(point, movingLink.data)
+            if(dropMoveTarget) {
                 dropMove = true
                 console.log("drop move!")
             } else {
@@ -266,7 +269,10 @@
     function handleMouseUp(event) {
         console.debug(isMovingExpression, movingLink, movingLinkOriginal)
         if(isMovingExpression && !linkEqual(movingLink, movingLinkOriginal)) {
-            const newLinkObject = JSON.parse(JSON.stringify(movingLink))
+            let newLinkObject = JSON.parse(JSON.stringify(movingLink))
+            if(dropMove) {
+                newLinkObject.data.source = dropMoveTarget.data.target
+            }
             delete newLinkObject.id
             console.debug("Updating link:", JSON.stringify(movingLinkOriginal), JSON.stringify(movingLinkOriginal))
             UPDATE_LINK({
@@ -356,21 +362,6 @@
         linksStore = query(ALL_LINKS_QUERY)
     }
 
-    function linkTo2D(link) {
-        const origin = {x: 0, y: 0}
-        if(!link.data.predicate)
-            return origin
-        const pred = link.data.predicate
-        if(!pred.startsWith("coord2d://"))
-            return origin
-        
-        const [x,y] = pred.substr(10).split('_').map(s => parseInt(s))
-        return {x,y}
-    }
-
-    function coordToPredicate(coords) {
-        return `coord2d://${coords.x}_${coords.y}`
-    }
 
     let expressionContextMenu
 
@@ -438,7 +429,7 @@
                             data-link-id={hashLinkExpression(link)}
                             >
                             <div class="drop-move-container" style={`transform: translateZ(${dropMove ? -2000 : 0}px);`}>
-                                <ExpressionIcon expressionURL={link.data.target}/>
+                                <ExpressionIcon expressionURL={link.data.target} perspectiveUUID={perspective.uuid}/>
                             </div>
                         </li>
                         {:else}
@@ -449,6 +440,7 @@
                             <ExpressionIcon
                                 expressionURL={link.data.target}
                                 parentLink={link}
+                                perspectiveUUID={perspective.uuid}
                                 on:context-menu={onExpressionContextMenu} 
                                 rotated={iconStates[link.data.target] === 'rotated'}
                                 selected={linkingSource?.data?.target === link.data.target}>
