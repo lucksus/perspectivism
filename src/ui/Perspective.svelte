@@ -112,6 +112,7 @@
     let isLinking = false
     let linkingSource
     let linkingCursor = {}
+    let dropMove = false
 
     let showSettings = false
 
@@ -159,6 +160,24 @@
         }
     }
 
+    function dist(c1, c2) {
+        const x = c1.x - c2.x
+        const y = c1.y - c2.y
+        return Math.sqrt(x*x + y*y)
+    }
+
+    function hoveredLink(coords, moving) {
+        for(const i in $linksStore.data.links) {
+            const link = $linksStore.data.links[i]
+            if(link.data.source === "root" && link.data.predicate?.startsWith("coord2d://") && link.data.target != moving.target) {
+                const linkCoords = linkTo2D(link)
+                const d = dist(coords, linkCoords)
+                if(d < 300) return link
+            }
+        }
+        return null
+    }
+
     function handleMouseMove(event) {
         const d = zoomNormalizedMouseMove({x: event.movementX, y: event.movementY })
         if(isPanning) {
@@ -171,6 +190,12 @@
             point.x += d.x
             point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
+            if(hoveredLink(point, movingLink.data)) {
+                dropMove = true
+                console.log("drop move!")
+            } else {
+                dropMove = false
+            }
             //linksStore.update(movingLink)
         }
 
@@ -412,14 +437,16 @@
                             style={`position: absolute; transform: translateX(${linkTo2D(movingLink).x}px) translateY(${linkTo2D(movingLink).y}px);`}
                             data-link-id={hashLinkExpression(link)}
                             >
-                            <ExpressionIcon class="inline" expressionURL={link.data.target}/>
+                            <div class="drop-move-container" style={`transform: translateZ(${dropMove ? -2000 : 0}px);`}>
+                                <ExpressionIcon expressionURL={link.data.target}/>
+                            </div>
                         </li>
                         {:else}
                         <li class="inline expression-list-container" 
                             style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
                             data-link-id={hashLinkExpression(link)}
                             >
-                            <ExpressionIcon class="inline" 
+                            <ExpressionIcon
                                 expressionURL={link.data.target}
                                 parentLink={link}
                                 on:context-menu={onExpressionContextMenu} 
@@ -541,5 +568,9 @@
         top: 0;
         left: 0;
         transform: translateX(-10000px) translateY(-10000px);
+    }
+
+    .drop-move-container {
+        transition: transform 0.5s;
     }
 </style>
