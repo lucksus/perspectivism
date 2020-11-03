@@ -161,33 +161,33 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             },
             languages: (parent, args, context, info) => {
                 let filter
-                if(args.filter && args.filter != '') filter = args.filter
+                if(args.filter && args.filter !== '') filter = args.filter
                 return languageController.filteredLanguageRefs(filter)
             }
         },
         Mutation: {
             addLink: (parent, args, context, info) => {
                 console.log("GQL| addLink:", args)
-                let { perspectiveUUID, link } = args.input
+                const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
-                link = JSON.parse(link)
-                return linkRepoController.addLink(perspective, link)
+                const parsedLink = JSON.parse(link)
+                return linkRepoController.addLink(perspective, parsedLink)
             },
             updateLink: (parent, args, context, info) => {
                 console.log("GQL| updateLink:", args)
-                let { perspectiveUUID, oldLink, newLink } = args.input
+                const { perspectiveUUID, oldLink, newLink } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
-                oldLink = JSON.parse(oldLink)
-                newLink = JSON.parse(newLink)
-                linkRepoController.updateLink(perspective, oldLink, newLink)
+                const parsedOldLink = JSON.parse(oldLink)
+                const parsedNewLink = JSON.parse(newLink)
+                linkRepoController.updateLink(perspective, parsedOldLink, nparsedNewLinkewLink)
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
                 console.log("GQL| removeLink:", args)
-                let { perspectiveUUID, link } = args.input
+                const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
-                link = JSON.parse(link)
-                linkRepoController.removeLink(perspective, link)
+                const parsedLink = JSON.parse(link)
+                linkRepoController.removeLink(perspective, parsedLink)
                 return true
             },
             createExpression: async (parent, args, context, info) => {
@@ -237,7 +237,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
                 subscribe: (parent, args, context, info) => {
                     return withFilter(
                         () => pubsub.asyncIterator(PubSub.LINK_ADDED_TOPIC),
-                        (payload, args) => payload.perspective.uuid === args.perspectiveUUID
+                        (payload, argsInner) => payload.perspective.uuid === argsInner.perspectiveUUID
                     )(undefined, args)
                 },
                 resolve: payload => payload.link

@@ -46,7 +46,7 @@ export default class LinkRepoController {
     }
 
     private callLinksAdapter(p: Perspective, functionName: string, ...args): Promise<any> {
-        if(p.linksSharingLanguage && p.linksSharingLanguage!="") {
+        if(p.linksSharingLanguage && p.linksSharingLanguage !== "") {
             return new Promise(async (resolve, reject) => {
                 setTimeout(() => resolve([]), 2000)
                 try {
@@ -74,16 +74,15 @@ export default class LinkRepoController {
         const localLinks = await this.getLinksPath(p, 'links')
         const remoteLinks = await this.callLinksAdapter(p, 'getLinks')
         const includes = (link, list) => {
-            return undefined != list.find(e =>
-                JSON.stringify(e.author) == JSON.stringify(link.author) &&
-                e.timestamp == link.timestamp &&
-                e.source == link.data.source &&
-                e.target == link.data.target &&
-                e.predicate == link.data.predicate
+            return undefined !== list.find(e =>
+                JSON.stringify(e.author) === JSON.stringify(link.author) &&
+                e.timestamp === link.timestamp &&
+                e.source === link.data.source &&
+                e.target === link.data.target &&
+                e.predicate === link.data.predicate
                 )
         }
-        for(const i in localLinks) {
-            const l = localLinks[i]
+        for(const l of localLinks) {
             if(!includes(l, remoteLinks)) {
                 await this.callLinksAdapter(p, "addLink", l)
             }
@@ -102,8 +101,8 @@ export default class LinkRepoController {
         return new Promise((resolve) => {
             setTimeout(()=>resolve([]), 200)
             let context = this.getPerspective(p)
-            for(const i in args) {
-                context = context.get(args[i])
+            for(const arg of args) {
+                context = context.get(arg)
             }
             context.load(linksObject => {
                 console.debug("linksObject:", linksObject)
@@ -191,11 +190,15 @@ export default class LinkRepoController {
         console.debug("getLinks 2")
 
         if(query.source) {
+            console.debug("query.source", query.source)
             let result = await this.getLinksPath(p, 'sources', query.source)
             // @ts-ignore
             if(query.target) result = result.filter(l => l.data.target === query.target)
             // @ts-ignore
+
+
             if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
+            console.debug("result", result)
             return result
         }
 

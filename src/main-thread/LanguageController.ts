@@ -51,7 +51,7 @@ export class LanguageController {
 
 
             Object.keys(aliases).forEach(alias => {
-                if(language.name == aliases[alias]) {
+                if(language.name === aliases[alias]) {
                     aliases[alias] = hash
                 }
             })
