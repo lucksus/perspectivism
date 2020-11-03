@@ -179,7 +179,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedOldLink = JSON.parse(oldLink)
                 const parsedNewLink = JSON.parse(newLink)
-                linkRepoController.updateLink(perspective, parsedOldLink, nparsedNewLinkewLink)
+                linkRepoController.updateLink(perspective, parsedOldLink, parsedNewLink)
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
