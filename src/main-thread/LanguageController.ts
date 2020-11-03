@@ -44,14 +44,14 @@ export class LanguageController {
             const bundleBytes = fs.readFileSync(bundle)
             const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
             const { default: create, name } = require(path.join(process.env.PWD, bundle))
-            
+
             const customSettings = this.getSettings({name, address: hash} as LanguageRef)
             const storageDirectory = Config.getLanguageStoragePath(name)
             const language = create({...context, customSettings, storageDirectory})
 
 
             Object.keys(aliases).forEach(alias => {
-                if(language.name == aliases[alias]) {
+                if(language.name === aliases[alias]) {
                     aliases[alias] = hash
                 }
             })
@@ -70,7 +70,7 @@ export class LanguageController {
     }
 
     private languageForExpression(e: ExpressionRef): Language {
-        let address = aliases[e.language.address] ? aliases[e.language.address] : e.language.address
+        const address = aliases[e.language.address] ? aliases[e.language.address] : e.language.address
         const language = this.#languages.get(address)
         if(language) {
             return language
@@ -80,8 +80,8 @@ export class LanguageController {
     }
 
     languageByRef(ref: LanguageRef): Language {
-        let address = aliases[ref.address] ? aliases[ref.address] : ref.address
-        let language = this.#languages.get(address)
+        const address = aliases[ref.address] ? aliases[ref.address] : ref.address
+        const language = this.#languages.get(address)
         if(language) {
             return language
         } else {
@@ -90,7 +90,7 @@ export class LanguageController {
     }
 
     filteredLanguageRefs(propertyFilter: void | string): LanguageRef[] {
-        let refs: LanguageRef[] = []
+        const refs: LanguageRef[] = []
         this.#languages.forEach((language, hash) => {
             if(!propertyFilter || Object.keys(language).includes(propertyFilter)) {
                 refs.push({
@@ -132,7 +132,7 @@ export class LanguageController {
             return JSON.parse(fs.readFileSync(FILEPATH).toString())
         } else {
             return {}
-        } 
+        }
     }
 
     putSettings(lang: LanguageRef, settings: object) {
@@ -156,13 +156,13 @@ export class LanguageController {
 
         try {
             // Ok, first we assume its a PublicSharing put adapter...
-            //@ts-ignore
+            // @ts-ignore
             address = await putAdapter.createPublic(content)
         } catch(e) {
             try {
                 // ...and if it's not, let's try to treat it like a
                 // ReadOnlyLangauge..
-                //@ts-ignore
+                // @ts-ignore
                 address = await putAdapter.addressOf(content)
             } catch(e) {
                 // If both don't work, we don't know what to do with this put adapter :/
