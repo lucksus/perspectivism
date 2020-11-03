@@ -22,7 +22,7 @@ export default interface Language {
     readonly linksAdapter?: LinksAdapter;
 
     readonly expressionUI?: ExpressionUI;
-    readonly settingsUI?: SettingsUI;    
+    readonly settingsUI?: SettingsUI;
 
     // All available interactions agent 'a' could execute on given expression
     interactions(a: Agent, expression: Address): Interaction[];
@@ -105,7 +105,7 @@ export interface LinksAdapter {
 
     getLinks(query: LinkQuery): Promise<Expression[]>;
 
-    //Get push notified by added links
+    // Get push notified by added links
     addCallback(callback: NewLinksObserver);
 }
 

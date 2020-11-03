@@ -10,7 +10,9 @@
     "serve": "sirv public",
     "validate": "svelte-check",
     "electron": "electron .",
-    "start": "electron ."
+    "start": "electron .",
+    "lint": "tslint -c tslint.json \"src/main-thread/*.ts\"",
+    "lint:fix": "tslint --fix -c tslint.json \"src/main-thread/*.ts\""
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^14.0.0",
@@ -34,6 +36,7 @@
     "svelte-check": "^1.0.0",
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
+    "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.9.3"
   },
   "dependencies": {

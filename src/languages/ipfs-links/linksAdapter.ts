@@ -46,13 +46,13 @@ export class IpfsLinksAdapter implements LinksAdapter {
         this.#IPFS = context.IPFS
         this.#storage = context.storageDirectory
         this.#mutex = new Mutex()
-        //@ts-ignore
+        // @ts-ignore
         this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
         this.#room = new Room(this.#IPFS, this.#roomName)
         this.#room.on('message', message => this.handlePubSubMessage(message))
         this.#room.on('peer joined', peer => this.handlePubSubPeerJoined(peer))
         this.#initialized = this.init()
-        
+
     }
 
     async init(): Promise<void> {
@@ -77,7 +77,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
     private async getLinksOfPeer(peer, cid): Promise<void | object> {
         debug(`getLinksOfPeer(${peer}, ${cid}) called`)
-        let result = undefined
+        let result
         try {
             cid = cid.toString()
 
@@ -91,7 +91,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
             console.error("IPFS LINKS| Error while retrieving links of peer", peer, " via IPNS CID", cid,":\n", e)
         }
 
-        //debug(`getLinksOfPeer() returning:`, result)
+        // debug(`getLinksOfPeer() returning:`, result)
         return result
     }
 
@@ -123,9 +123,9 @@ export class IpfsLinksAdapter implements LinksAdapter {
         try {
             const op = JSON.parse(data)
             if(typeof(op.removeLink) === 'object') {
-                this.#callbacks.forEach(cb => cb([], [op.removeLink]))    
-                return 
-            } 
+                this.#callbacks.forEach(cb => cb([], [op.removeLink]))
+                return
+            }
         } catch(e) {
 
         }
@@ -143,17 +143,17 @@ export class IpfsLinksAdapter implements LinksAdapter {
         } else {
             this.#room.broadcast(myHash)
         }
-        
+
     }
 
     private async notify(peer) {
         debug(`notify(${peer}`)
-        //const cid = await this.resolveIPNS(this.#peerList[peer])
+        // const cid = await this.resolveIPNS(this.#peerList[peer])
         const cid = this.#peerList[peer]
         const linksOfPeer = await this.getLinksOfPeer(peer, cid)
         debug(`links=${linksOfPeer}`)
         if(linksOfPeer) {
-            //@ts-ignore
+            // @ts-ignore
             this.#callbacks.forEach(cb => cb(Object.values(linksOfPeer.links)))
         }
     }
@@ -162,8 +162,8 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const content = JSON.stringify(links)
         const result = await this.#IPFS.add(content)
         console.log("IPFS-LINKS| published:", result, content)
-        //const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
-        //console.log("IPFS-LINKS: updated IPNS:", publishResult)
+        // const publishResult = await this.#IPFS.name.publish(result.cid, {key: this.#key.name})
+        // console.log("IPFS-LINKS: updated IPNS:", publishResult)
         fs.writeFileSync(this.paths().myLatestHash, JSON.stringify(result.cid.toString()))
         this.#room.broadcast(result.cid.toString())
         return result.cid
@@ -183,11 +183,11 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
     private async getMyLinks(): Promise<object> {
         let linksObject
-        let myHash = this.myLatestHash()
+        const myHash = this.myLatestHash()
         if(myHash) {
             linksObject = await this.getLinksOfPeer("me", myHash)
-        } 
-        //@ts-ignore
+        }
+        // @ts-ignore
         if(!linksObject || !linksObject.links ) {
             linksObject = { links: {} }
         }
@@ -200,7 +200,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const release = await this.#mutex.acquire()
         const linksObject = await this.getMyLinks()
         const linkHash = hashLinkExpression(link)
-        //@ts-ignore
+        // @ts-ignore
         linksObject.links[linkHash] = link
         await this.publish(linksObject)
         release()
@@ -214,15 +214,15 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const oldLinkHash = hashLinkExpression(oldLinkExpression)
         const newLinkHash = hashLinkExpression(newLinkExpression)
 
-        //@ts-ignore
+        // @ts-ignore
         if(!linksObject.links[oldLinkHash]) {
             throw new Error("Can't update link. Not found in my links.\nMy links: "+JSON.stringify(linksObject))
         }
 
-        //@ts-ignore
+        // @ts-ignore
         linksObject.links[newLinkHash] = newLinkExpression
 
-        //@ts-ignore
+        // @ts-ignore
         delete linksObject.links[oldLinkHash]
 
         this.#room.broadcast(JSON.stringify({
@@ -240,12 +240,12 @@ export class IpfsLinksAdapter implements LinksAdapter {
         const linksObject = await this.getMyLinks()
         const hash = hashLinkExpression(link)
 
-        //@ts-ignore
+        // @ts-ignore
         if(!linksObject.links[hash]) {
             throw new Error("Can't remove link. Not found in my links.\nMy links: "+JSON.stringify(linksObject))
         }
 
-        //@ts-ignore
+        // @ts-ignore
         delete linksObject.links[hash]
 
         this.#room.broadcast(JSON.stringify({
@@ -258,15 +258,15 @@ export class IpfsLinksAdapter implements LinksAdapter {
     async getLinks(query: LinkQuery): Promise<Expression[]> {
         await this.#initialized
 
-        //const resolved = await this.myResolvedIPNSObject()
-        //let requestList = [{peer: 'me', cid: resolved}]
-        let requestList = []
+        // const resolved = await this.myResolvedIPNSObject()
+        // let requestList = [{peer: 'me', cid: resolved}]
+        const requestList = []
         query = new LinkQuery(query)
 
         Object.keys(this.#peerList).forEach(peer => {
             requestList.push({peer, cid: this.#peerList[peer]})
         })
-            
+
         const allLinksOfallPeers = await Promise.all(
             requestList.map(r => {
                 return this.getLinksOfPeer(r.peer, r.cid)
@@ -275,7 +275,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
 
         console.log("IPFS-LINKS| getRootLinks - allLinksOfAllPeers =", allLinksOfallPeers)
 
-        //@ts-ignore
+        // @ts-ignore
         const merged = allLinksOfallPeers.map(o => o.links).reduce((agregated, current) => Object.assign(agregated, current), {})
         const list = Object.values(merged) as Expression[]
 

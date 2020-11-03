@@ -20,11 +20,11 @@ export class LinkQuery {
 
     constructor(obj: object) {
         if(obj) {
-            //@ts-ignore
+            // @ts-ignore
             this.source = obj.source
-            //@ts-ignore
+            // @ts-ignore
             this.predicate = obj.predicate
-            //@ts-ignore
+            // @ts-ignore
             this.target = obj.target
         }
     }
@@ -40,11 +40,11 @@ export class LinkQuery {
 export function linkEqual(l1: Expression, l2: Expression): boolean {
     return l1.author.did == l2.author.did &&
         l1.timestamp == l2.timestamp &&
-        //@ts-ignore
+        // @ts-ignore
         l1.data.source == l2.data.source &&
-        //@ts-ignore
+        // @ts-ignore
         l1.data.predicate == l2.data.predicate &&
-        //@ts-ignore
+        // @ts-ignore
         l1.data.target == l2.data.target
 }
 
@@ -55,7 +55,7 @@ export function isLink(l: any): boolean {
 export function hashLinkExpression(link: Expression): number {
     const mash = JSON.stringify(link.data, Object.keys(link.data).sort()) +
                 JSON.stringify(link.author) + link.timestamp
-    var hash = 0, i, chr;
+    let hash = 0, i, chr;
     for (i = 0; i < mash.length; i++) {
         chr   = mash.charCodeAt(i);
         hash  = ((hash << 5) - hash) + chr;

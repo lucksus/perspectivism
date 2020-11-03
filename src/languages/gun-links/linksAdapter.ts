@@ -21,22 +21,22 @@ export class GunLinksAdapter implements LinksAdapter {
             localStorage: false
         }
 
-        //@ts-ignore
+        // @ts-ignore
         if(context.customSettings.gunDbPeer) {
-            //@ts-ignore
-            opts.peers = {} 
-            //@ts-ignore
+            // @ts-ignore
+            opts.peers = {}
+            // @ts-ignore
             opts.peers[context.customSettings.gunDbPeer] = {}
         }
 
-        //@ts-ignore
+        // @ts-ignore
         if(context.customSettings.runServer) {
-            //@ts-ignore
-            let server = require('http').createServer().listen(context.customSettings.port);
-            //@ts-ignore
+            // @ts-ignore
+            const server = require('http').createServer().listen(context.customSettings.port);
+            // @ts-ignore
             opts.web = server
         }
-        
+
         this.#gun = new Gun(opts)
 
         this.#gun.get('root-links').map().open(links => {

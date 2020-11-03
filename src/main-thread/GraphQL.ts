@@ -147,7 +147,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             },
             expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
-                let expression = await languageController.getExpression(ref)
+                const expression = await languageController.getExpression(ref)
                 expression.ref = ref
                 expression.url = args.url.toString()
                 console.log("Query.expression:", expression)
@@ -155,7 +155,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             },
             language: (parent, args, context, info) => {
                 const { address } = args
-                let lang = languageController.languageByRef({address})
+                const lang = languageController.languageByRef({address})
                 lang.address = address
                 return lang
             },
@@ -199,7 +199,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             setLanguageSettings: (parent, args, context, info) => {
                 console.log("GQL| settings", args)
                 const { languageAddress, settings } = args.input
-                let langref = { name: '', address: languageAddress }
+                const langref = { name: '', address: languageAddress }
                 const lang = languageController.languageByRef(langref)
                 langref.name = lang.name
                 languageController.putSettings(langref, JSON.parse(settings))
@@ -219,8 +219,8 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
                 return true
             }
         },
-        
-        Subscription: {   
+
+        Subscription: {
             perspectiveAdded: {
                 subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_ADDED_TOPIC),
                 resolve: payload => payload.perspective
@@ -236,7 +236,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             linkAdded: {
                 subscribe: (parent, args, context, info) => {
                     return withFilter(
-                        () => pubsub.asyncIterator(PubSub.LINK_ADDED_TOPIC), 
+                        () => pubsub.asyncIterator(PubSub.LINK_ADDED_TOPIC),
                         (payload, args) => payload.perspective.uuid === args.perspectiveUUID
                     )(undefined, args)
                 },
@@ -244,7 +244,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             },
             linkRemoved: {
                 subscribe: (parent, args, context, info) => withFilter(
-                    () => pubsub.asyncIterator(PubSub.LINK_REMOVED_TOPIC), 
+                    () => pubsub.asyncIterator(PubSub.LINK_REMOVED_TOPIC),
                     (payload, variables) => payload.perspective.uuid === variables.perspectiveUUID
                 )(undefined, args),
                 resolve: payload => payload.link
@@ -254,7 +254,7 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
         Expression: {
             language: async (expression) => {
                 console.log("GQL EXPRESSION", expression)
-                let lang = await languageController.languageForExpression(expression.ref)
+                const lang = await languageController.languageForExpression(expression.ref)
                 lang.address = expression.ref.language.address
                 return lang
             },
