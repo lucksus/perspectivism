@@ -50,11 +50,11 @@ describe('LinkRepoController', () => {
         })
 
 
-        it('can add and get all links', async () => {
+        it('can get all links', async () => {
             const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
 
             expect(result.length).toEqual(5)
-            
+
             for(let i=0; i<5; i++) {
                 expect(result).toEqual(
                     expect.arrayContaining(
