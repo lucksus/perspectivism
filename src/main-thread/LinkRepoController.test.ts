@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import faker from 'faker'
 import type Link from '../acai/Links'
 import type { LinkQuery } from '../acai/Links'
-import { isExportDeclaration } from 'typescript'
+import temp from 'temp'
 
 function createLink(): Link {
     return {
@@ -14,7 +14,7 @@ function createLink(): Link {
     } as Link
 }
 
-const db = new PerspectivismDb('.')
+
 const agent = { did: 'did:local-test-agent' }
 const languageController = {
     getLinksAdapter: () => null
@@ -22,15 +22,15 @@ const languageController = {
 
 
 describe('LinkRepoController', () => {  
-    const linkRepoController = new LinkRepoController({db, languageController, agent})
+    let linkRepoController
     let perspective
-
-    beforeAll(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-    })
+    let allLinks
 
     beforeEach(() => {
+        let db = new PerspectivismDb(temp.track().mkdirSync())
+        linkRepoController = new LinkRepoController({db, languageController, agent})
         perspective = { uuid: uuidv4() }
+        allLinks = []
     })
 
     it('wraps links in expressions on addLink', () => {
@@ -40,25 +40,31 @@ describe('LinkRepoController', () => {
         expect(expression.data).toEqual(link)
     })
 
-    it('can add and get all links', async () => {
-        let allLinks = []
-        for(let i=0; i<5; i++) {
-            const link = createLink()
-            allLinks.push(link)
-            linkRepoController.addLink(perspective, link)
-        }
-        
-        const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
+    describe('after adding some links', () => {
+        beforeEach(() => {
+            for(let i=0; i<5; i++) {
+                const link = createLink()
+                allLinks.push(link)
+                linkRepoController.addLink(perspective, link)
+            }
+        })
 
-        expect(result.length).toEqual(5)
-        for(let i=0; i<5; i++) {
-            expect(result).toEqual(
-                expect.arrayContaining(
-                    [expect.objectContaining({data: allLinks[i]})]
+
+        it('can add and get all links', async () => {
+            const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
+
+            expect(result.length).toEqual(5)
+            
+            for(let i=0; i<5; i++) {
+                expect(result).toEqual(
+                    expect.arrayContaining(
+                        [expect.objectContaining({data: allLinks[i]})]
+                    )
                 )
-            )
-        }
+            }
+        })
     })
+
 })
 
 
