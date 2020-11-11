@@ -1,5 +1,5 @@
 import LinkRepoController from './LinkRepoController'
-const Gun = require('./Gun')
+import { PerspectivismDb } from './db'
 import { v4 as uuidv4 } from 'uuid'
 import faker from 'faker'
 import type Link from '../acai/Links'
@@ -13,7 +13,7 @@ function createLink(): Link {
     } as Link
 }
 
-const gun = Gun.init('.')
+const db = new PerspectivismDb('.')
 const agent = { did: 'did:local-test-agent' }
 const languageController = {
     getLinksAdapter: () => null
@@ -21,7 +21,7 @@ const languageController = {
 
 
 describe('LinkRepoController', () => {  
-    const linkRepoController = new LinkRepoController({gun, languageController, agent})
+    const linkRepoController = new LinkRepoController({db, languageController, agent})
     let perspective
 
     beforeAll(async () => {
