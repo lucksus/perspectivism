@@ -3,6 +3,7 @@ import { PerspectivismDb } from './db'
 import { v4 as uuidv4 } from 'uuid'
 import faker from 'faker'
 import type Link from '../acai/Links'
+import type { LinkQuery } from '../acai/Links'
 import { isExportDeclaration } from 'typescript'
 
 function createLink(): Link {
@@ -39,8 +40,24 @@ describe('LinkRepoController', () => {
         expect(expression.data).toEqual(link)
     })
 
-    it('can add and get all links', () => {
-        //linkRepoController.addLink(perspective, )
+    it('can add and get all links', async () => {
+        let allLinks = []
+        for(let i=0; i<5; i++) {
+            const link = createLink()
+            allLinks.push(link)
+            linkRepoController.addLink(perspective, link)
+        }
+        
+        const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
+
+        expect(result.length).toEqual(5)
+        for(let i=0; i<5; i++) {
+            expect(result).toEqual(
+                expect.arrayContaining(
+                    [expect.objectContaining({data: allLinks[i]})]
+                )
+            )
+        }
     })
 })
 
