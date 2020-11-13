@@ -13,7 +13,8 @@
     "start": "electron .",
     "lint": "tslint -c tslint.json \"src/main-thread/*.ts\"",
     "lint:fix": "tslint --fix -c tslint.json \"src/main-thread/*.ts\"",
-    "test": "jest"
+    "test": "jest",
+    "rebuild": "electron-rebuild -f -w serialport"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.11.5",
@@ -29,6 +30,7 @@
     "@tsconfig/svelte": "^1.0.0",
     "babel-jest": "^26.6.3",
     "electron": "^10.1.1",
+    "electron-rebuild": "^2.3.2",
     "faker": "^5.1.0",
     "mocha": "^8.2.1",
     "node-sass": "^4.14.1",
