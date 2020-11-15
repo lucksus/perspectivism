@@ -44,6 +44,9 @@ describe('LinkRepoController', () => {
         beforeEach(() => {
             for(let i=0; i<5; i++) {
                 const link = createLink()
+                if(i%2 == 0) {
+                    link.source = 'root'
+                }
                 allLinks.push(link)
                 linkRepoController.addLink(perspective, link)
             }
@@ -62,6 +65,11 @@ describe('LinkRepoController', () => {
                     )
                 )
             }
+        })
+
+        it('can get links by source', async () => {
+            const result = await linkRepoController.getLinks(perspective, {source: 'root'} as LinkQuery)
+            expect(result.length).toEqual(3)
         })
     })
 
