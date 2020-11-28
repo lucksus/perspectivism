@@ -1,23 +1,12 @@
-import lmdb from 'node-lmdb'
-import { TsJestTransformer } from 'ts-jest/dist/ts-jest-transformer';
+import low from 'lowdb'
+import FileSync from 'lowdb/adapters/FileSync'
+import path from 'path'
 
 export class PerspectivismDb {
     #db: any
-    #env: any
 
-    constructor(dbFilePath) {
-        const env = new lmdb.Env();
-        env.open({
-            path: dbFilePath,
-            mapSize: 2*1024*1024*1024, // maximum database size
-            maxDbs: 1
-        });
-        const db = env.openDbi({
-          name: "perspectivism",
-          create: true // will create if database did not exist
-        })
-    
-        this.#env = env
+    constructor(adapter) {
+        const db = low(adapter)
         this.#db = db
     }
 
@@ -38,31 +27,34 @@ export class PerspectivismDb {
     }
 
     storeLink(pUUID: String, link: object, linkName: String) {
-        let txn = this.#env.beginTxn()
-        txn.putString(this.#db, this.linkKey(pUUID, linkName), JSON.stringify([link]))
-        const allLinksRaw = txn.getString(this.#db, this.allLinksKey(pUUID))
-        let allLinks = allLinksRaw ? JSON.parse(allLinksRaw) : []
-        allLinks.push(linkName)
-        txn.putString(this.#db, this.allLinksKey(pUUID), JSON.stringify(allLinks))
-        txn.commit()
+        this.#db.set(this.linkKey(pUUID, linkName), [link])
+
+        const key = this.allLinksKey(pUUID)
+        if(!this.#db.has(key).value()) {
+            this.#db.set(key, []).write()
+        }
+
+        this.#db.get(key)
+            .push(linkName)
+            .write()
     }
 
     updateLink(pUUID: String, link: object, linkName: String) {
         const key = this.linkKey(pUUID, linkName)
-        let txn = this.#env.beginTxn()
-        const linkStatesRaw = txn.getString(this.#db, key)
-        let linkStates = linkStatesRaw ? JSON.parse(linkStatesRaw) : []
-        linkStates.push(link)
-        txn.putString(this.#db, key, JSON.stringify(linkStates))
-        txn.commit()
+
+        if(!this.#db.has(key).value()) {
+            this.storeLink(pUUID, link, linkName)
+            return
+        }
+
+        this.#db.get(key)
+            .push(link)
+            .write()
     }
 
     getLink(pUUID: String, linkName: String): object|void {
-        let txn = this.#env.beginTxn()
-        const linkStatesRaw = txn.getString(this.#db, this.linkKey(pUUID, linkName))
-        txn.abort()
-        let linkStates = linkStatesRaw ? JSON.parse(linkStatesRaw) : []
-        return linkStates.pop()
+        const key = this.linkKey(pUUID, linkName)
+        return this.#db.get(key).pop()
     }
 
     getAllLinks(pUUID: String): any[] {
@@ -80,10 +72,10 @@ export class PerspectivismDb {
     }
 
     getLinksByKey(pUUID: String, key: String): any[] {
-        let txn = this.#env.beginTxn()
-        const allLinkNamesRaw = txn.getString(this.#db, key)
-        const allLinkNames = allLinkNamesRaw ? JSON.parse(allLinkNamesRaw) : []
-        txn.abort()
+        let allLinkNames = this.#db.get(key).value()
+        if(!allLinkNames) {
+            allLinkNames = []
+        }
 
         let allLinks = []
         for(const linkName of allLinkNames) {
@@ -106,16 +98,15 @@ export class PerspectivismDb {
     }
 
     attach(key: String, linkName: String) {
-        let txn = this.#env.beginTxn()
-        const sourceLinkNamesRaw = txn.getString(this.#db, key)
-        let sourceLinkNames = sourceLinkNamesRaw ? JSON.parse(sourceLinkNamesRaw) : []
-        if(!sourceLinkNames.includes(linkName)) {
-            sourceLinkNames.push(linkName)
-            txn.putString(this.#db, key, JSON.stringify(sourceLinkNames))
-            txn.commit()
-        } else {
-            txn.abort()
+        if(!this.#db.has(key)) {
+            this.#db.set(key, []).write()
         }
+
+        if(!this.#db.get(key).includes(linkName)) {
+            this.#db.get(key)
+                .push(linkName)
+                .write()
+        } 
     }
 
     removeSource(pUUID: String, source: String, linkName: String) {
@@ -130,21 +121,13 @@ export class PerspectivismDb {
 
 
     remove(key: String, linkName: String) {
-        let txn = this.#env.beginTxn()
-        const sourceLinkNamesRaw = txn.getString(this.#db, key)
-        let sourceLinkNames = sourceLinkNamesRaw ? JSON.parse(sourceLinkNamesRaw) : []
-        if(sourceLinkNames.include(linkName)) {
-            sourceLinkNames = sourceLinkNames.filter((element)=> element !== linkName)
-            txn.putString(this.#db, key, JSON.stringify(sourceLinkNames))
-            txn.commit()
-        } else {
-            txn.abort()
-        }
+        this.#db.get(key).remove(linkName).write()
     }
     
 }
 
 export function init(dbFilePath): PerspectivismDb {
-    return new PerspectivismDb(dbFilePath)
+    const adapter = new FileSync(path.join(dbFilePath, 'db.json'))
+    return new PerspectivismDb(adapter)
 }
 

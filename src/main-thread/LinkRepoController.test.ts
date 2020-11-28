@@ -5,6 +5,7 @@ import faker from 'faker'
 import type Link from '../acai/Links'
 import type { LinkQuery } from '../acai/Links'
 import temp from 'temp'
+import Memory from 'lowdb/adapters/Memory'
 
 function createLink(): Link {
     return {
@@ -27,7 +28,7 @@ describe('LinkRepoController', () => {
     let allLinks
 
     beforeEach(() => {
-        let db = new PerspectivismDb(temp.track().mkdirSync())
+        let db = new PerspectivismDb(new Memory())
         linkRepoController = new LinkRepoController({db, languageController, agent})
         perspective = { uuid: uuidv4() }
         allLinks = []
