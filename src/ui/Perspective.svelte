@@ -503,6 +503,7 @@
         top: 30px;
         left: 0;
         right: 0;
+        height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
     }
