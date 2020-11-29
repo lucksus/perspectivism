@@ -13,7 +13,7 @@
     "start": "electron .",
     "lint": "tslint -c tslint.json \"src/main-thread/*.ts\"",
     "lint:fix": "tslint --fix -c tslint.json \"src/main-thread/*.ts\"",
-    "test": "jest",
+    "test": "tsc && jest",
     "rebuild": "electron-rebuild -f -w serialport"
   },
   "devDependencies": {
