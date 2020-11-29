@@ -11,6 +11,8 @@
     let settingsIconConstructors = new Map()
     let settingsIcons = {}
 
+    const M_SET_LANGUAGE_SETTINGS = mutation(SET_LANGUAGE_SETTINGS)
+
     getClient().query({query: LANGUAGES_WITH_SETTINGS}).then(async result => {
         languages = result.data.languages
         await checkLanguagesForSettingsIcon()
@@ -63,7 +65,7 @@
     }
 
     function updateSettings(lang) {
-      mutation(SET_LANGUAGE_SETTINGS)({variables: {
+      M_SET_LANGUAGE_SETTINGS({variables: {
         languageAddress: lang.address,
         settings: JSON.stringify(settingsIcons[lang.address].settings)
       }})

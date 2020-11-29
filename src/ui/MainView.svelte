@@ -13,6 +13,8 @@
 
 
 	let perspectives = query(PERSPECTIVES)
+	const M_ADD_PERSPECTIVE = mutation(ADD_PERSPECTIVE)
+	const M_REMOVE_PERSPECTIVE = mutation(REMOVE_PERSPECTIVE)
 
 	let collapsed = false;
 	let collapsing = false;
@@ -66,7 +68,7 @@
 		}
 
 		const name = prefix+number
-		mutation(ADD_PERSPECTIVE)({
+		M_ADD_PERSPECTIVE({
 			variables: {
 				name
 			}
@@ -78,7 +80,7 @@
 			selectedMainView.perspective = null
 		}
 
-		mutation(REMOVE_PERSPECTIVE)({
+		M_REMOVE_PERSPECTIVE({
 			variables: {
 				uuid: perspective.uuid
 			}

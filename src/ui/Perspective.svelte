@@ -19,8 +19,10 @@
     import { LANGUAGES } from './graphql_queries'
     import { linkTo2D, coordToPredicate } from './uiUtils';
 
+    const gqlClient = getClient()
+
     $: if(perspective) {
-        getClient().subscribe({
+        gqlClient.subscribe({
         query: gql`
             subscription {
                 linkAdded(perspectiveUUID: "${perspective.uuid}") {
@@ -32,7 +34,7 @@
             error: (e) => console.error(e)
         })
 
-        getClient().subscribe({
+        gqlClient.subscribe({
         query: gql`
             subscription {
                 linkRemoved(perspectiveUUID: "${perspective.uuid}") {
@@ -295,7 +297,7 @@
         constructionMenu.open(event.clientX, event.clientY)
     }
 
-    getClient().query({
+    gqlClient.query({
         query: LANGUAGES,
         variables: { filter: "expressionUI" }
     }).then( expressionUILanguages => {
@@ -327,7 +329,7 @@
     async function createExpression(lang) {
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
-            const { data } = await getClient().query({
+            const { data } = await gqlClient.query({
                 query: gql`
                 { 
                     language(address: "${lang.address}") {

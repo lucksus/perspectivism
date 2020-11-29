@@ -13,10 +13,12 @@
     import { getClient, mutation, query } from 'svelte-apollo'
 
     const dispatch = createEventDispatcher();
+    const gqlClient = getClient()
+    const M_UPDATE_PERSPECTIVE = mutation(UPDATE_PERSPECTIVE)
 
 
     if(!perspective && perspectiveId) {
-        getClient().query({
+        gqlClient.query({
             query: PERSPECTIVE,
             variables: { uuid: perspectiveId }
         }).then(p => {
@@ -33,7 +35,7 @@
     })   
 
     function save() {
-        mutation(UPDATE_PERSPECTIVE)({
+        M_UPDATE_PERSPECTIVE({
             variables: perspective
         })
         dispatch('submit', perspective.uuid)
