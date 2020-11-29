@@ -21,6 +21,17 @@ describe('PerspectivismDb', () => {
         expect(result).toEqual(obj)
     })
 
+    it('can call getLink() multiple times', () => {
+        const obj = { test: 'object' }
+        const name = 'linkName'
+        db.storeLink(pUUID, obj, name)
+
+        for(let i=0; i<3; i++) {
+            expect(db.getLink(pUUID, name)).toEqual(obj)
+        }
+        
+    })
+
     it('can getAllLinks', () => {
         const obj1 = { test: 'object1' }
         const name1 = 'linkName1'
@@ -42,6 +53,38 @@ describe('PerspectivismDb', () => {
                 name: name2,
             }
         ])
+    })
+
+    it('can getAllLinks with only one link (attached)', () => {
+        const obj1 = { test: 'object1' }
+        const name1 = 'linkName1'
+        db.storeLink(pUUID, obj1, name1)
+        db.attachSource(pUUID, 'root', name1)
+        db.attachTarget(pUUID, 'link-url', name1)
+
+        const allLinks = db.getAllLinks(pUUID)
+
+        expect(allLinks).toEqual([
+            {
+                link: obj1,
+                name: name1,
+            }
+        ])
+    })
+
+    it('can call getAllLinks() multiple times', () => {
+        const obj1 = { test: 'object1' }
+        const name1 = 'linkName1'
+        db.storeLink(pUUID, obj1, name1)
+
+        for(let i=0; i<3; i++) {
+            expect(db.getAllLinks(pUUID)).toEqual([
+                {
+                    link: obj1,
+                    name: name1,
+                }
+            ])
+        }
     })
 
     it('can getLinksBySource', () => {

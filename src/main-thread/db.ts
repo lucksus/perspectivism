@@ -54,7 +54,8 @@ export class PerspectivismDb {
 
     getLink(pUUID: String, linkName: String): object|void {
         const key = this.linkKey(pUUID, linkName)
-        return this.#db.get(key).pop().value()
+        const versions = this.#db.get(key).value()
+        return versions[versions.length-1]
     }
 
     getAllLinks(pUUID: String): any[] {
