@@ -10,6 +10,7 @@
 /src/main-thread/GraphQL.js
 /src/main-thread/PubSub.js
 /src/main-thread/db.js
+/src/main-thread/db.test.js
 /src/main-thread/LinkRepoController.test.js
 /src/**/*.js.map
 /src/languages/**/*.js
