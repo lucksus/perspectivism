@@ -98,11 +98,11 @@ export class PerspectivismDb {
     }
 
     attach(key: String, linkName: String) {
-        if(!this.#db.has(key)) {
+        if(!this.#db.has(key).value()) {
             this.#db.set(key, []).write()
         }
 
-        if(!this.#db.get(key).includes(linkName)) {
+        if(!this.#db.get(key).includes(linkName).value()) {
             this.#db.get(key)
                 .push(linkName)
                 .write()
