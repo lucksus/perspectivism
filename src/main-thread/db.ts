@@ -27,7 +27,7 @@ export class PerspectivismDb {
     }
 
     storeLink(pUUID: String, link: object, linkName: String) {
-        this.#db.set(this.linkKey(pUUID, linkName), [link])
+        this.#db.set(this.linkKey(pUUID, linkName), [link]).write()
 
         const key = this.allLinksKey(pUUID)
         if(!this.#db.has(key).value()) {
@@ -54,7 +54,7 @@ export class PerspectivismDb {
 
     getLink(pUUID: String, linkName: String): object|void {
         const key = this.linkKey(pUUID, linkName)
-        return this.#db.get(key).pop()
+        return this.#db.get(key).pop().value()
     }
 
     getAllLinks(pUUID: String): any[] {
