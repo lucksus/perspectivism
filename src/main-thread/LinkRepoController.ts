@@ -160,7 +160,7 @@ export default class LinkRepoController {
 
         if(query.source) {
             console.debug("query.source", query.source)
-            let result = this.#db.getLinksBySource(p.uuid, query.source)
+            let result = this.#db.getLinksBySource(p.uuid, query.source).map(e => e.link)
             // @ts-ignore
             if(query.target) result = result.filter(l => l.data.target === query.target)
             // @ts-ignore
@@ -174,7 +174,7 @@ export default class LinkRepoController {
         console.debug("getLinks 3")
 
         if(query.target) {
-            let result = this.#db.getLinksByTarget(p.uuid, query.target)
+            let result = this.#db.getLinksByTarget(p.uuid, query.target).map(e => e.link)
             // @ts-ignore
             if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
             return result
