@@ -1,11 +1,25 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
 import { exprRef2String, parseExprURL } from '../acai/ExpressionRef'
 import type Perspective from '../acai/Perspective'
+import type { Agent } from './Agent'
 import * as PubSub from './PubSub'
 
 const typeDefs = gql`
 type Agent {
     did: String
+}
+
+type AgentService {
+    isInitialized: Boolean
+    did: String
+    didDocument: String
+}
+
+input InitializeAgent {
+    did: String
+    didDocument: String
+    keystore: String
+    passphrase: String
 }
 
 type Icon {
@@ -57,12 +71,14 @@ type Perspective {
 
 type Query {
     hello: String
+    agent: AgentService
     links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
     expression(url: String): Expression
     language(address: String): Language
     languages(filter: String): [Language]
     perspectives: [Perspective]
     perspective(uuid: String): Perspective
+    
 }
 
 
@@ -103,6 +119,7 @@ input UpdatePerspectiveInput {
 }
 
 type Mutation {
+    initializeAgent(input: InitializeAgent): AgentService
     addPerspective(input: AddPerspectiveInput): Perspective
     updatePerspective(input: UpdatePerspectiveInput): Perspective
     removePerspective(uuid: String): Boolean
@@ -123,12 +140,20 @@ type Subscription {
 `
 
 
-function createResolvers(perspectivesController, languageController, linkRepoController) {
+function createResolvers(agent: Agent, perspectivesController, languageController, linkRepoController) {
     const pubsub = PubSub.get()
 
     return {
         Query: {
             hello: () => 'Hello world!',
+            agent: () => {
+                console.log("AgentService:", agent)
+                return {
+                    isInitialized: agent.isInitialized(),
+                    did: agent.did(),
+                    didDocument: agent.didDocument()
+                }
+            },
             perspective: (parent, args, context, info) => {
                 const { uuid } = args
                 return perspectivesController.get()[uuid]
@@ -166,6 +191,15 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
             }
         },
         Mutation: {
+            initializeAgent: (parent, args, context, info) => {
+                const { did, didDocument, keystore, passphrase } = args.input
+                agent.initialize(did, didDocument, keystore, passphrase)
+                return {
+                    isInitialized: agent.isInitialized(),
+                    did: agent.did(),
+                    didDocument: agent.didDocument()
+                }
+            },
             addLink: (parent, args, context, info) => {
                 console.log("GQL| addLink:", args)
                 const { perspectiveUUID, link } = args.input
@@ -283,8 +317,8 @@ function createResolvers(perspectivesController, languageController, linkRepoCon
 }
 
 
-export async function startServer(perspectivesController, languageController, linkRepoController) {
-    const resolvers = createResolvers(perspectivesController, languageController, linkRepoController)
+export async function startServer(agent, perspectivesController, languageController, linkRepoController) {
+    const resolvers = createResolvers(agent, perspectivesController, languageController, linkRepoController)
     const server = new ApolloServer({ typeDefs, resolvers });
     const { url, subscriptionsUrl } = await server.listen()
     return { url, subscriptionsUrl }

@@ -1,5 +1,15 @@
 import { gql } from '@apollo/client'
 
+export const AGENT = gql `
+    query agent {
+        agent {
+            isInitialized
+            did
+            didDocument
+        }
+    }
+`
+
 export const LANGUAGES = gql `
     query languages($filter: String = ""){
         languages(filter: $filter) {

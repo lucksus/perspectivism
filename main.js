@@ -7,12 +7,14 @@ const expressApp = express()
 const Config = require('./src/main-thread/Config')
 const Db = require('./src/main-thread/db')
 const IPFS = require('./src/main-thread/IPFS')
+const Agent = require('./src/main-thread/Agent')
 const PerspectivesController = require('./src/main-thread/PerspectivesController')
 const LinkRepoController = require('./src/main-thread/LinkRepoController')
 const LanguageController = require('./src/main-thread/LanguageController')
 const GraphQL = require('./src/main-thread/GraphQL')
 
 Config.init()
+const agentService = Agent.init(Config.rootConfigPath)
 const db = Db.init(Config.dataPath)
 IPFS.init().then((IPFS) => {
   const agent = { did: 'did:local-test-agent' }
@@ -20,7 +22,7 @@ IPFS.init().then((IPFS) => {
   const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
   const languageController = LanguageController.init(context)
   const linkRepoController = LinkRepoController.init({db, languageController, agent})
-  GraphQL.startServer(perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
+  GraphQL.startServer(agentService, perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
     console.log(`🚀  GraphQL Server ready at ${url}`)
     console.log(`🚀  GraphQL subscriptions ready at ${subscriptionsUrl}`)
   })
