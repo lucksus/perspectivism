@@ -10,6 +10,16 @@ export const AGENT = gql `
     }
 `
 
+export const INITIALIZE_AGENT = gql `
+    mutation initializeAgent($did: String, $didDocument: String, $keystore: String, $passphrase: String) {
+        initializeAgent(input: { did: $did, didDocument: $didDocument, keystore: $keystore, passphrase: $passphrase }) {
+            isInitialized
+            did
+            didDocument
+        }
+    }
+`
+
 export const LANGUAGES = gql `
     query languages($filter: String = ""){
         languages(filter: $filter) {

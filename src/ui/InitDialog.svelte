@@ -7,7 +7,21 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import { query, mutation, getClient } from "svelte-apollo";
-    import { AGENT } from './graphql_queries';
+    import { AGENT, INITIALIZE_AGENT } from './graphql_queries';
+
+    const QGL_CLIENT = getClient()
+    const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
+
+    function check() {
+        QGL_CLIENT.query({ query: AGENT }).then( agent => {
+            console.log(agent)
+            if(!agent.isInitialized) {
+                dialog.open()
+            } else {
+                dialog.close()
+            }
+        })
+    }
 
 	let dialog;
 	let did;
@@ -16,7 +30,14 @@
 	let passphrase
 
 	function submitDID() {
-		dialog.close()
+		GQL_INITIALIZE_AGENT({
+            variables: {
+                did,
+                didDocument: JSON.stringify(didDocument),
+                keystore,
+                passphrase
+            }
+        }).then(() => check())
 	}
 
 	function resolveDID() {
@@ -31,15 +52,10 @@
 		//let wallet = didWallet.create(keystore)
 		//wallet.unlock(passphrase)
 		//keystoreUnlocked = wallet
-	}
-    getClient().query({ query: AGENT }).then( agent => {
-            console.log(agent)
-            if(!agent.isInitialized)
-                dialog.open()
-        })
-
+    }
+    
 	afterUpdate(() => {
-        
+        check()
 	})
 </script>
 
