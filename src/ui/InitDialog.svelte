@@ -13,9 +13,9 @@
     const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
 
     function check() {
-        QGL_CLIENT.query({ query: AGENT }).then( agent => {
-            console.log(agent)
-            if(!agent.isInitialized) {
+        QGL_CLIENT.query({ query: AGENT }).then( result => {
+            console.log(result)
+            if(!result.data.agent.isInitialized) {
                 dialog.open()
             } else {
                 dialog.close()
