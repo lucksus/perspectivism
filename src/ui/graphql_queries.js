@@ -4,6 +4,7 @@ export const AGENT = gql `
     query agent {
         agent {
             isInitialized
+            isUnlocked
             did
             didDocument
         }
@@ -14,8 +15,20 @@ export const INITIALIZE_AGENT = gql `
     mutation initializeAgent($did: String, $didDocument: String, $keystore: String, $passphrase: String) {
         initializeAgent(input: { did: $did, didDocument: $didDocument, keystore: $keystore, passphrase: $passphrase }) {
             isInitialized
+            isUnlocked
             did
             didDocument
+        }
+    }
+`
+
+export const UNLOCK_AGENT = gql `
+    mutation unlockAgent($passphrase: String) {
+        unlockAgent(passphrase: $passphrase) {
+            isInitialized
+            isUnlocked
+            did
+            error
         }
     }
 `

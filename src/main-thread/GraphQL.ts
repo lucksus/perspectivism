@@ -1,7 +1,6 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
 import { exprRef2String, parseExprURL } from '../acai/ExpressionRef'
 import type Perspective from '../acai/Perspective'
-import type { Agent } from './Agent'
 import * as PubSub from './PubSub'
 
 const typeDefs = gql`
@@ -11,8 +10,10 @@ type Agent {
 
 type AgentService {
     isInitialized: Boolean
+    isUnlocked: Boolean
     did: String
     didDocument: String
+    error: String
 }
 
 input InitializeAgent {
@@ -120,6 +121,7 @@ input UpdatePerspectiveInput {
 
 type Mutation {
     initializeAgent(input: InitializeAgent): AgentService
+    unlockAgent(passphrase: String): AgentService
     addPerspective(input: AddPerspectiveInput): Perspective
     updatePerspective(input: UpdatePerspectiveInput): Perspective
     removePerspective(uuid: String): Boolean
@@ -140,19 +142,15 @@ type Subscription {
 `
 
 
-function createResolvers(agent: Agent, perspectivesController, languageController, linkRepoController) {
+function createResolvers(agent, perspectivesController, languageController, linkRepoController) {
     const pubsub = PubSub.get()
 
     return {
         Query: {
             hello: () => 'Hello world!',
             agent: () => {
-                console.log("AgentService:", agent)
-                return {
-                    isInitialized: agent.isInitialized(),
-                    did: agent.did(),
-                    didDocument: agent.didDocument()
-                }
+                console.log("GQL agent - AgentService:", agent)
+                return agent.dump()
             },
             perspective: (parent, args, context, info) => {
                 const { uuid } = args
@@ -194,11 +192,23 @@ function createResolvers(agent: Agent, perspectivesController, languageControlle
             initializeAgent: (parent, args, context, info) => {
                 const { did, didDocument, keystore, passphrase } = args.input
                 agent.initialize(did, didDocument, keystore, passphrase)
-                return {
-                    isInitialized: agent.isInitialized(),
-                    did: agent.did(),
-                    didDocument: agent.didDocument()
+                return agent.dump()
+            },
+            unlockAgent:  (parent, args, context, info) => {
+                let failed = false
+                try {
+                    agent.unlock(args.passphrase)
+                } catch(e) {
+                    failed = true
                 }
+
+                let dump = agent.dump()
+
+                if(failed) {
+                    dump.error = "Wrong passphrase"
+                }
+                
+                return dump
             },
             addLink: (parent, args, context, info) => {
                 console.log("GQL| addLink:", args)

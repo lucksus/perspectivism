@@ -7,27 +7,35 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import { query, mutation, getClient } from "svelte-apollo";
-    import { AGENT, INITIALIZE_AGENT } from './graphql_queries';
+    import { AGENT, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
 
     const QGL_CLIENT = getClient()
     const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
+    const GQL_UNLOCK_AGENT = mutation(UNLOCK_AGENT)
 
     function check() {
         QGL_CLIENT.query({ query: AGENT }).then( result => {
-            console.log(result)
+            console.log("check:", result)
             if(!result.data.agent.isInitialized) {
-                dialog.open()
+                initDialog.open()
             } else {
-                dialog.close()
+                initDialog.close()
+                if(!result.data.agent.isUnlocked) {
+                    unlockDialog.open()
+                } else {
+                    unlockDialog.close()
+                }
             }
         })
     }
 
-	let dialog;
+    let initDialog;
+    let unlockDialog;
 	let did;
 	let didDocument;
 	let keystore;
-	let passphrase
+    let passphrase
+    let unlockError
 
 	function submitDID() {
 		GQL_INITIALIZE_AGENT({
@@ -49,18 +57,23 @@
 	}
 
 	function unlockKeystore() {
-		//let wallet = didWallet.create(keystore)
-		//wallet.unlock(passphrase)
-		//keystoreUnlocked = wallet
+		GQL_UNLOCK_AGENT({ variables: { passphrase }}).then((result) => {
+            console.log("unlock response:", result)
+            unlockError = result.data.unlockAgent.error
+            passphrase = ""
+            if(result.data.unlockAgent.isUnlocked) {
+                unlockDialog.close()
+            } else {
+                unlockDialog.open()
+            }
+        })
     }
     
-	afterUpdate(() => {
-        check()
-	})
+    check()
 </script>
 
 <Dialog
-    bind:this={dialog}
+    bind:this={initDialog}
     aria-labelledby="dialog-title"
     aria-describedby="dialog-content"
 >
@@ -131,3 +144,31 @@
         </Button>
     </Actions>
 </Dialog>
+
+<Dialog bind:this={unlockDialog}>
+    <Title id="dialog-title">Unlock Agent Keystore</Title>
+    <Content>
+        <Textfield fullwidth lineRipple={false} label="Keystore">
+            <Input bind:value={passphrase} id="input-did" type="password" aria-controls="unlock-helper-text" aria-describedby="unlock-helper-text" />
+            <FloatingLabel for="input-did">Passphrase</FloatingLabel>
+            <LineRipple />
+        </Textfield>
+        <HelperText id="unlock-helper-text">Please enter the passphrase for you keystore</HelperText>
+        {#if unlockError}
+            <p>
+            <div class="error">{unlockError}</div>    
+        {/if}
+    </Content>
+    
+    <Actions>
+        <Button on:click={unlockKeystore}>
+            <Label>Unlock</Label>
+        </Button>
+    </Actions>
+</Dialog>
+
+<style>
+    .error {
+        color: red;
+    }
+</style>

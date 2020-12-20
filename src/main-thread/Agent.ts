@@ -12,35 +12,38 @@ export class Agent {
         this.#file = path.join(rootConfigPath, "agent.json")
     }
 
-    did() {
-        return this.#did
-    }
-
-    didDocument() {
-        return this.#didDocument
-    }
-
     initialize(did, didDocument, keystore, password) {
         this.#did = did
         this.#didDocument = didDocument
+
+        console.debug("Creating wallet...")
         this.#wallet = didWallet.create(keystore)
-        // @ts-ignore
-        this.#wallet.unlock(password)
+        console.debug("done.")
+
+        console.debug("Unlocking wallet...")
+        try {
+            // @ts-ignore
+            this.#wallet.unlock(password)
+        } catch(e) {
+            console.error(e)
+            return
+        }
+        
+        console.debug("done.")
+
+        console.debug("Saving wallet...")
         this.save(password)
+        console.debug("done.")
     }
 
     isInitialized() {
-        if(!fs.existsSync(this.#file))
-            return false
-
-        this.load()
-
-        return true
+        return fs.existsSync(this.#file)
     }
 
     isUnlocked() {
         // @ts-ignore
-        return this.#wallet?.keys
+        const keys = this.#wallet.keys ? true : false
+        return keys
     }
 
     unlock(password) {
@@ -66,15 +69,31 @@ export class Agent {
     }
 
     load() {
+        if(!this.isInitialized()) return
+
         const dump = JSON.parse(fs.readFileSync(this.#file).toString())
 
         this.#did = dump.did
         this.#didDocument = dump.didDocument
         this.#wallet = didWallet.create(dump.keystore)
     }
+
+    dump() {
+        const isInitialized = this.isInitialized()
+        // @ts-ignore
+        const isUnlocked = this.#wallet.keys ? true : false
+        const dump = {
+            isInitialized,
+            isUnlocked,
+            did: this.#did,
+            didDocument: this.#didDocument
+        }
+        return dump
+    }
 }
 
 export function init(rootConfigPath: string): Agent {
     const agent = new Agent(rootConfigPath)
+    agent.load()
     return agent
 }
