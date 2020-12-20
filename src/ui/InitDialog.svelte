@@ -21,6 +21,7 @@
             } else {
                 initDialog.close()
                 if(!result.data.agent.isUnlocked) {
+                    did = result.data.agent.did
                     unlockDialog.open()
                 } else {
                     unlockDialog.close()
@@ -148,6 +149,7 @@
 <Dialog bind:this={unlockDialog}>
     <Title id="dialog-title">Unlock Agent Keystore</Title>
     <Content>
+        <span>DID:</span><span>{did}</span>
         <Textfield fullwidth lineRipple={false} label="Keystore">
             <Input bind:value={passphrase} id="input-did" type="password" aria-controls="unlock-helper-text" aria-describedby="unlock-helper-text" />
             <FloatingLabel for="input-did">Passphrase</FloatingLabel>
