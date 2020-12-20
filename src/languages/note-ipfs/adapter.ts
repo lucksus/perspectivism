@@ -40,13 +40,7 @@ export default class Adapter implements ExpressionAdapter {
 
         const fileString = uint8ArrayConcat(chunks).toString();
         const fileJson = JSON.parse(fileString)
-        const expression = {
-            author: new Agent(fileJson.agent),
-            timestamp: fileJson.timestamp,
-            data: fileJson.data
-        };
-
-        return expression
+        return fileJson
 
     }
 }
