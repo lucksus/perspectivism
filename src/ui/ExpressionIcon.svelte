@@ -87,7 +87,7 @@
         }
     }
 
-    $: if(!$queryResult.loading) {
+    $: if(!$queryResult.loading && $queryResult.data) {
         expression = $queryResult.data.expression
         customElementName = iconComponentName(expression.language.address)
     }
