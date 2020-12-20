@@ -158,15 +158,15 @@ export class LanguageController {
             // Ok, first we assume its a PublicSharing put adapter...
             // @ts-ignore
             address = await putAdapter.createPublic(content)
-        } catch(e) {
+        } catch(e1) {
             try {
                 // ...and if it's not, let's try to treat it like a
                 // ReadOnlyLangauge..
                 // @ts-ignore
                 address = await putAdapter.addressOf(content)
-            } catch(e) {
+            } catch(e2) {
                 // If both don't work, we don't know what to do with this put adapter :/
-                throw new Error(`Incompatible putAdapter in Languge ${JSON.stringify(lang)}\nPutAdapter: ${Object.keys(putAdapter)}`)
+                throw new Error(`Incompatible putAdapter in Languge ${JSON.stringify(lang)}\nPutAdapter: ${Object.keys(putAdapter)}\nError was: ${e1.toString()}\nand: ${e2.toString()}`)
             }
         }
 
