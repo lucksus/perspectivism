@@ -12,12 +12,17 @@ const PerspectivesController = require('./src/main-thread/PerspectivesController
 const LinkRepoController = require('./src/main-thread/LinkRepoController')
 const LanguageController = require('./src/main-thread/LanguageController')
 const GraphQL = require('./src/main-thread/GraphQL')
+const DIDResolver = require('./src/main-thread/DIDs')
+const Signatures = require('./src/main-thread/Signatures')
 
 Config.init()
 const agent = Agent.init(Config.rootConfigPath)
 const db = Db.init(Config.dataPath)
+const didResolver = DIDResolver.init(Config.dataPath)
+const signatures = Signatures.init(didResolver)
+
 IPFS.init().then((IPFS) => {
-  const context = { agent, IPFS }
+  const context = { agent, IPFS, signatures }
   const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
   const languageController = LanguageController.init(context)
   const linkRepoController = LinkRepoController.init({db, languageController, agent})

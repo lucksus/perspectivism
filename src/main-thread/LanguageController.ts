@@ -174,7 +174,21 @@ export class LanguageController {
     }
 
     async getExpression(ref: ExpressionRef): Promise<void | Expression> {
-        return this.languageForExpression(ref).expressionAdapter.get(ref.expression)
+        const expr = await this.languageForExpression(ref).expressionAdapter.get(ref.expression)
+        if(expr) {
+            try{
+                if(! await this.#context.signatures.verify(expr)) {
+                    console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
+                } else {
+                    console.debug("Valid expr:", ref)
+                }
+            } catch(e) {
+                console.error("Error trying to verify expression signature:", e)
+                console.error("For expression:", expr)
+            }
+            
+        }
+        return expr
     }
 
     interact(expression: ExpressionRef, interaction: InteractionCall) {

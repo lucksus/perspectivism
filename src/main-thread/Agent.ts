@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import didWallet from '@transmute/did-wallet'
 import Expression, { ExpressionProof } from '../acai/Expression';
 import secp256k1 from 'secp256k1'
-import sha256 from 'sha256'
+
+import { Signatures } from './Signatures';
 
 
 export default class Agent {
@@ -26,10 +27,8 @@ export default class Agent {
         }
 
         const timestamp = new Date().toString()
-        const signaturePayload = this.buildSignaturePayload(data, timestamp)
-        const payloadBuffer = Buffer.from(signaturePayload)
-        const payloadBytes = Uint8Array.from(sha256(Uint8Array.from(payloadBuffer), { asBytes: true }))
-
+        const payloadBytes = Signatures.buildMessage(data, timestamp)
+        
         const key = this.getSigningKey()
         const privKey = Uint8Array.from(Buffer.from(key.privateKey, key.encoding))
         
@@ -61,11 +60,6 @@ export default class Agent {
         const key = keys[0]
         console.log(key)
         return key
-    }
-
-    buildSignaturePayload(data: any, timestamp: string): string {
-        const payload = { data, timestamp}
-        return JSON.stringify(payload)
     }
 
     initialize(did, didDocument, keystore, password) {
