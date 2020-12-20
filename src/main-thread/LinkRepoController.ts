@@ -3,7 +3,7 @@ import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
 import type Expression from "../acai/Expression";
-import type Agent from "../acai/Agent";
+import type Agent from "./Agent";
 import type { LanguageController } from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import * as PubSub from './PubSub'
@@ -22,11 +22,7 @@ export default class LinkRepoController {
     }
 
     linkToExpression(link: Link): Expression {
-        return {
-            author: this.#agent,
-            timestamp: new Date().toString(),
-            data: link
-        }
+        return this.#agent.createSignedExpression(link)
     }
 
     ensureLinkExpression(maybeLink: any): Expression {

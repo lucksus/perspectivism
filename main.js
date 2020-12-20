@@ -14,15 +14,14 @@ const LanguageController = require('./src/main-thread/LanguageController')
 const GraphQL = require('./src/main-thread/GraphQL')
 
 Config.init()
-const agentService = Agent.init(Config.rootConfigPath)
+const agent = Agent.init(Config.rootConfigPath)
 const db = Db.init(Config.dataPath)
 IPFS.init().then((IPFS) => {
-  const agent = { did: 'did:local-test-agent' }
   const context = { agent, IPFS }
   const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
   const languageController = LanguageController.init(context)
   const linkRepoController = LinkRepoController.init({db, languageController, agent})
-  GraphQL.startServer(agentService, perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
+  GraphQL.startServer(agent, perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
     console.log(`🚀  GraphQL Server ready at ${url}`)
     console.log(`🚀  GraphQL subscriptions ready at ${subscriptionsUrl}`)
   })

@@ -1,7 +1,7 @@
-import type Agent from "./Agent";
+import type AgentService from "./AgentService";
 
 export default interface LanguageContext {
-    agent: Agent;
+    agent: AgentService;
     IPFS: IPFSNode;
     storageDirectory: string;
     customSettings: object;

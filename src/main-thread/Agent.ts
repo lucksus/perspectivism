@@ -1,8 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import didWallet from '@transmute/did-wallet'
+import Expression, { ExpressionProof } from '../acai/Expression';
+import secp256k1 from 'secp256k1'
+import sha256 from 'sha256'
 
-export class Agent {
+
+export default class Agent {
     #did: string
     #didDocument: object
     #wallet: object
@@ -10,6 +14,58 @@ export class Agent {
 
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
+    }
+
+    get did() {
+        return this.#did
+    }
+
+    createSignedExpression(data: any): Expression {
+        if(!this.isUnlocked()) {
+            throw "Can't sign with locked keystore"
+        }
+
+        const timestamp = new Date().toString()
+        const signaturePayload = this.buildSignaturePayload(data, timestamp)
+        const payloadBuffer = Buffer.from(signaturePayload)
+        const payloadBytes = Uint8Array.from(sha256(Uint8Array.from(payloadBuffer), { asBytes: true }))
+
+        const key = this.getSigningKey()
+        const privKey = Uint8Array.from(Buffer.from(key.privateKey, key.encoding))
+        
+        const sigObj = secp256k1.ecdsaSign(payloadBytes, privKey)
+        const sigBuffer = Buffer.from(sigObj.signature)
+        const sigHex = sigBuffer.toString('hex')
+
+        const signedExpresssion = {
+            author: { did: this.#did },
+            timestamp,
+            data,
+            proof: new ExpressionProof(sigHex, `${this.#did}#primary`)
+        } as Expression
+
+        console.debug("Signed Expression:", signedExpresssion)
+        return signedExpresssion
+    }
+
+    private getSigningKey() {
+        // @ts-ignore
+        const keys = this.#wallet.extractByTags(["#primary"])
+        if(keys.length === 0) {
+            throw "No '#primary' key found in keystore. Abort signing."
+        }
+        if(keys.length > 1) {
+            throw "Multiple '#primary' keys found in keystore. Abort signing."
+        }
+
+        const key = keys[0]
+        console.log(key)
+        return key
+    }
+
+    buildSignaturePayload(data: any, timestamp: string): string {
+        const payload = { data, timestamp}
+        return JSON.stringify(payload)
     }
 
     initialize(did, didDocument, keystore, password) {
