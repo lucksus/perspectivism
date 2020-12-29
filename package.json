@@ -64,10 +64,12 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
+    "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@smui/dialog": "^1.0.0",
     "apollo-link-electron": "file:../apollo-link-electron",
     "apollo-server": "^2.18.2",
     "electron-graphql": "^0.2.1",
+    "electron-root-path": "^1.0.16",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "graphql": "^15.3.0",
