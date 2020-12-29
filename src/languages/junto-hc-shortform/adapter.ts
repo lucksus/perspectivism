@@ -4,6 +4,9 @@ import type Expression from '../../acai/Expression'
 import type { ExpressionAdapter, GetByAuthorAdapter, PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { default as HolochainLanguageDelegate, HolochainService } from "../../main-thread/Holochain";
+import DNA from './dna'
+
+const DNA_NICK = "junto-shortform"
 
 class ShortFormPutAdapter implements PublicSharing {
     #shortFormDNA: HolochainLanguageDelegate
@@ -23,22 +26,14 @@ class ShortFormPutAdapter implements PublicSharing {
 }
 
 export default class ShortFormAdapter implements ExpressionAdapter {
-    #holochainService: HolochainService
     #shortFormDNA: HolochainLanguageDelegate
-    #shortFormDNAHash = "uhCkkG1yasNsvqExuBZkr35GXAQ424MeM5S8FBUALXSHeqmVORiE6"
 
     putAdapter: PublicSharing
 
     constructor(context: LanguageContext) {
-        //@ts-ignore
-        this.#holochainService = context.customSettings.holochainService ? context.customSettings.holochainService : undefined;
-        if (this.#holochainService != undefined) {
-            this.#shortFormDNA = this.#holochainService.getDelegateForLanguage(this.#shortFormDNAHash);
-        };
-
-        //@ts-ignore
-        context.customSettings.shortFormDNA = this.#shortFormDNA;
-
+        const Holochain = context.Holochain as HolochainLanguageDelegate
+        Holochain.registerDNA(DNA, DNA_NICK)
+        this.#shortFormDNA = Holochain
         this.putAdapter = new ShortFormPutAdapter(context)
     }
 

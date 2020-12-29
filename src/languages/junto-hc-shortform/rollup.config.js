@@ -6,6 +6,7 @@ import sveltePreprocess from 'svelte-preprocess';
 import postcss from "rollup-plugin-postcss";
 import { string } from 'rollup-plugin-string'
 import json from '@rollup/plugin-json';
+import image from '@rollup/plugin-image';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -58,7 +59,8 @@ export default {
 			  }]
 			]
 		  }),
-		json()
+		json(),
+		image()
 	],
 	watch: {
 		clearScreen: false
