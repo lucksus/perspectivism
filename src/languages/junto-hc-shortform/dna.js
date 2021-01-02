@@ -1,6 +1,4 @@
-import dna from './shortform.png'
+import dna from './shortform.dna.gz'
 
-const omit = "data:image/png;base64,".length
-const cropped = dna.substring(omit)
-export const DNA = Buffer.from(cropped, 'base64')
+export const DNA = Buffer.from(dna, 'base64')
 export const DNA_NICK = "junto-shortform"
