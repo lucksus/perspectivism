@@ -46,6 +46,7 @@ export class HolochainService {
 
         this.#dataPath = dataPath
         this.#db = low(dbAdapter)
+        this.#db.defaults({pubKeys: []}).write()
 
         const holochainAdminPort = 1337
         process.env.PATH = `${rootPath}:${process.env.PATH}`
@@ -71,11 +72,15 @@ export class HolochainService {
 
     async pubKeyForLanguage(lang: string): Promise<AgentPubKey> {
         const alreadyExisting = this.#db.get('pubKeys').find({lang}).value()
-        if(alreadyExisting)
-            return alreadyExisting
-        else {
+        if(alreadyExisting) {
+            console.debug("Found existing pubKey entry", alreadyExisting, "for language:", lang)
+            const pubKey = Buffer.from(alreadyExisting.pubKey.data)
+            console.debug("Found existing pubKey", pubKey, "for language:", lang)
+            return pubKey
+        } else {
             const pubKey = await this.#adminWebsocket.generateAgentPubKey()
             this.#db.get('pubKeys').push({lang, pubKey}).write()
+            console.debug("Created new pubKey", pubKey, "for language", lang)
             return pubKey
         }
     }
