@@ -5,18 +5,15 @@ import * as fs from 'fs';
 export const rootConfigPath = path.join(app.getPath('appData'), 'Perspectivism')
 export const dataPath = path.join(rootConfigPath, 'data')
 export const languagesPath = path.join(rootConfigPath, 'languages')
+export const holochainPath = path.join(rootConfigPath, 'holochain')
+export const holochainConfigPath = path.join(holochainPath, 'config')
+export const holochainDataPath = path.join(holochainPath, 'data')
 
 export function init() {
-    if(!fs.existsSync(rootConfigPath)) {
-        fs.mkdirSync(rootConfigPath)
-    }
-
-    if(!fs.existsSync(dataPath)) {
-        fs.mkdirSync(dataPath)
-    }
-
-    if(!fs.existsSync(languagesPath)) {
-        fs.mkdirSync(languagesPath)
+    const dirs = [rootConfigPath, dataPath, languagesPath, holochainPath, holochainConfigPath, holochainDataPath]
+    for(const path of dirs)
+    if(!fs.existsSync(path)) {
+        fs.mkdirSync(path)
     }
 }
 
