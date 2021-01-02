@@ -86,18 +86,18 @@ export class HolochainService {
     }
 
     async ensureInstallDNAforLanguage(lang: string, dnas: Array<Dna>) {
+        await this.#ready
         let installed
 
         // 1. install app
         try {
-            await this.#ready
             console.debug("HolochainService: Installing DNAs for language", lang)
             //console.debug(dnaFile)
             //let installedCellIds = await this.#adminWebsocket.listCellIds()
             //console.debug("HolochainService: Installed cells before:", installedCellIds)
             //const cellId = HolochainService.dnaID(lang, nick)
 
-            this.#adminWebsocket.installApp({
+            await this.#adminWebsocket.installApp({
                 agent_key: await this.pubKeyForLanguage(lang),
                 installed_app_id: lang,
                 dnas: dnas.map((dna) => {
@@ -141,6 +141,7 @@ export class HolochainService {
     }
 
     async callZomeFunction(lang: string, dna_nick: string, zome_name: string, fn_name: string, payload: object): Promise<any> {
+        await this.#ready
         const installed_app_id = lang
         console.debug("HolochainService.callZomefunction: getting info for app:", installed_app_id)
         const infoResult = await this.#appWebsocket.appInfo({installed_app_id})
