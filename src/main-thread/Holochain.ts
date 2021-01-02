@@ -169,7 +169,7 @@ export class HolochainService {
                 zome_name,
                 fn_name,
                 provenance: await this.pubKeyForLanguage(lang),
-                payload
+                payload: JSON.stringify(payload)
             })
             console.debug("HolochainService zome function result:", result)
             return result
