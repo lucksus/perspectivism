@@ -3,14 +3,14 @@ import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
 import type Expression from "../acai/Expression";
-import type Agent from "./Agent";
+import type AgentService from "./AgentService";
 import type { LanguageController } from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import * as PubSub from './PubSub'
 
 export default class LinkRepoController {
     #db: any;
-    #agent: Agent;
+    #agent: AgentService;
     #languageController: LanguageController
     #pubsub: any
 
