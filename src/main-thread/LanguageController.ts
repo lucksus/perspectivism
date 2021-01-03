@@ -2,17 +2,16 @@ import type Expression from '../acai/Expression';
 import ExpressionRef from '../acai/ExpressionRef';
 import type Language from '../acai/Language'
 import type { LinksAdapter } from '../acai/Language'
-import type { InteractionCall, PublicSharing } from '../acai/Language'
+import type { InteractionCall } from '../acai/Language'
 import type LanguageContext from '../acai/LanguageContext';
 import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
-import { ipcMain } from 'electron'
 import * as Config from './Config'
-import type Address from '../acai/Address';
 import type { HolochainService } from './Holochain';
+import type AgentService from './AgentService'
 
 const builtInLanguages = [
     'note-ipfs',
@@ -54,10 +53,13 @@ export class LanguageController {
             const Holochain = holochainService.getDelegateForLanguage(hash)
             const language = create({...context, customSettings, storageDirectory, Holochain})
 
-
+            let isAgentLanguage = false
             Object.keys(aliases).forEach(alias => {
                 if(language.name === aliases[alias]) {
                     aliases[alias] = hash
+                    if(alias === 'did') {
+                        isAgentLanguage = true
+                    }
                 }
             })
 
@@ -71,6 +73,10 @@ export class LanguageController {
 
             this.#languages.set(hash, language)
             this.#languageConstructors.set(hash, create)
+
+            if(isAgentLanguage) {
+                ((context as LanguageContext).agent as AgentService).setAgentLanguage(language)
+            }
         })
     }
 

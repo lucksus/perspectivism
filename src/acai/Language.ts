@@ -12,6 +12,9 @@ export default interface Language {
     // by address and putting an expression
     readonly expressionAdapter?: ExpressionAdapter;
 
+    // Implementation of a Language that defines Agent Expressions
+    readonly agentAdapter?: AgentAdapter;
+
     // Optional adapter for getting Expressions by author
     readonly getByAuthorAdapter?: GetByAuthorAdapter;
     // Optional adapter for getting all Expressions

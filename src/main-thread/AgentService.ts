@@ -6,6 +6,7 @@ import secp256k1 from 'secp256k1'
 
 import { Signatures } from './Signatures';
 import Agent from '../acai/Agent';
+import type Language from '../acai/Language';
 
 
 export default class AgentService {
@@ -14,6 +15,7 @@ export default class AgentService {
     #wallet: object
     #file: string
     #agent: Agent
+    #agentLanguage: Language
 
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
@@ -55,6 +57,27 @@ export default class AgentService {
 
     updateAgent(a: Agent) {
         this.#agent = a
+        this.storeAgentProfile()
+    }
+
+    setAgentLanguage(lang: Language) {
+        if(!lang?.agentAdapter) {
+            console.error("AgentService ERROR: Not an AgentLanguage:", lang)
+            return
+        }
+
+        this.#agentLanguage = lang
+        this.storeAgentProfile()
+    }
+
+    storeAgentProfile() {
+        if(!this.#agentLanguage) {
+            console.error("AgentSergice ERROR: Can't store Agent profile. No AgentLanguage installed.")
+            return
+        }
+
+        if(this.#agent?.did)
+            this.#agentLanguage.agentAdapter.setProfile(this.#agent)
     }
 
     private getSigningKey() {
@@ -110,6 +133,7 @@ export default class AgentService {
     unlock(password) {
         // @ts-ignore
         this.#wallet.unlock(password)
+        this.storeAgentProfile()
     }
 
     save(password) {
