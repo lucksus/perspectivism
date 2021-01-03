@@ -61,7 +61,11 @@ export default {
 			browser: true,
 			dedupe: ['svelte']
 		}),
-		commonjs(),
+		commonjs({
+			dynamicRequireTargets: [
+				'./node_modules/blake2b'
+			]
+		}),
 		postcss({
 			extract: true,
 			minimize: true,

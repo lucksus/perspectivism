@@ -5,7 +5,7 @@ import type { ExpressionAdapter, GetByAuthorAdapter, PublicSharing } from '../..
 import type LanguageContext from '../../acai/LanguageContext'
 import type { default as HolochainLanguageDelegate, HolochainService } from "../../main-thread/Holochain";
 import { DNA_NICK } from './dna'
-//import blake2b from 'blake2b'
+import blake2b from 'blake2b'
 
 class ShortFormPutAdapter implements PublicSharing {
     #shortFormDNA: HolochainLanguageDelegate
@@ -36,9 +36,9 @@ export default class ShortFormAdapter implements ExpressionAdapter {
     async get(address: Address): Promise<void | Expression> {
         console.log("Getting at address", address);
         var output = new Uint8Array(35)
-        //let hash = blake2b(output.length).update(address).digest();
-        //console.log("Getting hash", hash);
-        //console.log("Hash to string", hash.toString('hex'));
+        let hash = blake2b(output.length).update(address).digest();
+        console.log("Getting hash", hash);
+        console.log("Hash to string", hash.toString('hex'));
         let expression = await this.#shortFormDNA.call(DNA_NICK, "shortform", "get_expression_by_address", { address });
 
         if (expression.entry.Present != undefined) {
