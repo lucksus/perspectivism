@@ -1,5 +1,4 @@
 import type Address from '../../acai/Address'
-import Agent from '../../acai/Agent'
 import type Expression from '../../acai/Expression'
 import type { ExpressionAdapter, PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
