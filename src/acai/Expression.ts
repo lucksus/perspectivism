@@ -1,4 +1,4 @@
-import type Agent from './Agent'
+import Agent from './Agent'
 
 export default class Expression {
     author: Agent;
@@ -7,7 +7,7 @@ export default class Expression {
     proof: ExpressionProof;
 
     constructor() {
-        this.author = {did: "anonymous"}
+        this.author = new Agent("anonymous")
         this.timestamp = "never"
         this.data = {}
     }
