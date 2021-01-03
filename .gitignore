@@ -22,3 +22,6 @@
 /src/languages/**/build
 /src/languages/**/node_modules
 /src/stores/LinksStore.js
+
+holochain
+lair-keystore
