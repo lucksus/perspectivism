@@ -6,6 +6,7 @@ const expressApp = express()
 
 const Config = require('./src/main-thread/Config')
 const Db = require('./src/main-thread/db')
+const Holochain = require('./src/main-thread/Holochain')
 const IPFS = require('./src/main-thread/IPFS')
 const Agent = require('./src/main-thread/Agent')
 const PerspectivesController = require('./src/main-thread/PerspectivesController')
@@ -16,6 +17,7 @@ const DIDResolver = require('./src/main-thread/DIDs')
 const Signatures = require('./src/main-thread/Signatures')
 
 Config.init()
+const holochain = Holochain.init(Config.holochainConfigPath, Config.holochainDataPath)
 const agent = Agent.init(Config.rootConfigPath)
 const db = Db.init(Config.dataPath)
 const didResolver = DIDResolver.init(Config.dataPath)
@@ -24,7 +26,7 @@ const signatures = Signatures.init(didResolver)
 IPFS.init().then((IPFS) => {
   const context = { agent, IPFS, signatures }
   const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
-  const languageController = LanguageController.init(context)
+  const languageController = LanguageController.init(context, holochain)
   const linkRepoController = LinkRepoController.init({db, languageController, agent})
   GraphQL.startServer(agent, perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
     console.log(`🚀  GraphQL Server ready at ${url}`)

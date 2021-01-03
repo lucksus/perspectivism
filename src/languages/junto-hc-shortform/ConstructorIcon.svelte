@@ -70,7 +70,7 @@
     <div><input bind:value={expData.body}></div>
     <div bind:this={picker}></div>
     <div>
-    <button on:click={()=>commitExpression(expData)}>Commit</button>
+    <button on:click={()=>commitExpression(JSON.stringify(expData))}>Commit</button>
     </div>
 </div>
 

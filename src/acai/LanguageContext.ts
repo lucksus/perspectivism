@@ -1,3 +1,4 @@
+import type HolochainLanguageDelegate from "../main-thread/Holochain";
 import type AgentService from "./AgentService";
 import type SignaturesService from "./SignaturesService";
 
@@ -7,6 +8,7 @@ export default interface LanguageContext {
     signatures: SignaturesService;
     storageDirectory: string;
     customSettings: object;
+    Holochain: HolochainLanguageDelegate | void;
 }
 
 export interface IPFSNode {

@@ -9,7 +9,8 @@ import Icon from './build/Icon.js'
 import ConstructorIcon from './build/ConstructorIcon.js'
 import { JuntoSettingsUI } from './SettingsUI'
 import { ShortFormExpressionUI } from './shortFormExpressionUI'
-
+import { DNA, DNA_NICK } from './dna'
+import type HolochainLanguageDelegate from '../../main-thread/Holochain'
 
 function iconFor(expression: Address): string {
     return Icon
@@ -26,6 +27,9 @@ function interactions(a: Agent, expression: Address): Interaction[] {
 export const name: string = "junto-shortform"
 
 export default function create(context: LanguageContext): Language {
+    const Holochain = context.Holochain as HolochainLanguageDelegate
+    Holochain.registerDNAs([{file: DNA, nick: DNA_NICK}])
+
     const expressionAdapter = new ShortFormAdapter(context)
     const authorAdaptor = new ShortFormAuthorAdapter(context)
     const settingsUI = new JuntoSettingsUI()

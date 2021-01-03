@@ -6,8 +6,24 @@ import sveltePreprocess from 'svelte-preprocess';
 import postcss from "rollup-plugin-postcss";
 import { string } from 'rollup-plugin-string'
 import json from '@rollup/plugin-json';
+import fs from 'fs';
 
 const production = !process.env.ROLLUP_WATCH;
+
+// Holochain DNA Rollup loader function
+// Checks if filename ends with .dna.gz and then loads it as base64 string
+function dna() {
+	return {
+	  name: 'dna',
+	  load: function load(id) {
+		if(!id.endsWith(".dna.gz"))
+			return null
+		var base64 = fs.readFileSync(id, "base64").replace(/[\r\n]+/gm, '');
+		var code = `var dna = "${base64}"; \nexport default dna;` 
+		return code.trim();
+	  }
+	};
+  }
 
 export default {
 	input: 'index.js',
@@ -58,7 +74,8 @@ export default {
 			  }]
 			]
 		  }),
-		json()
+		json(),
+		dna()
 	],
 	watch: {
 		clearScreen: false

@@ -12,12 +12,14 @@ import multihashes from 'multihashes'
 import { ipcMain } from 'electron'
 import * as Config from './Config'
 import type Address from '../acai/Address';
+import type { HolochainService } from './Holochain';
 
 const builtInLanguages = [
     'note-ipfs',
     'url-iframe',
     'gun-links',
-    'ipfs-links'
+    'ipfs-links',
+    'junto-hc-shortform'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
@@ -30,11 +32,11 @@ type LinkObservers = (added: Expression[], removed: Expression[], lang: Language
 export class LanguageController {
     #languages: Map<string, Language>
     #languageConstructors: Map<string, (LanguageContext)=>Language>
-    #context: LanguageContext;
+    #context: object;
     #linkObservers: LinkObservers[];
 
 
-    constructor(context: LanguageContext) {
+    constructor(context: object, holochainService: HolochainService) {
         this.#context = context
         this.#languages = new Map()
         this.#languageConstructors = new Map()
@@ -47,7 +49,8 @@ export class LanguageController {
 
             const customSettings = this.getSettings({name, address: hash} as LanguageRef)
             const storageDirectory = Config.getLanguageStoragePath(name)
-            const language = create({...context, customSettings, storageDirectory})
+            const Holochain = holochainService.getDelegateForLanguage(hash)
+            const language = create({...context, customSettings, storageDirectory, Holochain})
 
 
             Object.keys(aliases).forEach(alias => {
@@ -177,6 +180,7 @@ export class LanguageController {
         const expr = await this.languageForExpression(ref).expressionAdapter.get(ref.expression)
         if(expr) {
             try{
+                // @ts-ignore
                 if(! await this.#context.signatures.verify(expr)) {
                     console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
                 } else {
@@ -204,7 +208,7 @@ export class LanguageController {
     }
 }
 
-export function init(context: LanguageContext): LanguageController {
-    const languageController = new LanguageController(context)
+export function init(context: object, holochainService: HolochainService): LanguageController {
+    const languageController = new LanguageController(context, holochainService)
     return languageController
 }
