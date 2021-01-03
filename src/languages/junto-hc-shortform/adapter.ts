@@ -5,6 +5,7 @@ import type { ExpressionAdapter, GetByAuthorAdapter, PublicSharing } from '../..
 import type LanguageContext from '../../acai/LanguageContext'
 import type { default as HolochainLanguageDelegate, HolochainService } from "../../main-thread/Holochain";
 import { DNA_NICK } from './dna'
+//import blake2b from 'blake2b'
 
 class ShortFormPutAdapter implements PublicSharing {
     #shortFormDNA: HolochainLanguageDelegate
@@ -17,8 +18,8 @@ class ShortFormPutAdapter implements PublicSharing {
         //@ts-ignore
         let obj = JSON.parse(shortForm)
 
-        let res = await this.#shortFormDNA.call(DNA_NICK, "shortform", "create_public_expression", {content: obj});
-        return res.expression.signed_header.header;
+        let res = await this.#shortFormDNA.call(DNA_NICK, "shortform", "create_public_expression", {content: JSON.stringify(obj)});
+        return res.expression.signed_header.header.hash.toString('hex');
     }
 }
 
@@ -33,6 +34,11 @@ export default class ShortFormAdapter implements ExpressionAdapter {
     }
 
     async get(address: Address): Promise<void | Expression> {
+        console.log("Getting at address", address);
+        var output = new Uint8Array(35)
+        //let hash = blake2b(output.length).update(address).digest();
+        //console.log("Getting hash", hash);
+        //console.log("Hash to string", hash.toString('hex'));
         let expression = await this.#shortFormDNA.call(DNA_NICK, "shortform", "get_expression_by_address", { address });
 
         if (expression.entry.Present != undefined) {
@@ -53,7 +59,7 @@ export default class ShortFormAdapter implements ExpressionAdapter {
         //@ts-ignore
         let obj = JSON.parse(content)
 
-        this.#shortFormDNA.call(DNA_NICK, "shortform", "send_private", {to: to, content: obj});
+        this.#shortFormDNA.call(DNA_NICK, "shortform", "send_private", {to: to, content: JSON.stringify(obj)});
     }
 
     /// Get private expressions sent to you
