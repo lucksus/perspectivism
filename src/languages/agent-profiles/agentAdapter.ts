@@ -21,7 +21,7 @@ export default class AgentAdapter implements Interface {
         const existingProfile = await this.getProfile(this.#context.agent.did)
 
         const expr = this.#context.agent.createSignedExpression(agent)
-        const profile = { PERSPECTIVISM_PROFILE: expr}
+        const profile = { PERSPECTIVISM_PROFILE: JSON.stringify(expr)}
         if(!existingProfile) {
             const params = {
                 did: agent.did,
@@ -43,8 +43,8 @@ export default class AgentAdapter implements Interface {
 
     async getProfile(did: string): Promise<Agent|void> {
         const result = await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", did)
-        if(result) {
-            const agentExpression = result[PERSPECTIVISM_PROFILE]
+        if(result && result[PERSPECTIVISM_PROFILE] && result[PERSPECTIVISM_PROFILE] != "") {
+            const agentExpression = JSON.parse(result[PERSPECTIVISM_PROFILE])
             const expr = agentExpression as Expression
             const agent = expr.data as Agent
             return agent
