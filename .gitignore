@@ -4,7 +4,7 @@
 .DS_Store
 
 /src/acai/*.js
-/src/main-thread/Agent.js
+/src/main-thread/AgentService.js
 /src/main-thread/PerspectivesController.js
 /src/main-thread/LanguageController.js
 /src/main-thread/LinkRepoController.js

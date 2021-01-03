@@ -5,13 +5,15 @@ import Expression, { ExpressionProof } from '../acai/Expression';
 import secp256k1 from 'secp256k1'
 
 import { Signatures } from './Signatures';
+import Agent from '../acai/Agent';
 
 
-export default class Agent {
+export default class AgentService {
     #did: string
     #didDocument: object
     #wallet: object
     #file: string
+    #agent: Agent
 
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
@@ -19,6 +21,10 @@ export default class Agent {
 
     get did() {
         return this.#did
+    }
+
+    get agent() {
+        return this.#agent
     }
 
     createSignedExpression(data: any): Expression {
@@ -47,6 +53,10 @@ export default class Agent {
         return signedExpresssion
     }
 
+    updateAgent(a: Agent) {
+        this.#agent = a
+    }
+
     private getSigningKey() {
         // @ts-ignore
         const keys = this.#wallet.extractByTags(["#primary"])
@@ -65,6 +75,7 @@ export default class Agent {
     initialize(did, didDocument, keystore, password) {
         this.#did = did
         this.#didDocument = didDocument
+        this.#agent = new Agent(did)
 
         console.debug("Creating wallet...")
         this.#wallet = didWallet.create(keystore)
@@ -109,7 +120,8 @@ export default class Agent {
             did: this.#did,
             didDocument: this.#didDocument,
             // @ts-ignore
-            keystore: this.#wallet.export()
+            keystore: this.#wallet.export(),
+            agent: this.#agent
         }
 
         fs.writeFileSync(this.#file, JSON.stringify(dump))
@@ -126,6 +138,7 @@ export default class Agent {
         this.#did = dump.did
         this.#didDocument = dump.didDocument
         this.#wallet = didWallet.create(dump.keystore)
+        this.#agent = dump.agent ? dump.agent : new Agent(dump.did)
     }
 
     dump() {
@@ -142,8 +155,8 @@ export default class Agent {
     }
 }
 
-export function init(rootConfigPath: string): Agent {
-    const agent = new Agent(rootConfigPath)
+export function init(rootConfigPath: string): AgentService {
+    const agent = new AgentService(rootConfigPath)
     agent.load()
     return agent
 }
