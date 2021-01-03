@@ -19,12 +19,14 @@ const builtInLanguages = [
     'url-iframe',
     'gun-links',
     'ipfs-links',
-    'junto-hc-shortform'
+    'junto-hc-shortform',
+    'agent-profiles'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
     'http': 'url-iframe',
-    'https': 'url-iframe'
+    'https': 'url-iframe',
+    'did': 'agent-profiles'
 }
 
 type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;

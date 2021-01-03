@@ -26,7 +26,7 @@ export default class HolochainLanguageDelegate {
         this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
     }
 
-    async call(dnaNick: String, zome_name: string, fn_name: String, params: object): Promise<any> {
+    async call(dnaNick: String, zome_name: string, fn_name: String, params: object|string): Promise<any> {
         return this.#holochainService.callZomeFunction(this.#languageHash, dnaNick, zome_name, fn_name, params)
     }
 }
