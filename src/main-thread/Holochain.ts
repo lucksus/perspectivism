@@ -160,6 +160,7 @@ export class HolochainService {
         }
 
         const cell_id = cell[0]
+        const [_dnaHash, provenance] = cell_id
 
         try {
             console.debug("HolochainService calling zome function:", dna_nick, zome_name, fn_name, payload)
@@ -168,8 +169,8 @@ export class HolochainService {
                 cell_id,
                 zome_name,
                 fn_name,
-                provenance: await this.pubKeyForLanguage(lang),
-                payload: JSON.stringify(payload)
+                provenance: provenance,
+                payload: payload
             })
             console.debug("HolochainService zome function result:", result)
             return result
