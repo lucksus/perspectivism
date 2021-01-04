@@ -1,7 +1,7 @@
 {
   "name": "junto-shortform",
   "version": "1.0.0",
-  "description": "ACAI Language implementation for Junto's centralized backend",
+  "description": "ACAI Language implementation for a Junto shortform expression type on a holochain backend",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
