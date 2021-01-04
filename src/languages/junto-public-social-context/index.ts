@@ -3,23 +3,24 @@ import type Agent from '../../acai/Agent'
 import type Language from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
-import { GunLinksAdapter } from './linksAdapter'
-import { GunSettingsUI } from './settingsUI'
+import { JuntoSocialContextLinkAdapter } from './linksAdapter'
+import { JuntoSettingsUI } from './settingsUI'
 
 function interactions(a: Agent, expression: Address): Interaction[] {
     return []
 }
 
+export const name: string = "junto-public-social-context"
+
 export default function create(context: LanguageContext): Language {
-    const linksAdapter = new GunLinksAdapter(context)
-    const settingsUI = new GunSettingsUI()
+    const linksAdapter = new JuntoSocialContextLinkAdapter(context)
+    const settingsUI = new JuntoSettingsUI()
 
     return {
-        name: 'gun-links',
+        name,
         linksAdapter,
         settingsUI,
         interactions,
     } as Language
 }
 
-export const name: string = "gun-links"

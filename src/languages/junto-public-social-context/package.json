@@ -1,7 +1,7 @@
 {
-  "name": "note-ipfs",
+  "name": "junto-perspective",
   "version": "0.0.1",
-  "description": "An ACAI Language for simple text notes build on IPFS",
+  "description": "An ACAI Language for managing a perspective on the Junto Centralized API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,9 +15,10 @@
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.0.0",
-    "@smui/switch": "^1.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@tsconfig/svelte": "^1.0.0",
     "@types/node": "^14.11.2",
+    "ipfs-pubsub-room": "^2.0.1",
     "node-sass": "^4.14.1",
     "rollup": "^2.3.4",
     "rollup-plugin-postcss": "^3.1.8",
@@ -28,9 +29,11 @@
     "svelte-check": "^1.0.0",
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "axios": "^0.20.0",
+    "amazon-cognito-identity-js": "4.5.0"
   },
   "dependencies": {
-    "gun": "^0.2020.520"
+    "async-mutex": "^0.2.4"
   }
 }
