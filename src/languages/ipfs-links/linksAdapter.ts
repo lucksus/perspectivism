@@ -177,7 +177,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return true
     }
 
-    others() {
+    async others() {
         return []
     }
 
