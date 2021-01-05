@@ -16,7 +16,7 @@ import type AgentService from './AgentService'
 const builtInLanguages = [
     'note-ipfs',
     'url-iframe',
-    'gun-links',
+    //'gun-links',
     'ipfs-links',
     'junto-hc-shortform',
     'agent-profiles'

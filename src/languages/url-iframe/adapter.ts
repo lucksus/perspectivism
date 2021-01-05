@@ -27,6 +27,7 @@ export default class Adapter implements ExpressionAdapter {
             author: new Agent(url.hostname),
             timestamp: 'unknown',
             data,
+            proof: undefined 
         };
 
         return expression
