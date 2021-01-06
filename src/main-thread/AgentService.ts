@@ -67,7 +67,6 @@ export default class AgentService {
         }
 
         this.#agentLanguage = lang
-        this.storeAgentProfile()
     }
 
     storeAgentProfile() {
