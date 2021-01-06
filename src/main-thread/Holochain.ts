@@ -22,8 +22,8 @@ export default class HolochainLanguageDelegate {
         this.#holochainService = holochainService
     }
 
-    registerDNAs(dnas: Array<Dna>) {
-        this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
+    async registerDNAs(dnas: Array<Dna>) {
+        return this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
     }
 
     async call(dnaNick: String, zome_name: string, fn_name: String, params: object|string): Promise<any> {
@@ -148,7 +148,20 @@ export class HolochainService {
         await this.#ready
         const installed_app_id = lang
         console.debug("HolochainService.callZomefunction: getting info for app:", installed_app_id)
-        const infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+        let infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+        let tries = 1
+        while(!infoResult && tries < 10) {
+            await sleep(500)
+            infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+            tries++
+        }
+
+        if(!infoResult) {
+            console.error("HolochainService: no installed hApp found during callZomeFunction() for Language:", lang)
+            console.error("Did the Language forget to register a DNA?")
+            throw new Error("No DNA installed")
+        }
+
         console.debug("HolochainService.callZomefunction: get info result:", infoResult)
         const { cell_data } = infoResult
         if(cell_data.length == 0) {
@@ -191,3 +204,6 @@ export function init(configPath, dataPath) {
     const adapter = new FileSync(path.join(dataPath, 'holochain-service.json'))
     return new HolochainService(adapter, configPath, dataPath)
 }
+
+const sleep = (ms) =>
+  new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
