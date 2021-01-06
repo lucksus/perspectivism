@@ -71,7 +71,7 @@ export default class AgentService {
 
     storeAgentProfile() {
         if(!this.#agentLanguage) {
-            console.error("AgentSergice ERROR: Can't store Agent profile. No AgentLanguage installed.")
+            console.error("AgentService ERROR: Can't store Agent profile. No AgentLanguage installed.")
             return
         }
 
