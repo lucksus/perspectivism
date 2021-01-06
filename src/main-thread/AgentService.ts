@@ -169,6 +169,7 @@ export default class AgentService {
         // @ts-ignore
         const isUnlocked = this.#wallet.keys ? true : false
         const dump = {
+            agent: this.#agent,
             isInitialized,
             isUnlocked,
             did: this.#did,

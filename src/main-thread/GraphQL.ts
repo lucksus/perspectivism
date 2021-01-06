@@ -6,9 +6,12 @@ import * as PubSub from './PubSub'
 const typeDefs = gql`
 type Agent {
     did: String
+    name: String
+    email: String
 }
 
 type AgentService {
+    agent: Agent
     isInitialized: Boolean
     isUnlocked: Boolean
     did: String
@@ -119,9 +122,15 @@ input UpdatePerspectiveInput {
     linksSharingLanguage: String
 }
 
+input UpdateAgentProfileInput {
+    name: String
+    email: String
+}
+
 type Mutation {
     initializeAgent(input: InitializeAgent): AgentService
     unlockAgent(passphrase: String): AgentService
+    updateAgentProfile(input: UpdateAgentProfileInput): AgentService
     addPerspective(input: AddPerspectiveInput): Perspective
     updatePerspective(input: UpdatePerspectiveInput): Perspective
     removePerspective(uuid: String): Boolean
@@ -209,6 +218,14 @@ function createResolvers(agent, perspectivesController, languageController, link
                 }
                 
                 return dump
+            },
+            updateAgentProfile: (parent, args, context, info) => {
+                const { name, email } = args.input
+                let agentProfile = agent.agent
+                agentProfile.name = name
+                agentProfile.email = email
+                agent.updateAgent(agentProfile)
+                return agent.dump()
             },
             addLink: (parent, args, context, info) => {
                 console.log("GQL| addLink:", args)

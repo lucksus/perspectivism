@@ -10,6 +10,7 @@
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import { getClient, mutation, query } from "svelte-apollo";
 	import { ADD_PERSPECTIVE, PERSPECTIVES, PERSPECTIVE_ADDED, PERSPECTIVE_REMOVED, PERSPECTIVE_UPDATED, REMOVE_PERSPECTIVE } from './graphql_queries';
+	import AgentProfileSettings from './AgentProfileSettings.svelte';
 
 
 	let perspectives = query(PERSPECTIVES)
@@ -173,6 +174,14 @@
 				<Graphic class="material-icons" aria-hidden="true">insert_comment</Graphic>
 				<Text>Manage Languages</Text>
 			</Item>
+
+			<Item 
+				activated={selectedMainView.settings == 'agent'}
+				on:click={() => selectedMainView = { perspective: null, settings: 'agent' }}
+			>
+				<Graphic class="material-icons" aria-hidden="true">account_circle</Graphic>
+				<Text>Agent Profile</Text>
+			</Item>
 			
 		</List>
 		</Content>
@@ -209,6 +218,11 @@
 		{#if selectedMainView.settings == 'languages'}
 			<LanguagesSettings></LanguagesSettings>
 		{/if}
+		{#if selectedMainView.settings == 'agent'}
+			<div class="centered">
+				<AgentProfileSettings></AgentProfileSettings>
+			</div>
+		{/if}
 	{:else if selectedMainView.edit }
 		<PerspectiveSettings perspective={JSON.parse(JSON.stringify(selectedMainView.edit))} 
 			on:submit={editPerspectiveSubmit}
@@ -234,6 +248,13 @@
             font-size: 4em;
             font-weight: 100;
         }
+
+		.centered {
+			margin-top: 100px;
+			margin-left: auto;
+			margin-right: auto;
+			width: 380px;
+		}
     
         @media (min-width: 640px) {
             main {
