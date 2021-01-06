@@ -14,11 +14,13 @@ export default class AgentService {
     #didDocument: object
     #wallet: object
     #file: string
+    #fileProfile: string
     #agent: Agent
     #agentLanguage: Language
 
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
+        this.#fileProfile = path.join(rootConfigPath, "agentProfile.json")
     }
 
     get did() {
@@ -70,6 +72,8 @@ export default class AgentService {
     }
 
     storeAgentProfile() {
+        fs.writeFileSync(this.#fileProfile, JSON.stringify(this.#agent))
+
         if(!this.#agentLanguage) {
             console.error("AgentService ERROR: Can't store Agent profile. No AgentLanguage installed.")
             return
@@ -161,7 +165,11 @@ export default class AgentService {
         this.#did = dump.did
         this.#didDocument = dump.didDocument
         this.#wallet = didWallet.create(dump.keystore)
-        this.#agent = dump.agent ? dump.agent : new Agent(dump.did)
+        if(fs.existsSync(this.#fileProfile))
+            this.#agent = JSON.parse(fs.readFileSync(this.#fileProfile).toString())
+        else {
+            this.#agent = new Agent(this.#did)
+        }
     }
 
     dump() {
