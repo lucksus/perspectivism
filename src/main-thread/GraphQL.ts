@@ -180,6 +180,9 @@ function createResolvers(agent, perspectivesController, languageController, link
             expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
                 const expression = await languageController.getExpression(ref)
+                if(! (typeof expression.data == "string")) {
+                    expression.data = JSON.stringify(expression.data)
+                }
                 expression.ref = ref
                 expression.url = args.url.toString()
                 console.log("Query.expression:", expression)
