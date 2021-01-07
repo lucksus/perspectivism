@@ -3,6 +3,11 @@ import { gql } from '@apollo/client'
 export const AGENT = gql `
     query agent {
         agent {
+            agent {
+                did
+                name
+                email
+            }
             isInitialized
             isUnlocked
             did
@@ -25,6 +30,22 @@ export const INITIALIZE_AGENT = gql `
 export const UNLOCK_AGENT = gql `
     mutation unlockAgent($passphrase: String) {
         unlockAgent(passphrase: $passphrase) {
+            isInitialized
+            isUnlocked
+            did
+            error
+        }
+    }
+`
+
+export const UPDATE_AGENT_PROFILE = gql `
+    mutation updateAgentProfile($name: String, $email: String) {
+        updateAgentProfile(input: {name: $name, email: $email}) {
+            agent {
+                did
+                name
+                email
+            }
             isInitialized
             isUnlocked
             did

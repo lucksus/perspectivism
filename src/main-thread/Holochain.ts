@@ -22,8 +22,8 @@ export default class HolochainLanguageDelegate {
         this.#holochainService = holochainService
     }
 
-    registerDNAs(dnas: Array<Dna>) {
-        this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
+    async registerDNAs(dnas: Array<Dna>) {
+        return this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
     }
 
     async call(dnaNick: String, zome_name: string, fn_name: String, params: object|string): Promise<any> {
@@ -87,49 +87,53 @@ export class HolochainService {
 
     async ensureInstallDNAforLanguage(lang: string, dnas: Array<Dna>) {
         await this.#ready
-        let installed
+        
 
-        // 1. install app
-        try {
-            console.debug("HolochainService: Installing DNAs for language", lang)
-            //console.debug(dnaFile)
-            //let installedCellIds = await this.#adminWebsocket.listCellIds()
-            //console.debug("HolochainService: Installed cells before:", installedCellIds)
-            //const cellId = HolochainService.dnaID(lang, nick)
+        const activeApps = await this.#adminWebsocket.listActiveApps()
+        if(!activeApps.includes(lang)) {
 
-            await this.#adminWebsocket.installApp({
-                agent_key: await this.pubKeyForLanguage(lang),
-                installed_app_id: lang,
-                dnas: dnas.map((dna) => {
-                    const p = path.join(this.#dataPath, `${lang}-${dna.nick}.dna.gz`)
-                    fs.writeFileSync(p, dna.file)
-                    return { nick: dna.nick, path: p };
-                }),    
-            })
-    
-            //installedCellIds = await this.#adminWebsocket.listCellIds()
-            //console.debug("HolochainService: Installed cells after:", installedCellIds)
-            installed = true
-        } catch(e) {
-            if(!e.data?.data?.indexOf('AppAlreadyInstalled')) {
-                console.error("Error during install of DNA:", e)
-                installed = false
-            } else {
-                console.debug("HolochainService: App", lang, "already installed")
+            let installed
+            // 1. install app
+            try {
+                console.debug("HolochainService: Installing DNAs for language", lang)
+                //console.debug(dnaFile)
+                //let installedCellIds = await this.#adminWebsocket.listCellIds()
+                //console.debug("HolochainService: Installed cells before:", installedCellIds)
+                //const cellId = HolochainService.dnaID(lang, nick)
+
+                await this.#adminWebsocket.installApp({
+                    agent_key: await this.pubKeyForLanguage(lang),
+                    installed_app_id: lang,
+                    dnas: dnas.map((dna) => {
+                        const p = path.join(this.#dataPath, `${lang}-${dna.nick}.dna.gz`)
+                        fs.writeFileSync(p, dna.file)
+                        return { nick: dna.nick, path: p };
+                    }),    
+                })
+        
+                //installedCellIds = await this.#adminWebsocket.listCellIds()
+                //console.debug("HolochainService: Installed cells after:", installedCellIds)
                 installed = true
+            } catch(e) {
+                if(!e.data?.data?.indexOf('AppAlreadyInstalled')) {
+                    console.error("Error during install of DNA:", e)
+                    installed = false
+                } else {
+                    console.debug("HolochainService: App", lang, "already installed")
+                    installed = true
+                }
+            }
+
+            if(!installed)
+                return
+
+            // 2. activate app
+            try {
+                await this.#adminWebsocket.activateApp({installed_app_id: lang})
+            } catch(e) {
+                console.error("HolochainService: ERROR activating app", lang, " - ", e)
             }
         }
-
-        if(!installed)
-            return
-
-        // 2. activate app
-        try {
-            await this.#adminWebsocket.activateApp({installed_app_id: lang})
-        } catch(e) {
-            console.error("HolochainService: ERROR activating app", lang, " - ", e)
-        }
-
     }
 
     getDelegateForLanguage(languageHash: String) {
@@ -144,7 +148,20 @@ export class HolochainService {
         await this.#ready
         const installed_app_id = lang
         console.debug("HolochainService.callZomefunction: getting info for app:", installed_app_id)
-        const infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+        let infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+        let tries = 1
+        while(!infoResult && tries < 10) {
+            await sleep(500)
+            infoResult = await this.#appWebsocket.appInfo({installed_app_id})
+            tries++
+        }
+
+        if(!infoResult) {
+            console.error("HolochainService: no installed hApp found during callZomeFunction() for Language:", lang)
+            console.error("Did the Language forget to register a DNA?")
+            throw new Error("No DNA installed")
+        }
+
         console.debug("HolochainService.callZomefunction: get info result:", infoResult)
         const { cell_data } = infoResult
         if(cell_data.length == 0) {
@@ -187,3 +204,6 @@ export function init(configPath, dataPath) {
     const adapter = new FileSync(path.join(dataPath, 'holochain-service.json'))
     return new HolochainService(adapter, configPath, dataPath)
 }
+
+const sleep = (ms) =>
+  new Promise<void>((resolve) => setTimeout(() => resolve(), ms));

@@ -20,8 +20,16 @@ export default class AgentAdapter implements Interface {
     async setProfile(agent: Agent) {
         const existingProfile = await this.getProfile(this.#context.agent.did)
 
+        const oldAgent = JSON.stringify(existingProfile)
+        const newAgent = JSON.stringify(agent)
+        const changed = oldAgent !== newAgent
+
+        if(!changed)
+            return
+
         const expr = this.#context.agent.createSignedExpression(agent)
         const profile = { PERSPECTIVISM_PROFILE: JSON.stringify(expr)}
+
         if(!existingProfile) {
             const params = {
                 did: agent.did,
@@ -30,14 +38,12 @@ export default class AgentAdapter implements Interface {
             }
             await this.#holochain.call(DNA_NICK, "did-profiles", "create_profile", params)
         }
-        else if (!existingProfile[PERSPECTIVISM_PROFILE] || JSON.stringify(existingProfile[PERSPECTIVISM_PROFILE].data) !== JSON.stringify(agent)) {
+        else if (changed) {
             const params = {
                 did: agent.did,
                 profile
             }
             await this.#holochain.call(DNA_NICK, "did-profiles", "update_profile", params)
-        } else {
-            // no difference between new profile and already stored data
         }
     }
 
