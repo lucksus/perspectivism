@@ -39,6 +39,15 @@ type Expression {
 
     icon: Icon
     language: Language
+
+    proof: ExpressionProof
+}
+
+type ExpressionProof {
+    signature: String
+    key: String
+    valid: Boolean
+    invalid: Boolean
 }
 
 type Link {

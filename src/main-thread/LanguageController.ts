@@ -191,15 +191,17 @@ export class LanguageController {
                 // @ts-ignore
                 if(! await this.#context.signatures.verify(expr)) {
                     console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
+                    expr.proof.invalid = true
                 } else {
-                    console.debug("Valid expr:", ref)
+                    //console.debug("Valid expr:", ref)
+                    expr.proof.valid = true
                 }
             } catch(e) {
                 console.error("Error trying to verify expression signature:", e)
                 console.error("For expression:", expr)
             }
-            
         }
+
         return expr
     }
 

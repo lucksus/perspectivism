@@ -9,6 +9,8 @@
     import { linkTo2D, coordToPredicate } from './uiUtils';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
+    import {Graphic} from '@smui/list';
+
 
     export let expressionURL: string
     export let parentLink: Expression
@@ -31,6 +33,10 @@
                 data
                 language {
                     address
+                }
+                proof {
+                    valid
+                    invalid
                 }
             }
         }
@@ -139,7 +145,7 @@
         Loading failed!
         {$queryResult.error}
     {:else}
-    <div class="box__face container" class:selected bind:this={container}/>
+    <div class="box__face container" class:selected class:invalid="{!expression?.proof?.valid}" bind:this={container}/>
     <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
         <div class="backside-content">
             <div>
@@ -158,6 +164,27 @@
                 <span class="value">{expression?.timestamp}</span>
             </div>
             <h2 class="header">URL</h2> <span class="value">{expressionURL}</span>
+            <div class="signature-verification">
+                {#if !expression?.proof}
+                    <span class="broken">
+                        Signature MISSING
+                        <Graphic class="material-icons" aria-hidden="true" style="color: red; margin-right: 0;">rounded_corner</Graphic>
+                    </span>
+                {:else}
+                    {#if expression?.proof?.valid}
+                        <span class="verified">
+                            Signature verified
+                            <Graphic class="material-icons" aria-hidden="true" style="color: green; margin-right: 0;">verified</Graphic>
+                        </span>
+                    {/if}
+                    {#if expression?.proof?.invalid}
+                        <span class="broken">
+                            Signature BROKEN
+                            <Graphic class="material-icons" aria-hidden="true" style="color: red; margin-right: 0;">warning</Graphic>
+                        </span>
+                    {/if}
+                {/if}
+            </div>
             <!--{expression?.data}-->
         </div>
     </div>
@@ -194,6 +221,10 @@
         display: inline-block;
         border: 2px solid;
         overflow: hidden;
+    }
+
+    .invalid {
+        border: 5px solid red !important;
     }
 
     .selected {
@@ -254,5 +285,18 @@
         margin-right: 5px;
         width: 75px;
         height: 75px;
+    }
+
+    .signature-verification {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+    .verified {
+        color: green;
+    }
+
+    .broken {
+        color: red;
     }
 </style>
