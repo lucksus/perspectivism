@@ -158,7 +158,7 @@ function createResolvers(agent, perspectivesController, languageController, link
         Query: {
             hello: () => 'Hello world!',
             agent: () => {
-                console.log("GQL agent - AgentService:", agent)
+                //console.log("GQL agent - AgentService:", agent)
                 return agent.dump()
             },
             perspective: (parent, args, context, info) => {
@@ -167,11 +167,11 @@ function createResolvers(agent, perspectivesController, languageController, link
             },
             perspectives: (parent, args, context, info) => {
                 const ps = Object.values(perspectivesController.get())
-                console.debug("PERSPECTIVES:", ps)
+                //console.debug("PERSPECTIVES:", ps)
                 return ps
             },
             links: async (parent, args, context, info) => {
-                console.log("GQL| links:", args)
+                //console.log("GQL| links:", args)
                 const { perspectiveUUID, query } = args
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const result = await linkRepoController.getLinks(perspective, query)
@@ -182,7 +182,7 @@ function createResolvers(agent, perspectivesController, languageController, link
                 const expression = await languageController.getExpression(ref)
                 expression.ref = ref
                 expression.url = args.url.toString()
-                console.log("Query.expression:", expression)
+                //console.log("Query.expression:", expression)
                 return expression
             },
             language: (parent, args, context, info) => {
@@ -228,14 +228,14 @@ function createResolvers(agent, perspectivesController, languageController, link
                 return agent.dump()
             },
             addLink: (parent, args, context, info) => {
-                console.log("GQL| addLink:", args)
+                //console.log("GQL| addLink:", args)
                 const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedLink = JSON.parse(link)
                 return linkRepoController.addLink(perspective, parsedLink)
             },
             updateLink: (parent, args, context, info) => {
-                console.log("GQL| updateLink:", args)
+                //console.log("GQL| updateLink:", args)
                 const { perspectiveUUID, oldLink, newLink } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedOldLink = JSON.parse(oldLink)
@@ -244,7 +244,7 @@ function createResolvers(agent, perspectivesController, languageController, link
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
-                console.log("GQL| removeLink:", args)
+                //console.log("GQL| removeLink:", args)
                 const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedLink = JSON.parse(link)
@@ -258,7 +258,7 @@ function createResolvers(agent, perspectivesController, languageController, link
                 return exprRef2String(expref)
             },
             setLanguageSettings: (parent, args, context, info) => {
-                console.log("GQL| settings", args)
+                //console.log("GQL| settings", args)
                 const { languageAddress, settings } = args.input
                 const langref = { name: '', address: languageAddress }
                 const lang = languageController.languageByRef(langref)
@@ -314,7 +314,7 @@ function createResolvers(agent, perspectivesController, languageController, link
 
         Expression: {
             language: async (expression) => {
-                console.log("GQL EXPRESSION", expression)
+                //console.log("GQL EXPRESSION", expression)
                 const lang = await languageController.languageForExpression(expression.ref)
                 lang.address = expression.ref.language.address
                 return lang

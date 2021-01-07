@@ -147,15 +147,15 @@ export default class LinkRepoController {
     }
 
     private getLinksLocal(p: Perspective, query: LinkQuery): Expression[] {
-        console.debug("getLinks 1")
+        //console.debug("getLinks 1")
         if(!query || !query.source && !query.predicate && !query.target) {
             return this.#db.getAllLinks(p.uuid).map(e => e.link)
         }
 
-        console.debug("getLinks 2")
+        //console.debug("getLinks 2")
 
         if(query.source) {
-            console.debug("query.source", query.source)
+            //console.debug("query.source", query.source)
             let result = this.#db.getLinksBySource(p.uuid, query.source).map(e => e.link)
             // @ts-ignore
             if(query.target) result = result.filter(l => l.data.target === query.target)
@@ -163,11 +163,11 @@ export default class LinkRepoController {
 
 
             if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
-            console.debug("result", result)
+            //console.debug("result", result)
             return result
         }
 
-        console.debug("getLinks 3")
+        //console.debug("getLinks 3")
 
         if(query.target) {
             let result = this.#db.getLinksByTarget(p.uuid, query.target).map(e => e.link)
@@ -176,18 +176,18 @@ export default class LinkRepoController {
             return result
         }
 
-        console.debug("getLinks 4")
+        //console.debug("getLinks 4")
 
         return this.#db.getAllLinks(p.uuid).map(e => e.link).filter(link => link.data.predicate === query.predicate)
     }
 
     async getLinks(p: Perspective, query: LinkQuery): Promise<Expression[]> {
-        console.debug("getLinks local...")
+        //console.debug("getLinks local...")
         const localLinks = await this.getLinksLocal(p, query)
-        console.debug("getLinks local", localLinks)
-        console.debug("getLinks remote...")
+        //console.debug("getLinks local", localLinks)
+        //console.debug("getLinks remote...")
         const remoteLinks = await this.callLinksAdapter(p, 'getLinks', query)
-        console.debug("getLinks remote", remoteLinks)
+        //console.debug("getLinks remote", remoteLinks)
         const mergedLinks = {}
         localLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
         remoteLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
