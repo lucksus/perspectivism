@@ -7,6 +7,8 @@
     import { gql } from "@apollo/client"
     import { CHILD_LINKS_QUERY } from "./graphql_queries";
     import { linkTo2D, coordToPredicate } from './uiUtils';
+    import emailValidator from 'email-validator'
+    import md5 from 'md5'
 
     export let expressionURL: string
     export let parentLink: Expression
@@ -24,7 +26,7 @@
     $: if(expressionURL) queryResult = query(gql`
         { 
             expression(url: "${expressionURL}") {
-                author { did }
+                author { did, name, email }
                 timestamp
                 data
                 language {
@@ -141,15 +143,22 @@
     <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
         <div class="backside-content">
             <div>
-                <span class="header">Author:</span> <span class="value">{expression?.author?.did}</span>
+                <h2 class="header">Author</h2>
+                {#if emailValidator.validate(expression?.author?.email) }
+                    <img class="avatar" src="http://www.gravatar.com/avatar/{md5(expression?.author?.email)}?s=75" alt="gravatar">
+                {/if}
+                <span class="property">Name:</span><span class="value">{expression?.author?.name}</span>
+                <br>
+                <span class="property">Email:</span><span class="value">{expression?.author?.email}</span>
+                <br>
+                <span class="property">DID:</span> <span class="value">{expression?.author?.did}</span>
             </div>
             <div>
-                <span class="header">Timestamp:</span> <span class="value">{expression?.timestamp}</span>
+                <h2 class="header">Timestamp</h2> 
+                <span class="value">{expression?.timestamp}</span>
             </div>
-            <hr>
-                <span class="header">URL:</span> <span class="value">{expressionURL}</span>
-            <hr>
-            {expression?.data}
+            <h2 class="header">URL</h2> <span class="value">{expressionURL}</span>
+            <!--{expression?.data}-->
         </div>
     </div>
     <div class="box__face right" style={`transform:  translateX(${width-depth/2}px)  translateZ(-${depth/2}px) rotateY(90deg); width: ${depth}px; height: ${height}px;`}>right</div>
@@ -159,9 +168,11 @@
     {/if}
 </div>
 </div>
+<!--
 {#if childLinks}
     {JSON.stringify($childLinks)}
 {/if}
+-->
 {#if childLinks && !$childLinks.loading && $childLinks.data?.links}
     <ul class="child-plane">
         {#each $childLinks.data.links as link}
@@ -209,6 +220,13 @@
     }
 
     .backside-content .header {
+        margin-top: 0;
+        margin-bottom: 5px;
+        color: rgb(127, 129, 255)
+    }
+
+    .backside-content .property {
+        margin-right: 2px;
         color: rgb(127, 129, 255)
     }
 
@@ -228,5 +246,13 @@
     .inline {
         display: inline;
         transform-style: preserve-3d;
+    }
+
+    .avatar {
+        float: left;
+        margin-left: 5px;
+        margin-right: 5px;
+        width: 75px;
+        height: 75px;
     }
 </style>

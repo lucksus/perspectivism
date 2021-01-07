@@ -339,6 +339,26 @@ function createResolvers(agent, perspectivesController, languageController, link
                 else
                     return null
             }
+        },
+
+        Agent: {
+            name: async (agent) => {
+                if(agent.name && agent.name !== "")
+                    return agent.name
+                else {
+                    const agentExpression = await languageController.getExpression(parseExprURL(agent.did))
+                    return agentExpression.data.name
+                }
+            },
+
+            email: async (agent) => {
+                if(agent.email && agent.email !== "")
+                    return agent.email
+                else {
+                    const agentExpression = await languageController.getExpression(parseExprURL(agent.did))
+                    return agentExpression.data.email
+                }
+            }
         }
     }
 }

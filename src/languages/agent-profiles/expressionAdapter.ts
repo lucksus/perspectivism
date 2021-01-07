@@ -19,8 +19,9 @@ export default class ExpressionAdapter implements Interface {
 
     async get(address: Address): Promise<void | Expression> {
         const result = await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", address)
-        if(result) {
-            const agentExpression = result[PERSPECTIVISM_PROFILE] as Expression
+        if(result && result[PERSPECTIVISM_PROFILE] && result[PERSPECTIVISM_PROFILE] != "") {
+            const expr = JSON.parse(result[PERSPECTIVISM_PROFILE])
+            const agentExpression = expr as Expression
             return agentExpression
         } else {
             return null
