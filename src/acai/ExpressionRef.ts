@@ -15,7 +15,10 @@ export default class ExpressionRef {
 // Creates unique expression URI like this:
 // expr:Qm3490gfwe489hf34:Qm90ghjoaw4iehioefwe4ort
 export function exprRef2String(ref: ExpressionRef): string {
-    return `${ref.language.address}://${ref.expression}`
+    if(ref.language.address === 'did')
+        return ref.expression.toString()
+    else
+        return `${ref.language.address}://${ref.expression}`
 }
 
 export function parseExprURL(url: string): ExpressionRef {

@@ -192,6 +192,7 @@ function createResolvers(agent, perspectivesController, languageController, link
                 expression.ref = ref
                 expression.url = args.url.toString()
                 //console.log("Query.expression:", expression)
+                expression.data = JSON.stringify(expression.data)
                 return expression
             },
             language: (parent, args, context, info) => {
@@ -263,7 +264,7 @@ function createResolvers(agent, perspectivesController, languageController, link
             createExpression: async (parent, args, context, info) => {
                 const { languageAddress, content } = args.input
                 const langref = { address: languageAddress }
-                const expref = await languageController.createPublicExpression(langref, content)
+                const expref = await languageController.createPublicExpression(langref, JSON.parse(content))
                 return exprRef2String(expref)
             },
             setLanguageSettings: (parent, args, context, info) => {

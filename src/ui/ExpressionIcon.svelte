@@ -110,7 +110,9 @@
     $: if(container && componentConstructor && !$queryResult.loading) {
         iconReady = false
         const icon = new componentConstructor()
-        icon.expression = $queryResult.data.expression
+        const expression = JSON.parse(JSON.stringify($queryResult.data.expression))
+        expression.data = JSON.parse(expression.data)
+        icon.expression = expression
         while(container.lastChild)
             container.removeChild(container.lastChild)
         container.appendChild(icon)

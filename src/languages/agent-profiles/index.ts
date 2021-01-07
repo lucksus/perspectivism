@@ -6,6 +6,7 @@ import type { Interaction } from '../../acai/Language'
 import type HolochainLanguageDelegate from '../../main-thread/Holochain'
 import AgentAdapter from './agentAdapter'
 import ExpressionAdapter from './expressionAdapter'
+import AgentExpressionUI from './expressionUI'
 import { DNA, DNA_NICK } from './dna'
 
 export const name: string = "agent-profiles"
@@ -20,11 +21,13 @@ export default function create(context: LanguageContext): Language {
 
     const agentAdapter = new AgentAdapter(context)
     const expressionAdapter = new ExpressionAdapter(context)
+    const expressionUI = new AgentExpressionUI()
 
     return {
         name,
         agentAdapter,
         expressionAdapter,
+        expressionUI,
         interactions,
     } as Language
 }

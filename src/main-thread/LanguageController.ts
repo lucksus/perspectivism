@@ -181,6 +181,15 @@ export class LanguageController {
             }
         }
 
+        // This makes sure that Expression references used in Links (i.e. in Perspectives) use the aliased Language schemas.
+        // Especially important for DIDs
+        for(const alias in aliases) {
+            const target = aliases[alias]
+            if(lang.address === target) {
+                lang.address = alias
+            }
+        }
+        
         return new ExpressionRef(lang, address)
     }
 

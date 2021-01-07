@@ -14,7 +14,7 @@ export default {
 	output: {
 		sourcemap: true,
 		format: 'cjs',
-		name: 'NoteIpfs',
+		name: 'AgentProfile',
 		file: 'build/bundle.js'
 	},
 	plugins: [

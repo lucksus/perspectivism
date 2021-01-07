@@ -310,7 +310,7 @@
         const creationResult = await CREATE_EXPRESSION({
             variables: {
                 languageAddress: lang.address,
-                content
+                content: JSON.stringify(content)
             }
         })
 
