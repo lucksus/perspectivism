@@ -32,6 +32,9 @@ export default class AgentService {
     }
 
     createSignedExpression(data: any): Expression {
+        if(!this.isInitialized){
+            throw "Can't sign without keystore"
+        }
         if(!this.isUnlocked()) {
             throw "Can't sign with locked keystore"
         }
@@ -174,8 +177,12 @@ export default class AgentService {
 
     dump() {
         const isInitialized = this.isInitialized()
-        // @ts-ignore
-        const isUnlocked = this.#wallet.keys ? true : false
+        let isUnlocked = false
+        if(isInitialized) {
+            // @ts-ignore
+            isUnlocked= this.#wallet.keys ? true : false
+        }
+        
         const dump = {
             agent: this.#agent,
             isInitialized,
