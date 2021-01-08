@@ -7,7 +7,8 @@ import secp256k1 from 'secp256k1'
 import { Signatures } from './Signatures';
 import Agent from '../acai/Agent';
 import type Language from '../acai/Language';
-
+import * as PubSubInstance from './PubSub'
+import type { PubSub } from 'apollo-server';
 
 export default class AgentService {
     #did: string
@@ -17,10 +18,12 @@ export default class AgentService {
     #fileProfile: string
     #agent: Agent
     #agentLanguage: Language
+    #pubsub: PubSub
 
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
         this.#fileProfile = path.join(rootConfigPath, "agentProfile.json")
+        this.#pubsub = PubSubInstance.get()
     }
 
     get did() {
@@ -63,6 +66,7 @@ export default class AgentService {
     updateAgent(a: Agent) {
         this.#agent = a
         this.storeAgentProfile()
+        this.#pubsub.publish(PubSubInstance.AGENT_UPDATED, a)
     }
 
     setAgentLanguage(lang: Language) {
@@ -127,6 +131,7 @@ export default class AgentService {
 
         console.debug("Registering new DID with agent language...")
         this.storeAgentProfile()
+        this.#pubsub.publish(PubSubInstance.AGENT_UPDATED, this.#agent)
     }
 
     isInitialized() {

@@ -151,6 +151,7 @@ type Mutation {
 }
 
 type Subscription {
+    agentUpdated: Agent
     perspectiveAdded: Perspective
     perspectiveUpdated: Perspective
     perspectiveRemoved: String
@@ -292,6 +293,10 @@ function createResolvers(agent, perspectivesController, languageController, link
         },
 
         Subscription: {
+            agentUpdated: {
+                subscribe: () => pubsub.asyncIterator(PubSub.AGENT_UPDATED),
+                resolve: payload => payload.agent
+            },
             perspectiveAdded: {
                 subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_ADDED_TOPIC),
                 resolve: payload => payload.perspective

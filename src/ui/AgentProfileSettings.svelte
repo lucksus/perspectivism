@@ -4,7 +4,7 @@
     import { AGENT, UPDATE_AGENT_PROFILE } from './graphql_queries';
     import Textfield from '@smui/textfield'
     import Button, {Label} from '@smui/button';
-
+    import { gql } from '@apollo/client';
     import Card, {Content, PrimaryAction, Media, MediaContent, Actions, ActionButtons, ActionIcons} from '@smui/card';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
@@ -28,6 +28,18 @@
             }
         })
     }
+
+    QGL_CLIENT.subscribe({
+          query: gql`
+              subscription {
+                  agentUpdated {
+                    did
+                  }
+              }   
+          `}).subscribe({
+              next: () => update(),
+              error: (e) => console.error(e)
+          })
 
 
     function save() {
