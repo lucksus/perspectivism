@@ -124,6 +124,9 @@ export default class AgentService {
         console.debug("Saving wallet...")
         this.save(password)
         console.debug("done.")
+
+        console.debug("Registering new DID with agent language...")
+        this.storeAgentProfile()
     }
 
     isInitialized() {
