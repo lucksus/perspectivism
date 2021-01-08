@@ -7,7 +7,7 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import { query, mutation, getClient } from "svelte-apollo";
-    import { AGENT_SERVICE_STATUS, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
+    import { AGENT, AGENT_SERVICE_STATUS, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
 
     const QGL_CLIENT = getClient()
     const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
@@ -77,6 +77,8 @@
     bind:this={initDialog}
     aria-labelledby="dialog-title"
     aria-describedby="dialog-content"
+    scrimClickAction=""
+    escapeKeyAction=""
 >
     <Title id="dialog-title">Setup Agent Identity</Title>
     <Content id="dialog-content">
@@ -146,10 +148,13 @@
     </Actions>
 </Dialog>
 
-<Dialog bind:this={unlockDialog}>
+<Dialog bind:this={unlockDialog}
+    scrimClickAction=""
+    escapeKeyAction=""
+>
     <Title id="dialog-title">Unlock Agent Keystore</Title>
     <Content>
-        <span>DID:</span><span>{did}</span>
+        <span class="did">{did}</span>
         <Textfield fullwidth lineRipple={false} label="Keystore">
             <Input bind:value={passphrase} id="input-did" type="password" aria-controls="unlock-helper-text" aria-describedby="unlock-helper-text" />
             <FloatingLabel for="input-did">Passphrase</FloatingLabel>
@@ -172,5 +177,10 @@
 <style>
     .error {
         color: red;
+    }
+
+    .did {
+        max-width: 512px;
+        word-wrap: break-word;
     }
 </style>

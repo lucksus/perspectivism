@@ -19,12 +19,16 @@ app.whenReady().then(() => {
 function createSplash () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 1000,
+    width: 1000,
+    height: 600,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
-    }
+    },
+    minimizable: false,
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
   })
 
   // and load the index.html of the app.
