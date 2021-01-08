@@ -300,7 +300,7 @@ function createResolvers(core: PerspectivismCore) {
         Subscription: {
             agentUpdated: {
                 subscribe: () => pubsub.asyncIterator(PubSub.AGENT_UPDATED),
-                resolve: payload => payload.agent
+                resolve: payload => payload
             },
             perspectiveAdded: {
                 subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_ADDED_TOPIC),

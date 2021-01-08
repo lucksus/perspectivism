@@ -34,10 +34,18 @@
               subscription {
                   agentUpdated {
                     did
+                    name
+                    email
                   }
               }   
           `}).subscribe({
-              next: () => update(),
+              next: result => {
+                console.debug(result)
+                const agent = result.data.agentUpdated
+                did = agent.did
+                name = agent.name ? agent.name : ""
+                email = agent.email ? agent.email : ""
+              },
               error: (e) => console.error(e)
           })
 
