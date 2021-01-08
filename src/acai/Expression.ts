@@ -20,6 +20,8 @@ export function isExpression(e: any): boolean {
 export class ExpressionProof {
     signature: string;
     key: string;
+    valid?: boolean;
+    invalid?: boolean;
 
     constructor(sig: string, k: string) {
         this.key = k

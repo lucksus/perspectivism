@@ -181,6 +181,15 @@ export class LanguageController {
             }
         }
 
+        // This makes sure that Expression references used in Links (i.e. in Perspectives) use the aliased Language schemas.
+        // Especially important for DIDs
+        for(const alias in aliases) {
+            const target = aliases[alias]
+            if(lang.address === target) {
+                lang.address = alias
+            }
+        }
+        
         return new ExpressionRef(lang, address)
     }
 
@@ -191,15 +200,17 @@ export class LanguageController {
                 // @ts-ignore
                 if(! await this.#context.signatures.verify(expr)) {
                     console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
+                    expr.proof.invalid = true
                 } else {
-                    console.debug("Valid expr:", ref)
+                    //console.debug("Valid expr:", ref)
+                    expr.proof.valid = true
                 }
             } catch(e) {
                 console.error("Error trying to verify expression signature:", e)
                 console.error("For expression:", expr)
             }
-            
         }
+
         return expr
     }
 
