@@ -112,10 +112,7 @@
                 <LineRipple />
             </Textfield>
             <HelperText id="did-helper-text">Please paste here your already existing DID (e.g.: did:github:lucksus)</HelperText>
-            <Button on:click={resolveDID}>				<HelperText id="keystore-helper-text">Keystore (locked)</HelperText>
-
-                <Label>Resolve</Label>
-            </Button>
+            <HelperText id="keystore-helper-text">Keystore (locked)</HelperText>
             <br>
             DID document:Please paste here your locked/encrypted keystore string
         </div>
@@ -135,9 +132,6 @@
                 <LineRipple />
             </Textfield>
             <HelperText id="keystore-helper-text">Passphrase for above entered keystore cipher</HelperText>
-            <Button on:click={unlockKeystore}>
-                <Label>Unlock</Label>
-            </Button>
         </div>
         
     </Content>
