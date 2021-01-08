@@ -7,14 +7,14 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import { query, mutation, getClient } from "svelte-apollo";
-    import { AGENT, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
+    import { AGENT_SERVICE_STATUS, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
 
     const QGL_CLIENT = getClient()
     const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
     const GQL_UNLOCK_AGENT = mutation(UNLOCK_AGENT)
 
     function check() {
-        QGL_CLIENT.query({ query: AGENT }).then( result => {
+        QGL_CLIENT.query({ query: AGENT_SERVICE_STATUS }).then( result => {
             console.log("check:", result)
             if(!result.data.agent.isInitialized) {
                 initDialog.open()

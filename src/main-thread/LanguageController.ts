@@ -30,7 +30,7 @@ const aliases = {
 
 type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;
 
-export class LanguageController {
+export default class LanguageController {
     #languages: Map<string, Language>
     #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: object;
@@ -80,7 +80,7 @@ export class LanguageController {
         })
     }
 
-    private languageForExpression(e: ExpressionRef): Language {
+    languageForExpression(e: ExpressionRef): Language {
         const address = aliases[e.language.address] ? aliases[e.language.address] : e.language.address
         const language = this.#languages.get(address)
         if(language) {

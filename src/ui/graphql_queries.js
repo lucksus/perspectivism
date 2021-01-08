@@ -1,5 +1,16 @@
 import { gql } from '@apollo/client'
 
+export const AGENT_SERVICE_STATUS = gql `
+    query agent {
+        agent {
+            isInitialized
+            isUnlocked
+            did
+            didDocument
+        }
+    }
+`
+
 export const AGENT = gql `
     query agent {
         agent {
@@ -8,10 +19,6 @@ export const AGENT = gql `
                 name
                 email
             }
-            isInitialized
-            isUnlocked
-            did
-            didDocument
         }
     }
 `

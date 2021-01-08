@@ -4,7 +4,7 @@ import didWallet from '@transmute/did-wallet'
 import Expression, { ExpressionProof } from '../acai/Expression';
 import secp256k1 from 'secp256k1'
 
-import { Signatures } from './Signatures';
+import Signatures from './Signatures';
 import Agent from '../acai/Agent';
 import type Language from '../acai/Language';
 import * as PubSubInstance from './PubSub'
@@ -20,10 +20,16 @@ export default class AgentService {
     #agentLanguage: Language
     #pubsub: PubSub
 
+    #readyPromise: Promise<void>
+    #readyPromiseResolve
+
     constructor(rootConfigPath: string) {
         this.#file = path.join(rootConfigPath, "agent.json")
         this.#fileProfile = path.join(rootConfigPath, "agentProfile.json")
         this.#pubsub = PubSubInstance.get()
+        this.#readyPromise = new Promise(resolve => {
+            this.#readyPromiseResolve = resolve
+        })
     }
 
     get did() {
@@ -32,6 +38,10 @@ export default class AgentService {
 
     get agent() {
         return this.#agent
+    }
+
+    get ready(): Promise<void> {
+        return this.#readyPromise
     }
 
     createSignedExpression(data: any): Expression {
@@ -132,6 +142,7 @@ export default class AgentService {
         console.debug("Registering new DID with agent language...")
         this.storeAgentProfile()
         this.#pubsub.publish(PubSubInstance.AGENT_UPDATED, this.#agent)
+        this.#readyPromiseResolve()
     }
 
     isInitialized() {
@@ -148,6 +159,7 @@ export default class AgentService {
         // @ts-ignore
         this.#wallet.unlock(password)
         this.storeAgentProfile()
+        this.#readyPromiseResolve()
     }
 
     save(password) {
