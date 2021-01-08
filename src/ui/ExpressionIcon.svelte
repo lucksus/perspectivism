@@ -63,12 +63,11 @@
             .split('')
             .filter(letter => { return /[a-z]|[A-Z]/.test(letter)})
             .join('')
-        const short = onlyLetters.substr(onlyLetters.length-5, 5)
+        const short = onlyLetters.substr(onlyLetters.length-10, 10).toLowerCase()
 
         console.debug(languageAddress, '->', onlyLetters, '->', short)
         return 'icon-'+short
     }
-
 
     async function getComponentConstructor() {
         componentConstructor = customElements.get(customElementName)
