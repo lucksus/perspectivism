@@ -3,7 +3,6 @@
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import { setClient } from "svelte-apollo";
 	import MainView from "./MainView.svelte";
-	import InitDialog from "./InitDialog.svelte"
 
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:4000/graphql`,
@@ -34,7 +33,6 @@
 
 <main>
 
-	<InitDialog></InitDialog>
 	<MainView></MainView>
 
 </main>

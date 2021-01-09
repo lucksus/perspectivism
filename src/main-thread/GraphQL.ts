@@ -5,6 +5,7 @@ import type LanguageRef from '../acai/LanguageRef'
 import type Perspective from '../acai/Perspective'
 import type PerspectivismCore from './PerspectivismCore'
 import * as PubSub from './PubSub'
+import { shell } from 'electron'
 
 const typeDefs = gql`
 type Agent {
@@ -151,6 +152,8 @@ type Mutation {
     removeLink(input: RemoveLinkInput): Boolean
     createExpression(input: CreateExpressionInput): String
     setLanguageSettings(input: SetLanguageSettingsInput): Boolean
+    openLinkExtern(url: String): Boolean
+    quit: Boolean
 }
 
 type Subscription {
@@ -293,6 +296,16 @@ function createResolvers(core: PerspectivismCore) {
             removePerspective: (parent, args, context, info) => {
                 const { uuid } = args
                 core.perspectivesController.remove(uuid)
+                return true
+            },
+            openLinkExtern: (parent, args) => {
+                const { url } = args
+                console.log("openLinkExtern:", url)
+                shell.openExternal(url)
+                return true
+            },
+            quit: () => {
+                process.exit(0)
                 return true
             }
         },
