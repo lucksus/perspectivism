@@ -14,7 +14,8 @@
     "lint": "tslint -c tslint.json \"src/main-thread/*.ts\"",
     "lint:fix": "tslint --fix -c tslint.json \"src/main-thread/*.ts\"",
     "test": "tsc && jest",
-    "rebuild": "electron-rebuild -f -w serialport"
+    "rebuild": "electron-rebuild -f -w serialport",
+    "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png"
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
@@ -36,12 +37,12 @@
     "@smui/select": "^1.0.0",
     "@smui/textfield": "^1.0.0",
     "@smui/top-app-bar": "^1.0.0",
-    "@transmute/did-wallet": "file:../did-wallet",
     "@tsconfig/svelte": "^1.0.0",
     "@types/jest": "^26.0.15",
     "@types/mocha": "^8.0.3",
     "babel-jest": "^26.6.3",
     "electron": "^10.1.1",
+    "electron-packager": "^15.2.0",
     "electron-rebuild": "^2.3.2",
     "email-validator": "^2.0.4",
     "faker": "^5.1.0",
@@ -70,6 +71,7 @@
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@holochain/conductor-api": "0.0.1-dev.15",
     "@smui/dialog": "^1.0.0",
+    "@transmute/did-wallet": "file:../did-wallet",
     "apollo-link-electron": "file:../apollo-link-electron",
     "apollo-server": "^2.18.2",
     "base-x": "^3.0.8",
