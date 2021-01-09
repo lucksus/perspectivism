@@ -2,46 +2,43 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
-const expressApp = express()
+const PerspectivismCore = require('./src/main-thread/PerspectivismCore')
+const core = PerspectivismCore.create()
 
-const Config = require('./src/main-thread/Config')
-const Db = require('./src/main-thread/db')
-const Holochain = require('./src/main-thread/Holochain')
-const IPFS = require('./src/main-thread/IPFS')
-const AgentService = require('./src/main-thread/AgentService')
-const PerspectivesController = require('./src/main-thread/PerspectivesController')
-const LinkRepoController = require('./src/main-thread/LinkRepoController')
-const LanguageController = require('./src/main-thread/LanguageController')
-const GraphQL = require('./src/main-thread/GraphQL')
-const DIDResolver = require('./src/main-thread/DIDs')
-const Signatures = require('./src/main-thread/Signatures')
-
-Config.init()
-const holochain = Holochain.init(Config.holochainConfigPath, Config.holochainDataPath)
-const agent = AgentService.init(Config.rootConfigPath)
-const db = Db.init(Config.dataPath)
-const didResolver = DIDResolver.init(Config.dataPath)
-const signatures = Signatures.init(didResolver)
-
-IPFS.init().then((IPFS) => {
-  const context = { agent, IPFS, signatures }
-  const perspectivesController = PerspectivesController.init(Config.rootConfigPath)
-  const languageController = LanguageController.init(context, holochain)
-  const linkRepoController = LinkRepoController.init({db, languageController, agent})
-  GraphQL.startServer(agent, perspectivesController, languageController, linkRepoController).then(({ url, subscriptionsUrl }) => {
-    console.log(`🚀  GraphQL Server ready at ${url}`)
-    console.log(`🚀  GraphQL subscriptions ready at ${subscriptionsUrl}`)
-  })
-
-  console.log("Installed languages:", JSON.stringify(languageController.getInstalledLanguages()))
-
-  app.whenReady().then(() => {
-    const win = createWindow()
-    languageController.addLinkObserver((added, removed, langRef) => {
-      win.webContents.send("links-incoming", added, removed, langRef)
-    })
+app.whenReady().then(() => {  
+  core.initServices()
+  core.startGraphQLServer()
+  const splash = createSplash()
+  core.waitForAgent().then(() => {
+    core.initControllers()
+    createWindow()
+    splash.close()
   })
 })
+
+function createSplash () {
+  // Create the browser window.
+  const win = new BrowserWindow({
+    width: 1000,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true,
+      enableRemoteModule: true,
+    },
+    minimizable: false,
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
+  })
+
+  // and load the index.html of the app.
+  win.loadURL(`file://${__dirname}/public/splash.html`)
+
+  // Open the DevTools.
+  //win.webContents.openDevTools()
+
+  return win
+}
 
 function createWindow () {
   // Create the browser window.
@@ -64,6 +61,7 @@ function createWindow () {
 }
 
 function serveUI() {
+  const expressApp = express()
   expressApp.use(express.static(`${__dirname}/public`))
   expressApp.listen(9090)
 }

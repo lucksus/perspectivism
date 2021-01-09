@@ -3,18 +3,19 @@
 	import Button, {Label} from '@smui/button';
 	import Textfield, {Input} from '@smui/textfield';
 	import HelperText from '@smui/textfield/helper-text/index';
-	import { afterUpdate } from "svelte";
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
-    import { query, mutation, getClient } from "svelte-apollo";
-    import { AGENT, INITIALIZE_AGENT, UNLOCK_AGENT } from './graphql_queries';
+    import { mutation, getClient } from "svelte-apollo";
+    import { AGENT_SERVICE_STATUS, INITIALIZE_AGENT, QUIT, UNLOCK_AGENT } from './graphql_queries';
+    import LinkExtern from './LinkExtern.svelte'
 
     const QGL_CLIENT = getClient()
     const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
     const GQL_UNLOCK_AGENT = mutation(UNLOCK_AGENT)
+    const GQL_QUIT = mutation(QUIT)
 
     function check() {
-        QGL_CLIENT.query({ query: AGENT }).then( result => {
+        QGL_CLIENT.query({ query: AGENT_SERVICE_STATUS }).then( result => {
             console.log("check:", result)
             if(!result.data.agent.isInitialized) {
                 initDialog.open()
@@ -69,6 +70,10 @@
             }
         })
     }
+
+    function quit() {
+        GQL_QUIT({})
+    }
     
     check()
 </script>
@@ -77,14 +82,16 @@
     bind:this={initDialog}
     aria-labelledby="dialog-title"
     aria-describedby="dialog-content"
+    scrimClickAction=""
+    escapeKeyAction=""
 >
     <Title id="dialog-title">Setup Agent Identity</Title>
     <Content id="dialog-content">
         <div>
-            Perspectivism is agent-centric and built around <a href="https://w3c.github.io/did-core/">DIDs (Decentralized Identifier)</a> 
+            Perspectivism is agent-centric and built around <LinkExtern url="https://w3c.github.io/did-core/">DIDs (Decentralized Identifier)</LinkExtern> 
             as the agent representation.
             This means it does not add its own siloed user handling / login, but in principle can work with any decentralized/sovereign
-            identitiy platform that implements DID (like <a href="https://www.uport.me/">uPort</a>, <a href="https://sovrin.org/">sovrin</a>, a DID document on your own webserver, etc.).
+            identitiy platform that implements DID (like <LinkExtern url="https://www.uport.me/">uPort</LinkExtern>, <LinkExtern url="https://sovrin.org/">sovrin</LinkExtern>, a DID document on your own webserver, etc.).
             <p>
                 The main caveat is that Perspectivism needs access to that agent's private key to sign expressions - and it can't implement
                 all keystore formats at once. (adding more as we progress towards v 1.0)
@@ -92,9 +99,9 @@
                 it currently supportSubmit export the according keys in a locked keystore.
             </p>
             <p>
-                Please head over to <a href="https://element-did.com">https://element-did.com</a> and create a keytore and register a DID.
-                You will need a web3 browser/plugin like <a href="https://metamask.io/">MetaMask</a>, set it to the Ropsten test network
-                and load your account with some <a href="https://faucet.dimensions.network/">test ETH</a>.
+                Please head over to <LinkExtern url="https://element-did.com">https://element-did.com</LinkExtern> and create a keytore and register a DID.
+                You will need a web3 browser/plugin like <LinkExtern url="https://metamask.io/">MetaMask</LinkExtern>, set it to the Ropsten test network
+                and load your account with some <LinkExtern url="https://faucet.dimensions.network/">test ETH</LinkExtern>.
                 <br>
                 Then paste both your DID and your exported keystore below.
             </p>
@@ -110,10 +117,7 @@
                 <LineRipple />
             </Textfield>
             <HelperText id="did-helper-text">Please paste here your already existing DID (e.g.: did:github:lucksus)</HelperText>
-            <Button on:click={resolveDID}>				<HelperText id="keystore-helper-text">Keystore (locked)</HelperText>
-
-                <Label>Resolve</Label>
-            </Button>
+            <HelperText id="keystore-helper-text">Keystore (locked)</HelperText>
             <br>
             DID document:Please paste here your locked/encrypted keystore string
         </div>
@@ -133,23 +137,26 @@
                 <LineRipple />
             </Textfield>
             <HelperText id="keystore-helper-text">Passphrase for above entered keystore cipher</HelperText>
-            <Button on:click={unlockKeystore}>
-                <Label>Unlock</Label>
-            </Button>
         </div>
         
     </Content>
     <Actions>
+        <Button on:click={quit}>
+            <Label>Quit</Label>
+        </Button>
         <Button on:click={submitDID}>
             <Label>Submit</Label>
         </Button>
     </Actions>
 </Dialog>
 
-<Dialog bind:this={unlockDialog}>
+<Dialog bind:this={unlockDialog}
+    scrimClickAction=""
+    escapeKeyAction=""
+>
     <Title id="dialog-title">Unlock Agent Keystore</Title>
     <Content>
-        <span>DID:</span><span>{did}</span>
+        <span class="did">{did}</span>
         <Textfield fullwidth lineRipple={false} label="Keystore">
             <Input bind:value={passphrase} id="input-did" type="password" aria-controls="unlock-helper-text" aria-describedby="unlock-helper-text" />
             <FloatingLabel for="input-did">Passphrase</FloatingLabel>
@@ -163,6 +170,9 @@
     </Content>
     
     <Actions>
+        <Button on:click={quit}>
+            <Label>Quit</Label>
+        </Button>
         <Button on:click={unlockKeystore}>
             <Label>Unlock</Label>
         </Button>
@@ -172,5 +182,10 @@
 <style>
     .error {
         color: red;
+    }
+
+    .did {
+        max-width: 512px;
+        word-wrap: break-word;
     }
 </style>

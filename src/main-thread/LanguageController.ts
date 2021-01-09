@@ -12,6 +12,10 @@ import multihashes from 'multihashes'
 import * as Config from './Config'
 import type { HolochainService } from './Holochain';
 import type AgentService from './AgentService'
+import baseX from 'base-x'
+
+const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const bs58 = baseX(BASE58)
 
 const builtInLanguages = [
     'note-ipfs',
@@ -30,7 +34,7 @@ const aliases = {
 
 type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;
 
-export class LanguageController {
+export default class LanguageController {
     #languages: Map<string, Language>
     #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: object;
@@ -45,7 +49,7 @@ export class LanguageController {
 
         builtInLanguages.forEach( bundle => {
             const bundleBytes = fs.readFileSync(bundle)
-            const hash = multihashes.toHexString(multihashing(bundleBytes, 'sha2-256'))
+            const hash = bs58.encode(multihashing(bundleBytes, 'sha2-256'))
             const { default: create, name } = require(path.join(process.env.PWD, bundle))
 
             const customSettings = this.getSettings({name, address: hash} as LanguageRef)
@@ -80,7 +84,7 @@ export class LanguageController {
         })
     }
 
-    private languageForExpression(e: ExpressionRef): Language {
+    languageForExpression(e: ExpressionRef): Language {
         const address = aliases[e.language.address] ? aliases[e.language.address] : e.language.address
         const language = this.#languages.get(address)
         if(language) {

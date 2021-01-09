@@ -3,7 +3,7 @@ import type { DIDResolver } from "./DIDs"
 import sha256 from 'sha256'
 import secp256k1 from 'secp256k1'
 
-export class Signatures {
+export default class Signatures {
     #didResolver: DIDResolver
 
     constructor(didResolver: DIDResolver) {
@@ -37,8 +37,4 @@ export class Signatures {
         const payloadBytes = Uint8Array.from(sha256(Uint8Array.from(payloadBuffer), { asBytes: true }))
         return payloadBytes
     }
-}
-
-export function init(didResolver: DIDResolver) {
-    return new Signatures(didResolver)
 }

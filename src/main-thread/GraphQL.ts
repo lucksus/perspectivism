@@ -1,7 +1,11 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
+import type Agent from '../acai/Agent'
 import { exprRef2String, parseExprURL } from '../acai/ExpressionRef'
+import type LanguageRef from '../acai/LanguageRef'
 import type Perspective from '../acai/Perspective'
+import type PerspectivismCore from './PerspectivismCore'
 import * as PubSub from './PubSub'
+import { shell } from 'electron'
 
 const typeDefs = gql`
 type Agent {
@@ -148,9 +152,12 @@ type Mutation {
     removeLink(input: RemoveLinkInput): Boolean
     createExpression(input: CreateExpressionInput): String
     setLanguageSettings(input: SetLanguageSettingsInput): Boolean
+    openLinkExtern(url: String): Boolean
+    quit: Boolean
 }
 
 type Subscription {
+    agentUpdated: Agent
     perspectiveAdded: Perspective
     perspectiveUpdated: Perspective
     perspectiveRemoved: String
@@ -160,7 +167,7 @@ type Subscription {
 `
 
 
-function createResolvers(agent, perspectivesController, languageController, linkRepoController) {
+function createResolvers(core: PerspectivismCore) {
     const pubsub = PubSub.get()
 
     return {
@@ -168,14 +175,14 @@ function createResolvers(agent, perspectivesController, languageController, link
             hello: () => 'Hello world!',
             agent: () => {
                 //console.log("GQL agent - AgentService:", agent)
-                return agent.dump()
+                return core.agentService.dump()
             },
             perspective: (parent, args, context, info) => {
                 const { uuid } = args
-                return perspectivesController.get()[uuid]
+                return core.perspectivesController.get()[uuid]
             },
             perspectives: (parent, args, context, info) => {
-                const ps = Object.values(perspectivesController.get())
+                const ps = Object.values(core.perspectivesController.get())
                 //console.debug("PERSPECTIVES:", ps)
                 return ps
             },
@@ -183,48 +190,47 @@ function createResolvers(agent, perspectivesController, languageController, link
                 //console.log("GQL| links:", args)
                 const { perspectiveUUID, query } = args
                 const perspective = { uuid: perspectiveUUID } as Perspective
-                const result = await linkRepoController.getLinks(perspective, query)
+                const result = await core.linkRepoController.getLinks(perspective, query)
                 return result
             },
             expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
-                const expression = await languageController.getExpression(ref)
-                if(! (typeof expression.data == "string")) {
+                let expression = await core.languageController.getExpression(ref) as any
+                if(expression) {
+                    expression.ref = ref
+                    expression.url = args.url.toString()
                     expression.data = JSON.stringify(expression.data)
                 }
-                expression.ref = ref
-                expression.url = args.url.toString()
-                //console.log("Query.expression:", expression)
-                expression.data = JSON.stringify(expression.data)
+                
                 return expression
             },
             language: (parent, args, context, info) => {
                 const { address } = args
-                const lang = languageController.languageByRef({address})
+                const lang = core.languageController.languageByRef({address} as LanguageRef) as any
                 lang.address = address
                 return lang
             },
             languages: (parent, args, context, info) => {
                 let filter
                 if(args.filter && args.filter !== '') filter = args.filter
-                return languageController.filteredLanguageRefs(filter)
+                return core.languageController.filteredLanguageRefs(filter)
             }
         },
         Mutation: {
             initializeAgent: (parent, args, context, info) => {
                 const { did, didDocument, keystore, passphrase } = args.input
-                agent.initialize(did, didDocument, keystore, passphrase)
-                return agent.dump()
+                core.agentService.initialize(did, didDocument, keystore, passphrase)
+                return core.agentService.dump()
             },
             unlockAgent:  (parent, args, context, info) => {
                 let failed = false
                 try {
-                    agent.unlock(args.passphrase)
+                    core.agentService.unlock(args.passphrase)
                 } catch(e) {
                     failed = true
                 }
 
-                let dump = agent.dump()
+                let dump = core.agentService.dump() as any
 
                 if(failed) {
                     dump.error = "Wrong passphrase"
@@ -234,18 +240,18 @@ function createResolvers(agent, perspectivesController, languageController, link
             },
             updateAgentProfile: (parent, args, context, info) => {
                 const { name, email } = args.input
-                let agentProfile = agent.agent
+                let agentProfile = core.agentService.agent
                 agentProfile.name = name
                 agentProfile.email = email
-                agent.updateAgent(agentProfile)
-                return agent.dump()
+                core.agentService.updateAgent(agentProfile)
+                return core.agentService.dump()
             },
             addLink: (parent, args, context, info) => {
                 //console.log("GQL| addLink:", args)
                 const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedLink = JSON.parse(link)
-                return linkRepoController.addLink(perspective, parsedLink)
+                return core.linkRepoController.addLink(perspective, parsedLink)
             },
             updateLink: (parent, args, context, info) => {
                 //console.log("GQL| updateLink:", args)
@@ -253,7 +259,7 @@ function createResolvers(agent, perspectivesController, languageController, link
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedOldLink = JSON.parse(oldLink)
                 const parsedNewLink = JSON.parse(newLink)
-                linkRepoController.updateLink(perspective, parsedOldLink, parsedNewLink)
+                core.linkRepoController.updateLink(perspective, parsedOldLink, parsedNewLink)
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
@@ -261,40 +267,54 @@ function createResolvers(agent, perspectivesController, languageController, link
                 const { perspectiveUUID, link } = args.input
                 const perspective = { uuid: perspectiveUUID } as Perspective
                 const parsedLink = JSON.parse(link)
-                linkRepoController.removeLink(perspective, parsedLink)
+                core.linkRepoController.removeLink(perspective, parsedLink)
                 return true
             },
             createExpression: async (parent, args, context, info) => {
                 const { languageAddress, content } = args.input
-                const langref = { address: languageAddress }
-                const expref = await languageController.createPublicExpression(langref, JSON.parse(content))
+                const langref = { address: languageAddress } as LanguageRef
+                const expref = await core.languageController.createPublicExpression(langref, JSON.parse(content))
                 return exprRef2String(expref)
             },
             setLanguageSettings: (parent, args, context, info) => {
                 //console.log("GQL| settings", args)
                 const { languageAddress, settings } = args.input
                 const langref = { name: '', address: languageAddress }
-                const lang = languageController.languageByRef(langref)
+                const lang = core.languageController.languageByRef(langref)
                 langref.name = lang.name
-                languageController.putSettings(langref, JSON.parse(settings))
+                core.languageController.putSettings(langref, JSON.parse(settings))
                 return true
             },
             addPerspective: (parent, args, context, info) => {
-                return perspectivesController.add(args.input)
+                return core.perspectivesController.add(args.input)
             },
             updatePerspective: (parent, args, context, info) => {
                 const perspective = args.input
-                perspectivesController.update(perspective)
+                core.perspectivesController.update(perspective)
                 return perspective
             },
             removePerspective: (parent, args, context, info) => {
                 const { uuid } = args
-                perspectivesController.remove(uuid)
+                core.perspectivesController.remove(uuid)
+                return true
+            },
+            openLinkExtern: (parent, args) => {
+                const { url } = args
+                console.log("openLinkExtern:", url)
+                shell.openExternal(url)
+                return true
+            },
+            quit: () => {
+                process.exit(0)
                 return true
             }
         },
 
         Subscription: {
+            agentUpdated: {
+                subscribe: () => pubsub.asyncIterator(PubSub.AGENT_UPDATED),
+                resolve: payload => payload
+            },
             perspectiveAdded: {
                 subscribe: () => pubsub.asyncIterator(PubSub.PERSPECTIVE_ADDED_TOPIC),
                 resolve: payload => payload.perspective
@@ -328,25 +348,25 @@ function createResolvers(agent, perspectivesController, languageController, link
         Expression: {
             language: async (expression) => {
                 //console.log("GQL EXPRESSION", expression)
-                const lang = await languageController.languageForExpression(expression.ref)
+                const lang = await core.languageController.languageForExpression(expression.ref) as any
                 lang.address = expression.ref.language.address
                 return lang
             },
 
             icon: (expression) => {
-                return { code: languageController.getIcon(expression.ref.language) }
+                return { code: core.languageController.getIcon(expression.ref.language) }
             }
         },
 
         Language: {
             constructorIcon: (language) => {
-                return { code: languageController.getConstructorIcon(language) }
+                return { code: core.languageController.getConstructorIcon(language) }
             },
             settings: (language) => {
-                return JSON.stringify(languageController.getSettings(language))
+                return JSON.stringify(core.languageController.getSettings(language))
             },
             settingsIcon: (language) => {
-                const code =  languageController.getSettingsIcon(language)
+                const code =  core.languageController.getSettingsIcon(language)
                 if(code)
                     return { code }
                 else
@@ -356,20 +376,28 @@ function createResolvers(agent, perspectivesController, languageController, link
 
         Agent: {
             name: async (agent) => {
+                console.debug("GQL| AGENT.name:", agent)
                 if(agent.name && agent.name !== "")
                     return agent.name
                 else {
-                    const agentExpression = await languageController.getExpression(parseExprURL(agent.did))
-                    return agentExpression.data.name
+                    const agentExpression = await core.languageController.getExpression(parseExprURL(agent.did))
+                    if(agentExpression)
+                        return (agentExpression.data as Agent).name
+                    else
+                        return ''
                 }
             },
 
             email: async (agent) => {
+                console.debug("GQL| AGENT.email:", agent)
                 if(agent.email && agent.email !== "")
                     return agent.email
                 else {
-                    const agentExpression = await languageController.getExpression(parseExprURL(agent.did))
-                    return agentExpression.data.email
+                    const agentExpression = await core.languageController.getExpression(parseExprURL(agent.did))
+                    if(agentExpression)
+                        return (agentExpression.data as Agent).email
+                    else
+                        return ''
                 }
             }
         }
@@ -377,8 +405,8 @@ function createResolvers(agent, perspectivesController, languageController, link
 }
 
 
-export async function startServer(agent, perspectivesController, languageController, linkRepoController) {
-    const resolvers = createResolvers(agent, perspectivesController, languageController, linkRepoController)
+export async function startServer(core: PerspectivismCore) {
+    const resolvers = createResolvers(core)
     const server = new ApolloServer({ typeDefs, resolvers });
     const { url, subscriptionsUrl } = await server.listen()
     return { url, subscriptionsUrl }
