@@ -1,10 +1,9 @@
-import LinkRepoController from './LinkRepoController'
+import Perspective, { PerspectiveContext, PerspectiveID } from './Perspective'
 import { PerspectivismDb } from './db'
 import { v4 as uuidv4 } from 'uuid'
 import faker from 'faker'
 import type Link from '../acai/Links'
 import type { LinkQuery } from '../acai/Links'
-import temp from 'temp'
 import Memory from 'lowdb/adapters/Memory'
 
 function createLink(): Link {
@@ -30,27 +29,35 @@ const agentService = {
         }
     }),
     agent: { did }
- }
+}
 const languageController = {
     getLinksAdapter: () => null
 }
 
 
-describe('LinkRepoController', () => {  
-    let linkRepoController
+describe('Perspective', () => {  
     let perspective
     let allLinks
 
     beforeEach(() => {
         let db = new PerspectivismDb(new Memory())
-        linkRepoController = new LinkRepoController({db, languageController, agent: agentService})
-        perspective = { uuid: uuidv4() }
+        perspective = new Perspective(
+            {
+                uuid: uuidv4(),
+                name: "Test Perspective"
+            } as PerspectiveID,
+            // @ts-ignore
+            {
+                agentService,
+                db, 
+                languageController
+            } as PerspectiveContext)
         allLinks = []
     })
 
     it('wraps links in expressions on addLink', () => {
         const link = createLink()
-        const expression = linkRepoController.addLink(perspective, link)
+        const expression = perspective.addLink(link)
         expect(expression.author).toEqual(agentService.agent)
         expect(expression.data).toEqual(link)
         expect(agentService.createSignedExpression.mock.calls.length).toBe(1)
@@ -65,7 +72,7 @@ describe('LinkRepoController', () => {
                     link.source = 'root'
                 }
                 allLinks.push(link)
-                linkRepoController.addLink(perspective, link)
+                perspective.addLink(link)
             }
         })
 
@@ -74,7 +81,7 @@ describe('LinkRepoController', () => {
         })
 
         it('can get all links', async () => {
-            const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
+            const result = await perspective.getLinks({} as LinkQuery)
 
             expect(result.length).toEqual(5)
 
@@ -88,7 +95,7 @@ describe('LinkRepoController', () => {
         })
 
         it('can get links by source', async () => {
-            const result = await linkRepoController.getLinks(perspective, {source: 'root'} as LinkQuery)
+            const result = await perspective.getLinks({source: 'root'} as LinkQuery)
             expect(result.length).toEqual(3)
         })
     })

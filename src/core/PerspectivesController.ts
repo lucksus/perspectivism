@@ -2,58 +2,96 @@ import path from 'path'
 import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import * as PubSub from './PubSub'
+import type { PerspectiveContext, PerspectiveID } from './Perspective'
+import Perspective from './Perspective'
 
 export default class PerspectivesController {
-    #perspectives = null
+    #perspectiveIDs: Map<string, PerspectiveID>
+    #perspectiveInstances: Map<string, Perspective>
     #rootConfigPath
     #pubsub
+    #context
 
-    constructor(rootConfigPath) {
+    constructor(rootConfigPath: string, context: PerspectiveContext) {
+        this.#context = context
         this.#rootConfigPath = rootConfigPath
         this.#pubsub = PubSub.get()
+
+        this.#perspectiveIDs = new Map<string, PerspectiveID>()
+        this.#perspectiveInstances = new Map<string, Perspective>()
+
         const FILENAME = 'perspectives.json'
         const FILEPATH = path.join(rootConfigPath, FILENAME)
+        
         if(fs.existsSync(FILEPATH)) {
-            this.#perspectives = JSON.parse(fs.readFileSync(FILEPATH).toString())
-        } else {
-            this.#perspectives = {}
-        }
+            const fileObject = JSON.parse(fs.readFileSync(FILEPATH).toString())
+            const entries = Object.keys(fileObject).map(k => {
+                console.debug(`Found Perspective "${k}":`, fileObject[k])
+                this.#perspectiveIDs.set(k, fileObject[k])
+            })
+        } 
     }
 
     private save() {
         const FILENAME = 'perspectives.json'
         const FILEPATH = path.join(this.#rootConfigPath, FILENAME)
-        fs.writeFileSync(FILEPATH, JSON.stringify(this.#perspectives))
+        let obj = {}
+        this.#perspectiveIDs.forEach((perspectiveID, uuid) => {
+            obj[uuid] = perspectiveID
+        })
+        fs.writeFileSync(FILEPATH, JSON.stringify(obj))
     }
 
-    get() {
-        return this.#perspectives
+    perspectiveID(uuid: string): PerspectiveID|void {
+        const pID = this.#perspectiveIDs.get(uuid)
+        console.log("pID:", pID)
+        return pID
+    }
+
+    allPerspectiveIDs(): PerspectiveID[] {
+        const alluuids = Array.from(this.#perspectiveIDs.values())
+        console.log("ALL PerspectiveIDs:", alluuids)
+        return alluuids
+    }
+
+    perspective(uuid: string): Perspective {
+        const foundInstance = this.#perspectiveInstances.get(uuid)
+        if(foundInstance) {
+            return foundInstance
+        } else {
+            const foundID = this.#perspectiveIDs.get(uuid)
+            if(foundID) {
+                return new Perspective(foundID, this.#context)
+            } else {
+                throw Error(`Perspective not found: ${uuid}`)
+            }
+        }
     }
 
     add(perspective) {
         if(!perspective.uuid) {
             perspective.uuid = uuidv4()
         }
-        this.#perspectives[perspective.uuid] = perspective
+        this.#perspectiveIDs.set(perspective.uuid, perspective)
         this.save()
         this.#pubsub.publish(PubSub.PERSPECTIVE_ADDED_TOPIC, { perspective })
         return perspective
     }
 
     remove(uuid) {
-        delete this.#perspectives[uuid]
+        this.#perspectiveIDs.delete(uuid)
         this.save()
         this.#pubsub.publish(PubSub.PERSPECTIVE_REMOVED_TOPIC, { uuid })
     }
 
     update(perspective) {
         const uuid = perspective.uuid
-        this.#perspectives[uuid] = perspective
+        this.#perspectiveIDs.set(uuid, perspective)
         this.save()
+        const instance = this.#perspectiveInstances.get(uuid)
+        if(instance) {
+            instance.updateFromId(perspective as PerspectiveID)
+        }
         this.#pubsub.publish(PubSub.PERSPECTIVE_UPDATED_TOPIC, { perspective })
     }
-}
-
-export function init(rootConfigPath) {
-    return new PerspectivesController(rootConfigPath)
 }

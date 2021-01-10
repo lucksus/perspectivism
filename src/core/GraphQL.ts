@@ -178,20 +178,17 @@ function createResolvers(core: PerspectivismCore) {
                 return core.agentService.dump()
             },
             perspective: (parent, args, context, info) => {
-                const { uuid } = args
-                return core.perspectivesController.get()[uuid]
+                console.log("GQL perspective", args.uuid)
+                return core.perspectivesController.perspectiveID(args.uuid)
             },
             perspectives: (parent, args, context, info) => {
-                const ps = Object.values(core.perspectivesController.get())
-                //console.debug("PERSPECTIVES:", ps)
-                return ps
+                return core.perspectivesController.allPerspectiveIDs()
             },
             links: async (parent, args, context, info) => {
                 //console.log("GQL| links:", args)
                 const { perspectiveUUID, query } = args
-                const perspective = { uuid: perspectiveUUID } as Perspective
-                const result = await core.linkRepoController.getLinks(perspective, query)
-                return result
+                const perspective = core.perspectivesController.perspective(perspectiveUUID)
+                return await perspective.getLinks(query)
             },
             expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
@@ -249,25 +246,25 @@ function createResolvers(core: PerspectivismCore) {
             addLink: (parent, args, context, info) => {
                 //console.log("GQL| addLink:", args)
                 const { perspectiveUUID, link } = args.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
+                const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedLink = JSON.parse(link)
-                return core.linkRepoController.addLink(perspective, parsedLink)
+                return perspective.addLink(parsedLink)
             },
             updateLink: (parent, args, context, info) => {
                 //console.log("GQL| updateLink:", args)
                 const { perspectiveUUID, oldLink, newLink } = args.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
+                const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedOldLink = JSON.parse(oldLink)
                 const parsedNewLink = JSON.parse(newLink)
-                core.linkRepoController.updateLink(perspective, parsedOldLink, parsedNewLink)
+                perspective.updateLink(parsedOldLink, parsedNewLink)
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
                 //console.log("GQL| removeLink:", args)
                 const { perspectiveUUID, link } = args.input
-                const perspective = { uuid: perspectiveUUID } as Perspective
+                const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedLink = JSON.parse(link)
-                core.linkRepoController.removeLink(perspective, parsedLink)
+                perspective.removeLink(parsedLink)
                 return true
             },
             createExpression: async (parent, args, context, info) => {

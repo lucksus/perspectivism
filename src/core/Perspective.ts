@@ -1,5 +1,5 @@
+import type Agent from "../acai/Agent"
 import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
-import type Perspective from "../acai/Perspective";
 import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
 import type Expression from "../acai/Expression";
@@ -7,18 +7,58 @@ import type AgentService from "./AgentService";
 import type LanguageController from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import * as PubSub from './PubSub'
+import type { LanguageAdapter } from "../acai/Language";
 
-export default class LinkRepoController {
+export class PerspectiveID {
+    name: string;
+    uuid: string;
+    author: Agent;
+    timestamp: string;
+}
+
+export class PerspectiveContext {
+    db: any
+    agentService: AgentService
+    languageController: LanguageController
+}
+
+export default class Perspective {
+    name: string;
+    uuid: string;
+    author: Agent;
+    timestamp: string;
+    linksSharingLanguage: string;
+
     #db: any;
     #agent: AgentService;
     #languageController: LanguageController
     #pubsub: any
 
-    constructor({db, languageController, agent}) {
-        this.#db = db
-        this.#agent = agent
-        this.#languageController = languageController
+    constructor(id: PerspectiveID, context: PerspectiveContext) {
+        this.uuid = id.uuid
+        this.name = id.name
+        this.author = id.author
+        this.timestamp = id.timestamp
+
+        this.#db = context.db
+        this.#agent = context.agentService
+        this.#languageController = context.languageController
+
         this.#pubsub = PubSub.get()
+    }
+
+    plain(): PerspectiveID {
+        const { name, uuid, author, timestamp } = this
+        return JSON.parse(JSON.stringify({
+            name, uuid, author, timestamp
+        }))
+    }
+
+    updateFromId(id: PerspectiveID) {
+        if(id.name) this.name = id.name
+        if(id.uuid) this.uuid = id.uuid
+        if(id.author) this.author = id.author
+        if(id.timestamp) this.timestamp = id.timestamp
     }
 
     linkToExpression(link: Link): Expression {
@@ -37,12 +77,12 @@ export default class LinkRepoController {
         throw new Error("Object is neither Link nor Expression: " + JSON.stringify(maybeLink))
     }
 
-    private callLinksAdapter(p: Perspective, functionName: string, ...args): Promise<any> {
-        if(p.linksSharingLanguage && p.linksSharingLanguage !== "") {
+    private callLinksAdapter(functionName: string, ...args): Promise<any> {
+        if(this.linksSharingLanguage && this.linksSharingLanguage !== "") {
             return new Promise(async (resolve, reject) => {
                 setTimeout(() => resolve([]), 2000)
                 try {
-                    const langRef = {address: p.linksSharingLanguage, name: ''} as LanguageRef
+                    const langRef = {address: this.linksSharingLanguage, name: ''} as LanguageRef
                     const linksAdapter = this.#languageController.getLinksAdapter(langRef)
                     if(linksAdapter) {
                         console.debug(`Calling linksAdapter.${functionName}(${args})`)
@@ -50,7 +90,7 @@ export default class LinkRepoController {
                         console.debug("Got result:", result)
                         resolve(result)
                     } else {
-                        throw new Error("LinksSharingLanguage '"+p.linksSharingLanguage+"' set in perspective '"+p.name+"' not installed!")
+                        throw new Error("LinksSharingLanguage '"+this.linksSharingLanguage+"' set in perspective '"+this.name+"' not installed!")
                     }
                 } catch(e) {
                     console.error("Error while trying to call links adapter:", e)
@@ -62,9 +102,9 @@ export default class LinkRepoController {
         }
     }
 
-    async syncWithSharingAdapter(p: Perspective) {
-        const localLinks = this.#db.getAllLinks(p.uuid)
-        const remoteLinks = await this.callLinksAdapter(p, 'getLinks')
+    async syncWithSharingAdapter() {
+        const localLinks = this.#db.getAllLinks(this.uuid)
+        const remoteLinks = await this.callLinksAdapter('getLinks')
         const includes = (link, list) => {
             return undefined !== list.find(e =>
                 JSON.stringify(e.author) === JSON.stringify(link.author) &&
@@ -76,87 +116,99 @@ export default class LinkRepoController {
         }
         for(const l of localLinks) {
             if(!includes(l, remoteLinks)) {
-                await this.callLinksAdapter(p, "addLink", l)
+                await this.callLinksAdapter("addLink", l)
             }
         }
 
     }
 
-    addLink(p: Perspective, link: Link | Expression): Expression {
+    addLink(link: Link | Expression): Expression {
         const linkExpression = this.ensureLinkExpression(link)
-        this.callLinksAdapter(p, 'addLink', linkExpression)
+        this.callLinksAdapter('addLink', linkExpression)
         const hash = new SHA3(256);
         hash.update(JSON.stringify(linkExpression));
         const addr = hash.digest('hex');
 
         link = linkExpression.data as Link
 
-        this.#db.storeLink(p.uuid, linkExpression, addr)
-        this.#db.attachSource(p.uuid, link.source, addr)
-        this.#db.attachTarget(p.uuid, link.target, addr)
+        this.#db.storeLink(this.uuid, linkExpression, addr)
+        this.#db.attachSource(this.uuid, link.source, addr)
+        this.#db.attachTarget(this.uuid, link.target, addr)
 
-        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { perspective: p, linkAdded: linkExpression })
+        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { 
+            perspective: this.plain(), 
+            linkAdded: linkExpression 
+        })
 
         return linkExpression
     }
 
 
 
-    private findLink(p: Perspective, linkToFind: Expression): string {
-        const allLinks = this.#db.getAllLinks(p.uuid)
+    private findLink(linkToFind: Expression): string {
+        const allLinks = this.#db.getAllLinks(this.uuid)
         for(const {name, link} of allLinks) {
             if(linkEqual(linkToFind, link)) {
                 return name
             }
         }
-        throw `Link not found in perspective "${JSON.stringify(p)}": ${JSON.stringify(linkToFind)}`
+        throw `Link not found in perspective "${this.plain()}": ${JSON.stringify(linkToFind)}`
     }
 
-    async updateLink(p: Perspective, oldLink: Expression, newLink: Expression) {
+    async updateLink(oldLink: Expression, newLink: Expression) {
         console.debug("LINK REPO: updating link:", oldLink, newLink)
-        const addr = this.findLink(p, oldLink)
+        const addr = this.findLink(oldLink)
         console.debug("hash:", addr)
 
         const _old = oldLink.data as Link
         const _new = newLink.data as Link
 
-        this.#db.updateLink(p.uuid, newLink, addr)
+        this.#db.updateLink(this.uuid, newLink, addr)
         if(_old.source !== _new.source){
-            this.#db.removeSource(p.uuid, _old.source, addr)
-            this.#db.attachSource(p.uuid, _new.source, addr)
+            this.#db.removeSource(this.uuid, _old.source, addr)
+            this.#db.attachSource(this.uuid, _new.source, addr)
         }
         if(_old.target !== _new.target){
-            this.#db.removeTarget(p.uuid, _old.target, addr)
-            this.#db.attachTarget(p.uuid, _new.target, addr)
+            this.#db.removeTarget(this.uuid, _old.target, addr)
+            this.#db.attachTarget(this.uuid, _new.target, addr)
         }
 
-        this.callLinksAdapter(p, 'updateLink', oldLink, newLink)
-        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { perspective: p, link: newLink })
-        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { perspective: p, link: oldLink })
+        this.callLinksAdapter('updateLink', oldLink, newLink)
+        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { 
+            perspective: this.plain(), 
+            link: newLink
+        })
+        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { 
+            perspective: this.plain(), 
+            link: oldLink 
+        })
     }
 
-    async removeLink(p: Perspective, linkExpression: Expression) {
-        const addr = this.findLink(p, linkExpression)
+    async removeLink(linkExpression: Expression) {
+        const addr = this.findLink(linkExpression)
         const link = linkExpression.data as Link
 
-        this.#db.removeSource(p.uuid, link.source, addr)
-        this.#db.removeTarget(p.uuid, link.target, addr)
+        this.#db.removeSource(this.uuid, link.source, addr)
+        this.#db.removeTarget(this.uuid, link.target, addr)
 
-        this.callLinksAdapter(p, 'removeLink', linkExpression)
-        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { perspective: p, link })
+        this.callLinksAdapter('removeLink', linkExpression)
+        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { 
+            perspective: this.plain(), 
+            link 
+        })
     }
 
-    private getLinksLocal(p: Perspective, query: LinkQuery): Expression[] {
+    private getLinksLocal(query: LinkQuery): Expression[] {
         //console.debug("getLinks 1")
         if(!query || !query.source && !query.predicate && !query.target) {
-            return this.#db.getAllLinks(p.uuid).map(e => e.link)
+            return this.#db.getAllLinks(this.uuid).map(e => e.link)
         }
 
         //console.debug("getLinks 2")
 
         if(query.source) {
             //console.debug("query.source", query.source)
-            let result = this.#db.getLinksBySource(p.uuid, query.source).map(e => e.link)
+            let result = this.#db.getLinksBySource(this.uuid, query.source).map(e => e.link)
             // @ts-ignore
             if(query.target) result = result.filter(l => l.data.target === query.target)
             // @ts-ignore
@@ -170,7 +222,7 @@ export default class LinkRepoController {
         //console.debug("getLinks 3")
 
         if(query.target) {
-            let result = this.#db.getLinksByTarget(p.uuid, query.target).map(e => e.link)
+            let result = this.#db.getLinksByTarget(this.uuid, query.target).map(e => e.link)
             // @ts-ignore
             if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
             return result
@@ -178,15 +230,15 @@ export default class LinkRepoController {
 
         //console.debug("getLinks 4")
 
-        return this.#db.getAllLinks(p.uuid).map(e => e.link).filter(link => link.data.predicate === query.predicate)
+        return this.#db.getAllLinks(this.uuid).map(e => e.link).filter(link => link.data.predicate === query.predicate)
     }
 
-    async getLinks(p: Perspective, query: LinkQuery): Promise<Expression[]> {
+    async getLinks(query: LinkQuery): Promise<Expression[]> {
         //console.debug("getLinks local...")
-        const localLinks = await this.getLinksLocal(p, query)
+        const localLinks = await this.getLinksLocal(query)
         //console.debug("getLinks local", localLinks)
         //console.debug("getLinks remote...")
-        const remoteLinks = await this.callLinksAdapter(p, 'getLinks', query)
+        const remoteLinks = await this.callLinksAdapter('getLinks', query)
         //console.debug("getLinks remote", remoteLinks)
         const mergedLinks = {}
         localLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
@@ -194,9 +246,4 @@ export default class LinkRepoController {
 
         return Object.values(mergedLinks)
     }
-}
-
-export function init(context: any): LinkRepoController {
-    const linkRepoController = new LinkRepoController(context)
-    return linkRepoController
 }

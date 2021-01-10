@@ -5,12 +5,12 @@ import * as Holochain from './Holochain'
 import * as IPFS from './IPFS'
 import AgentService from './AgentService'
 import PerspectivesController from './PerspectivesController'
-import LinkRepoController from './LinkRepoController'
 import LanguageController from './LanguageController'
 import * as GraphQL from './GraphQL'
 import * as DIDs from './DIDs'
 import type { DIDResolver } from './DIDs'
 import Signatures from './Signatures'
+import type Perspective from './Perspective'
 
 
 export default class PerspectivismCore {
@@ -24,7 +24,6 @@ export default class PerspectivismCore {
 
     #perspectivesController: PerspectivesController
     #languageController: LanguageController
-    #linkRepoController: LinkRepoController
 
     constructor() {
         Config.init()
@@ -48,10 +47,6 @@ export default class PerspectivismCore {
         return this.#languageController
     }
 
-    get linkRepoController(): LinkRepoController {
-        return this.#linkRepoController
-    }
-
     async startGraphQLServer() {
         const { url, subscriptionsUrl } = await GraphQL.startServer(this)
         console.log(`🚀  GraphQL Server ready at ${url}`)
@@ -68,17 +63,21 @@ export default class PerspectivismCore {
     }
 
     initControllers() {
-        this.#perspectivesController = new PerspectivesController(Config.rootConfigPath)
         this.#languageController = new LanguageController({
             agent: this.#agentService,
             IPFS: this.#IPFS,
             signatures: this.#signatures
         }, this.#holochain)
-        this.#linkRepoController = new LinkRepoController({
-            db: this.#db, 
-            languageController: this.#languageController, 
-            agent: this.#agentService
+
+        this.#perspectivesController = new PerspectivesController(Config.rootConfigPath, {
+            db: this.#db,
+            agentService: this.agentService,
+            languageController: this.#languageController
         })
+    }
+
+    perspectiveByUuid(uuid: string): Perspective|void {
+
     }
 }
 
