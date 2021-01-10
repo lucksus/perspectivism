@@ -95,7 +95,7 @@ type Query {
     languages(filter: String): [Language]
     perspectives: [Perspective]
     perspective(uuid: String): Perspective
-    
+
 }
 
 
@@ -174,7 +174,7 @@ function createResolvers(core: PerspectivismCore) {
         Query: {
             hello: () => 'Hello world!',
             agent: () => {
-                //console.log("GQL agent - AgentService:", agent)
+                // console.log("GQL agent - AgentService:", agent)
                 return core.agentService.dump()
             },
             perspective: (parent, args, context, info) => {
@@ -185,20 +185,20 @@ function createResolvers(core: PerspectivismCore) {
                 return core.perspectivesController.allPerspectiveIDs()
             },
             links: async (parent, args, context, info) => {
-                //console.log("GQL| links:", args)
+                // console.log("GQL| links:", args)
                 const { perspectiveUUID, query } = args
                 const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 return await perspective.getLinks(query)
             },
             expression: async (parent, args, context, info) => {
                 const ref = parseExprURL(args.url.toString())
-                let expression = await core.languageController.getExpression(ref) as any
+                const expression = await core.languageController.getExpression(ref) as any
                 if(expression) {
                     expression.ref = ref
                     expression.url = args.url.toString()
                     expression.data = JSON.stringify(expression.data)
                 }
-                
+
                 return expression
             },
             language: (parent, args, context, info) => {
@@ -227,31 +227,31 @@ function createResolvers(core: PerspectivismCore) {
                     failed = true
                 }
 
-                let dump = core.agentService.dump() as any
+                const dump = core.agentService.dump() as any
 
                 if(failed) {
                     dump.error = "Wrong passphrase"
                 }
-                
+
                 return dump
             },
             updateAgentProfile: (parent, args, context, info) => {
                 const { name, email } = args.input
-                let agentProfile = core.agentService.agent
+                const agentProfile = core.agentService.agent
                 agentProfile.name = name
                 agentProfile.email = email
                 core.agentService.updateAgent(agentProfile)
                 return core.agentService.dump()
             },
             addLink: (parent, args, context, info) => {
-                //console.log("GQL| addLink:", args)
+                // console.log("GQL| addLink:", args)
                 const { perspectiveUUID, link } = args.input
                 const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedLink = JSON.parse(link)
                 return perspective.addLink(parsedLink)
             },
             updateLink: (parent, args, context, info) => {
-                //console.log("GQL| updateLink:", args)
+                // console.log("GQL| updateLink:", args)
                 const { perspectiveUUID, oldLink, newLink } = args.input
                 const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedOldLink = JSON.parse(oldLink)
@@ -260,7 +260,7 @@ function createResolvers(core: PerspectivismCore) {
                 return newLink
             },
             removeLink: (parent, args, context, info) => {
-                //console.log("GQL| removeLink:", args)
+                // console.log("GQL| removeLink:", args)
                 const { perspectiveUUID, link } = args.input
                 const perspective = core.perspectivesController.perspective(perspectiveUUID)
                 const parsedLink = JSON.parse(link)
@@ -274,7 +274,7 @@ function createResolvers(core: PerspectivismCore) {
                 return exprRef2String(expref)
             },
             setLanguageSettings: (parent, args, context, info) => {
-                //console.log("GQL| settings", args)
+                // console.log("GQL| settings", args)
                 const { languageAddress, settings } = args.input
                 const langref = { name: '', address: languageAddress }
                 const lang = core.languageController.languageByRef(langref)
@@ -344,7 +344,7 @@ function createResolvers(core: PerspectivismCore) {
 
         Expression: {
             language: async (expression) => {
-                //console.log("GQL EXPRESSION", expression)
+                // console.log("GQL EXPRESSION", expression)
                 const lang = await core.languageController.languageForExpression(expression.ref) as any
                 lang.address = expression.ref.language.address
                 return lang

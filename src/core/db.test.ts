@@ -29,7 +29,7 @@ describe('PerspectivismDb', () => {
         for(let i=0; i<3; i++) {
             expect(db.getLink(pUUID, name)).toEqual(obj)
         }
-        
+
     })
 
     it('can getAllLinks', () => {

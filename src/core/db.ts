@@ -78,7 +78,7 @@ export class PerspectivismDb {
             allLinkNames = []
         }
 
-        let allLinks = []
+        const allLinks = []
         for(const linkName of allLinkNames) {
             allLinks.push({
                 name: linkName,
@@ -107,7 +107,7 @@ export class PerspectivismDb {
             this.#db.get(key)
                 .push(linkName)
                 .write()
-        } 
+        }
     }
 
     removeSource(pUUID: String, source: String, linkName: String) {
@@ -124,7 +124,7 @@ export class PerspectivismDb {
     remove(key: String, linkName: String) {
         this.#db.get(key).remove(linkName).write()
     }
-    
+
 }
 
 export function init(dbFilePath): PerspectivismDb {

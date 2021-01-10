@@ -16,17 +16,17 @@ export default class Signatures {
         if(!didDocument) return false
 
 
-        if(!didDocument["publicKey"]) {
+        if(!didDocument.publicKey) {
             console.error("Got weird DID document without 'publicKey':", didDocument)
         }
 
-        const key = didDocument["publicKey"].find(key => key.id === expr.proof.key)
+        const key = didDocument.publicKey.find(key => key.id === expr.proof.key)
         if(!key) return false
 
-        const pubKey = Uint8Array.from(Buffer.from(key["publicKeyHex"], "hex"))
+        const pubKey = Uint8Array.from(Buffer.from(key.publicKeyHex, "hex"))
         const sigBytes = Uint8Array.from(Buffer.from(expr.proof.signature, "hex"))
         const message = Signatures.buildMessage(expr.data, expr.timestamp)
-        
+
         return secp256k1.ecdsaVerify(sigBytes, message, pubKey)
     }
 

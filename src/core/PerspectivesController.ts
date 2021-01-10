@@ -22,20 +22,20 @@ export default class PerspectivesController {
 
         const FILENAME = 'perspectives.json'
         const FILEPATH = path.join(rootConfigPath, FILENAME)
-        
+
         if(fs.existsSync(FILEPATH)) {
             const fileObject = JSON.parse(fs.readFileSync(FILEPATH).toString())
             const entries = Object.keys(fileObject).map(k => {
                 console.debug(`Found Perspective "${k}":`, fileObject[k])
                 this.#perspectiveIDs.set(k, fileObject[k])
             })
-        } 
+        }
     }
 
     private save() {
         const FILENAME = 'perspectives.json'
         const FILEPATH = path.join(this.#rootConfigPath, FILENAME)
-        let obj = {}
+        const obj = {}
         this.#perspectiveIDs.forEach((perspectiveID, uuid) => {
             obj[uuid] = perspectiveID
         })

@@ -27,7 +27,7 @@ export default class PerspectivismCore {
 
     constructor() {
         Config.init()
-        
+
         this.#agentService = new AgentService(Config.rootConfigPath)
         this.#agentService.load()
         this.#db = Db.init(Config.dataPath)

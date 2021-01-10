@@ -135,9 +135,9 @@ export default class Perspective {
         this.#db.attachSource(this.uuid, link.source, addr)
         this.#db.attachTarget(this.uuid, link.target, addr)
 
-        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { 
-            perspective: this.plain(), 
-            linkAdded: linkExpression 
+        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, {
+            perspective: this.plain(),
+            linkAdded: linkExpression
         })
 
         return linkExpression
@@ -152,7 +152,7 @@ export default class Perspective {
                 return name
             }
         }
-        throw `Link not found in perspective "${this.plain()}": ${JSON.stringify(linkToFind)}`
+        throw new Error(`Link not found in perspective "${this.plain()}": ${JSON.stringify(linkToFind)}`)
     }
 
     async updateLink(oldLink: Expression, newLink: Expression) {
@@ -174,13 +174,13 @@ export default class Perspective {
         }
 
         this.callLinksAdapter('updateLink', oldLink, newLink)
-        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, { 
-            perspective: this.plain(), 
+        this.#pubsub.publish(PubSub.LINK_ADDED_TOPIC, {
+            perspective: this.plain(),
             link: newLink
         })
-        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { 
-            perspective: this.plain(), 
-            link: oldLink 
+        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, {
+            perspective: this.plain(),
+            link: oldLink
         })
     }
 
@@ -192,22 +192,22 @@ export default class Perspective {
         this.#db.removeTarget(this.uuid, link.target, addr)
 
         this.callLinksAdapter('removeLink', linkExpression)
-        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, { 
-            perspective: this.plain(), 
-            link 
+        this.#pubsub.publish(PubSub.LINK_REMOVED_TOPIC, {
+            perspective: this.plain(),
+            link
         })
     }
 
     private getLinksLocal(query: LinkQuery): Expression[] {
-        //console.debug("getLinks 1")
+        // console.debug("getLinks 1")
         if(!query || !query.source && !query.predicate && !query.target) {
             return this.#db.getAllLinks(this.uuid).map(e => e.link)
         }
 
-        //console.debug("getLinks 2")
+        // console.debug("getLinks 2")
 
         if(query.source) {
-            //console.debug("query.source", query.source)
+            // console.debug("query.source", query.source)
             let result = this.#db.getLinksBySource(this.uuid, query.source).map(e => e.link)
             // @ts-ignore
             if(query.target) result = result.filter(l => l.data.target === query.target)
@@ -215,11 +215,11 @@ export default class Perspective {
 
 
             if(query.predicate) result = result.filter(l => l.data.predicate === query.predicate)
-            //console.debug("result", result)
+            // console.debug("result", result)
             return result
         }
 
-        //console.debug("getLinks 3")
+        // console.debug("getLinks 3")
 
         if(query.target) {
             let result = this.#db.getLinksByTarget(this.uuid, query.target).map(e => e.link)
@@ -228,18 +228,18 @@ export default class Perspective {
             return result
         }
 
-        //console.debug("getLinks 4")
+        // console.debug("getLinks 4")
 
         return this.#db.getAllLinks(this.uuid).map(e => e.link).filter(link => link.data.predicate === query.predicate)
     }
 
     async getLinks(query: LinkQuery): Promise<Expression[]> {
-        //console.debug("getLinks local...")
+        // console.debug("getLinks local...")
         const localLinks = await this.getLinksLocal(query)
-        //console.debug("getLinks local", localLinks)
-        //console.debug("getLinks remote...")
+        // console.debug("getLinks local", localLinks)
+        // console.debug("getLinks remote...")
         const remoteLinks = await this.callLinksAdapter('getLinks', query)
-        //console.debug("getLinks remote", remoteLinks)
+        // console.debug("getLinks remote", remoteLinks)
         const mergedLinks = {}
         localLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)
         remoteLinks.forEach(l => mergedLinks[hashLinkExpression(l)] = l)

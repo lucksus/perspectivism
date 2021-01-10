@@ -193,7 +193,7 @@ export default class LanguageController {
                 lang.address = alias
             }
         }
-        
+
         return new ExpressionRef(lang, address)
     }
 
@@ -206,7 +206,7 @@ export default class LanguageController {
                     console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
                     expr.proof.invalid = true
                 } else {
-                    //console.debug("Valid expr:", ref)
+                    // console.debug("Valid expr:", ref)
                     expr.proof.valid = true
                 }
             } catch(e) {

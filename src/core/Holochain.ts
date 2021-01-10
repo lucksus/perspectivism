@@ -22,7 +22,7 @@ export default class HolochainLanguageDelegate {
         this.#holochainService = holochainService
     }
 
-    async registerDNAs(dnas: Array<Dna>) {
+    async registerDNAs(dnas: Dna[]) {
         return this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
     }
 
@@ -56,7 +56,7 @@ export class HolochainService {
                 this.#adminWebsocket = await AdminWebsocket.connect(
                     `ws://localhost:${this.#adminPort}`
                 )
-    
+
                 console.debug("Holochain admin interface connected on port", this.#adminPort)
                 this.#appPort = this.#adminPort + 1
                 this.#adminWebsocket.attachAppInterface({ port: this.#appPort })
@@ -66,7 +66,7 @@ export class HolochainService {
             } catch(e) {
                 console.error("Error intializing Holochain conductor:", e)
             }
-            
+
         })
     }
 
@@ -85,9 +85,9 @@ export class HolochainService {
         }
     }
 
-    async ensureInstallDNAforLanguage(lang: string, dnas: Array<Dna>) {
+    async ensureInstallDNAforLanguage(lang: string, dnas: Dna[]) {
         await this.#ready
-        
+
 
         const activeApps = await this.#adminWebsocket.listActiveApps()
         if(!activeApps.includes(lang)) {
@@ -96,10 +96,10 @@ export class HolochainService {
             // 1. install app
             try {
                 console.debug("HolochainService: Installing DNAs for language", lang)
-                //console.debug(dnaFile)
-                //let installedCellIds = await this.#adminWebsocket.listCellIds()
-                //console.debug("HolochainService: Installed cells before:", installedCellIds)
-                //const cellId = HolochainService.dnaID(lang, nick)
+                // console.debug(dnaFile)
+                // let installedCellIds = await this.#adminWebsocket.listCellIds()
+                // console.debug("HolochainService: Installed cells before:", installedCellIds)
+                // const cellId = HolochainService.dnaID(lang, nick)
 
                 await this.#adminWebsocket.installApp({
                     agent_key: await this.pubKeyForLanguage(lang),
@@ -108,11 +108,11 @@ export class HolochainService {
                         const p = path.join(this.#dataPath, `${lang}-${dna.nick}.dna.gz`)
                         fs.writeFileSync(p, dna.file)
                         return { nick: dna.nick, path: p };
-                    }),    
+                    }),
                 })
-        
-                //installedCellIds = await this.#adminWebsocket.listCellIds()
-                //console.debug("HolochainService: Installed cells after:", installedCellIds)
+
+                // installedCellIds = await this.#adminWebsocket.listCellIds()
+                // console.debug("HolochainService: Installed cells after:", installedCellIds)
                 installed = true
             } catch(e) {
                 if(!e.data?.data?.indexOf('AppAlreadyInstalled')) {
@@ -186,8 +186,8 @@ export class HolochainService {
                 cell_id,
                 zome_name,
                 fn_name,
-                provenance: provenance,
-                payload: payload
+                provenance,
+                payload
             })
             console.debug("HolochainService zome function result:", result)
             return result

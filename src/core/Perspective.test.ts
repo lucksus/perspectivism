@@ -15,7 +15,7 @@ function createLink(): Link {
 }
 
 const did = 'did:local-test-agent'
-const agentService = { 
+const agentService = {
     did,
     createSignedExpression: jest.fn(data => {
         return {
@@ -35,12 +35,12 @@ const languageController = {
 }
 
 
-describe('Perspective', () => {  
+describe('Perspective', () => {
     let perspective
     let allLinks
 
     beforeEach(() => {
-        let db = new PerspectivismDb(new Memory())
+        const db = new PerspectivismDb(new Memory())
         perspective = new Perspective(
             {
                 uuid: uuidv4(),
@@ -49,7 +49,7 @@ describe('Perspective', () => {
             // @ts-ignore
             {
                 agentService,
-                db, 
+                db,
                 languageController
             } as PerspectiveContext)
         allLinks = []
