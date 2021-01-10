@@ -3,7 +3,7 @@ import type AgentService from '../../acai/AgentService'
 import type { PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { IPFSNode } from '../../acai/LanguageContext'
-import type HolochainLanguageDelegate from '../../main-thread/Holochain'
+import type HolochainLanguageDelegate from '../../core/Holochain'
 import { DNA_NICK } from './dna'
 
 export class IpfsPutAdapter implements PublicSharing {
