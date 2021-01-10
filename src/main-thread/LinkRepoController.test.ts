@@ -15,8 +15,22 @@ function createLink(): Link {
     } as Link
 }
 
-
-const agent = { did: 'did:local-test-agent' }
+const did = 'did:local-test-agent'
+const agentService = { 
+    did,
+    createSignedExpression: jest.fn(data => {
+        return {
+            author: { did },
+            timestamp: "now",
+            data,
+            proof: {
+                signature: "abcdefgh",
+                key: `${did}#primary`
+            }
+        }
+    }),
+    agent: { did }
+ }
 const languageController = {
     getLinksAdapter: () => null
 }
@@ -29,7 +43,7 @@ describe('LinkRepoController', () => {
 
     beforeEach(() => {
         let db = new PerspectivismDb(new Memory())
-        linkRepoController = new LinkRepoController({db, languageController, agent})
+        linkRepoController = new LinkRepoController({db, languageController, agent: agentService})
         perspective = { uuid: uuidv4() }
         allLinks = []
     })
@@ -37,11 +51,13 @@ describe('LinkRepoController', () => {
     it('wraps links in expressions on addLink', () => {
         const link = createLink()
         const expression = linkRepoController.addLink(perspective, link)
-        expect(expression.author).toEqual(agent)
+        expect(expression.author).toEqual(agentService.agent)
         expect(expression.data).toEqual(link)
+        expect(agentService.createSignedExpression.mock.calls.length).toBe(1)
+        expect(agentService.createSignedExpression.mock.calls[0][0]).toEqual(link)
     })
 
-    describe('after adding some links', () => {
+    describe('after adding 5 links', () => {
         beforeEach(() => {
             for(let i=0; i<5; i++) {
                 const link = createLink()
@@ -53,6 +69,9 @@ describe('LinkRepoController', () => {
             }
         })
 
+        it('has asked agent service for 5 signatures', () => {
+            expect(agentService.createSignedExpression.mock.calls.length).toBe(6)
+        })
 
         it('can get all links', async () => {
             const result = await linkRepoController.getLinks(perspective, {} as LinkQuery)
