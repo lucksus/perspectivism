@@ -4,19 +4,8 @@
 .DS_Store
 
 /src/acai/*.js
-/src/core/AgentService.js
-/src/core/LanguageController.js
-/src/core/Perspective.js
-/src/core/Perspective.test.js
-/src/core/PerspectivesController.js
-/src/core/PerspectivismCore.js
-/src/core/GraphQL.js
-/src/core/Holochain.js
-/src/core/PubSub.js
-/src/core/db.js
-/src/core/db.test.js
-/src/core/DIDs.js
-/src/core/Signatures.js
+/src/core/*.js
+/src/core/**/*.js
 /src/**/*.js.map
 /src/languages/**/*.js
 /src/languages/**/*.js.map

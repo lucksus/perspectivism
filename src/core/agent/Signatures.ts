@@ -1,5 +1,5 @@
-import type Expression from "../acai/Expression"
-import type { DIDResolver } from "./DIDs"
+import type Expression from "../../acai/Expression"
+import type { DIDResolver } from ".//DIDs"
 import sha256 from 'sha256'
 import secp256k1 from 'secp256k1'
 

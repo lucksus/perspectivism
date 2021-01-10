@@ -1,13 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import didWallet from '@transmute/did-wallet'
-import Expression, { ExpressionProof } from '../acai/Expression';
+import Expression, { ExpressionProof } from '../../acai/Expression';
 import secp256k1 from 'secp256k1'
 
 import Signatures from './Signatures';
-import Agent from '../acai/Agent';
-import type Language from '../acai/Language';
-import * as PubSubInstance from './PubSub'
+import Agent from '../../acai/Agent';
+import type Language from '../../acai/Language';
+import * as PubSubInstance from '../PubSub'
 import type { PubSub } from 'apollo-server';
 
 export default class AgentService {

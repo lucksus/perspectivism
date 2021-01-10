@@ -1,10 +1,9 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
-import type Agent from '../acai/Agent'
-import { exprRef2String, parseExprURL } from '../acai/ExpressionRef'
-import type LanguageRef from '../acai/LanguageRef'
-import type Perspective from '../acai/Perspective'
-import type PerspectivismCore from './PerspectivismCore'
-import * as PubSub from './PubSub'
+import type Agent from '../../acai/Agent'
+import { exprRef2String, parseExprURL } from '../../acai/ExpressionRef'
+import type LanguageRef from '../../acai/LanguageRef'
+import type PerspectivismCore from '../PerspectivismCore'
+import * as PubSub from '../PubSub'
 import { shell } from 'electron'
 
 const typeDefs = gql`

@@ -10,8 +10,8 @@ import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import * as Config from './Config'
-import type { HolochainService } from './Holochain';
-import type AgentService from './AgentService'
+import type { HolochainService } from './storage-services/Holochain';
+import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
