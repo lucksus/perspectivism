@@ -5,33 +5,12 @@ import path from 'path'
 import { execHolochain } from '@holochain-open-dev/holochain-run-dna/src/execHolochain'
 import { rootPath } from 'electron-root-path'
 import fs from 'fs'
-
+import HolochainLanguageDelegate from "./HolochainLanguageDelegate"
+import type Dna from "./dna"
 
 export const fakeCapSecret = (): CapSecret => Buffer.from(Array(64).fill('aa').join(''), 'hex')
 
-export class Dna {
-    file: Buffer
-    nick: string
-}
-export default class HolochainLanguageDelegate {
-    #languageHash
-    #holochainService
-
-    constructor(languageHash: String, holochainService: HolochainService) {
-        this.#languageHash = languageHash
-        this.#holochainService = holochainService
-    }
-
-    async registerDNAs(dnas: Dna[]) {
-        return this.#holochainService.ensureInstallDNAforLanguage(this.#languageHash, dnas)
-    }
-
-    async call(dnaNick: String, zome_name: string, fn_name: String, params: object|string): Promise<any> {
-        return this.#holochainService.callZomeFunction(this.#languageHash, dnaNick, zome_name, fn_name, params)
-    }
-}
-
-export class HolochainService {
+export default class HolochainService {
     #db: any
     #adminPort: number
     #appPort: number
@@ -40,12 +19,12 @@ export class HolochainService {
     #dataPath: string
     #ready: Promise<void>
 
-    constructor(dbAdapter, configPath, dataPath) {
+    constructor(configPath, dataPath) {
         let resolveReady
         this.#ready = new Promise(resolve => resolveReady = resolve)
 
         this.#dataPath = dataPath
-        this.#db = low(dbAdapter)
+        this.#db = low(new FileSync(path.join(dataPath, 'holochain-service.json')))
         this.#db.defaults({pubKeys: []}).write()
 
         const holochainAdminPort = 1337
@@ -136,15 +115,15 @@ export class HolochainService {
         }
     }
 
-    getDelegateForLanguage(languageHash: String) {
+    getDelegateForLanguage(languageHash: string) {
         return new HolochainLanguageDelegate(languageHash, this)
     }
 
-    static dnaID(languageHash: String, dnaNick: String) {
+    static dnaID(languageHash: string, dnaNick: string) {
         return `${languageHash}-${dnaNick}`
     }
 
-    async callZomeFunction(lang: string, dna_nick: string, zome_name: string, fn_name: string, payload: object): Promise<any> {
+    async callZomeFunction(lang: string, dnaNick: string, zomeName: string, fnName: string, payload: object): Promise<any> {
         await this.#ready
         const installed_app_id = lang
         console.debug("HolochainService.callZomefunction: getting info for app:", installed_app_id)
@@ -164,14 +143,14 @@ export class HolochainService {
 
         console.debug("HolochainService.callZomefunction: get info result:", infoResult)
         const { cell_data } = infoResult
-        if(cell_data.length == 0) {
+        if(cell_data.length === 0) {
             console.error("HolochainService: tried to call zome function without any installed cell!")
             return null
         }
 
-        const cell = cell_data.find(cell => cell[1] === dna_nick)
+        const cell = cell_data.find(c => c[1] === dnaNick)
         if(!cell) {
-            const e = new Error(`No DNA with nick '${dna_nick}' found for language ${installed_app_id}`)
+            const e = new Error(`No DNA with nick '${dnaNick}' found for language ${installed_app_id}`)
             console.error(e)
             return e
         }
@@ -180,12 +159,12 @@ export class HolochainService {
         const [_dnaHash, provenance] = cell_id
 
         try {
-            console.debug("HolochainService calling zome function:", dna_nick, zome_name, fn_name, payload)
+            console.debug("HolochainService calling zome function:", dnaNick, zomeName, fnName, payload)
             const result = await this.#appWebsocket.callZome({
                 cap: fakeCapSecret(),
                 cell_id,
-                zome_name,
-                fn_name,
+                zome_name: zomeName,
+                fn_name: fnName,
                 provenance,
                 payload
             })
@@ -198,11 +177,6 @@ export class HolochainService {
     }
 
 
-}
-
-export function init(configPath, dataPath) {
-    const adapter = new FileSync(path.join(dataPath, 'holochain-service.json'))
-    return new HolochainService(adapter, configPath, dataPath)
 }
 
 const sleep = (ms) =>

@@ -1,7 +1,7 @@
 import * as Config from './Config'
 import * as Db from './db'
 import type { PerspectivismDb } from './db'
-import * as Holochain from './storage-services/Holochain'
+import HolochainService from './storage-services/Holochain/HolochainService'
 import * as IPFS from './storage-services/IPFS'
 import AgentService from './agent/AgentService'
 import PerspectivesController from './PerspectivesController'
@@ -14,7 +14,7 @@ import type Perspective from './Perspective'
 
 
 export default class PerspectivismCore {
-    #holochain: any
+    #holochain: HolochainService
     #IPFS: any
 
     #agentService: AgentService
@@ -54,7 +54,7 @@ export default class PerspectivismCore {
     }
 
     async initServices() {
-        this.#holochain = Holochain.init(Config.holochainConfigPath, Config.holochainDataPath)
+        this.#holochain = new HolochainService(Config.holochainConfigPath, Config.holochainDataPath)
         this.#IPFS = await IPFS.init()
     }
 
@@ -74,10 +74,6 @@ export default class PerspectivismCore {
             agentService: this.agentService,
             languageController: this.#languageController
         })
-    }
-
-    perspectiveByUuid(uuid: string): Perspective|void {
-
     }
 }
 

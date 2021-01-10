@@ -20,7 +20,7 @@ export default class Signatures {
             console.error("Got weird DID document without 'publicKey':", didDocument)
         }
 
-        const key = didDocument.publicKey.find(key => key.id === expr.proof.key)
+        const key = didDocument.publicKey.find(k => k.id === expr.proof.key)
         if(!key) return false
 
         const pubKey = Uint8Array.from(Buffer.from(key.publicKeyHex, "hex"))

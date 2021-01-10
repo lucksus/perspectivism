@@ -10,7 +10,7 @@ import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import * as Config from './Config'
-import type { HolochainService } from './storage-services/Holochain';
+import type HolochainService from './storage-services/Holochain/HolochainService';
 import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
 
@@ -187,7 +187,7 @@ export default class LanguageController {
 
         // This makes sure that Expression references used in Links (i.e. in Perspectives) use the aliased Language schemas.
         // Especially important for DIDs
-        for(const alias in aliases) {
+        for(const alias of Object.keys(aliases)) {
             const target = aliases[alias]
             if(lang.address === target) {
                 lang.address = alias

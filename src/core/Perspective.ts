@@ -1,26 +1,13 @@
 import type Agent from "../acai/Agent"
 import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
-import { ipcMain } from 'electron'
 import { SHA3 } from "sha3";
 import type Expression from "../acai/Expression";
 import type AgentService from "./agent/AgentService";
 import type LanguageController from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import * as PubSub from './PubSub'
-import type { LanguageAdapter } from "../acai/Language";
-
-export class PerspectiveID {
-    name: string;
-    uuid: string;
-    author: Agent;
-    timestamp: string;
-}
-
-export class PerspectiveContext {
-    db: any
-    agentService: AgentService
-    languageController: LanguageController
-}
+import type PerspectiveID from "./PerspectiveID"
+import type PerspectiveContext from "./PerspectiveContext"
 
 export default class Perspective {
     name: string;

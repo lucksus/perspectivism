@@ -1,4 +1,6 @@
-import Perspective, { PerspectiveContext, PerspectiveID } from './Perspective'
+import Perspective from './Perspective'
+import type PerspectiveContext from './PerspectiveContext'
+import type PerspectiveID from './PerspectiveID'
 import { PerspectivismDb } from './db'
 import { v4 as uuidv4 } from 'uuid'
 import faker from 'faker'
@@ -68,7 +70,7 @@ describe('Perspective', () => {
         beforeEach(() => {
             for(let i=0; i<5; i++) {
                 const link = createLink()
-                if(i%2 == 0) {
+                if(i%2 === 0) {
                     link.source = 'root'
                 }
                 allLinks.push(link)

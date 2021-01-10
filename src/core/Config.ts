@@ -11,9 +11,9 @@ export const holochainDataPath = path.join(holochainPath, 'data')
 
 export function init() {
     const dirs = [rootConfigPath, dataPath, languagesPath, holochainPath, holochainConfigPath, holochainDataPath]
-    for(const path of dirs)
-    if(!fs.existsSync(path)) {
-        fs.mkdirSync(path)
+    for(const d of dirs)
+    if(!fs.existsSync(d)) {
+        fs.mkdirSync(d)
     }
 }
 
