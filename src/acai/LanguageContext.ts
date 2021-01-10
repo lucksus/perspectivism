@@ -1,4 +1,4 @@
-import type HolochainLanguageDelegate from "../main-thread/Holochain";
+import type HolochainLanguageDelegate from "../core/Holochain";
 import type AgentService from "./AgentService";
 import type SignaturesService from "./SignaturesService";
 

@@ -3,7 +3,7 @@ import type Address from '../../acai/Address';
 import Agent from '../../acai/Agent';
 import type { ExpressionAdapter, GetByAuthorAdapter, PublicSharing } from '../../acai/Language';
 import type LanguageContext from '../../acai/LanguageContext';
-import type { default as HolochainLanguageDelegate, HolochainService } from "../../main-thread/Holochain";
+import type { default as HolochainLanguageDelegate, HolochainService } from "../../core/Holochain";
 import { DNA_NICK } from './dna'
 export default class ShortFormAuthorAdapter implements GetByAuthorAdapter {
     #shortFormDNA: HolochainLanguageDelegate

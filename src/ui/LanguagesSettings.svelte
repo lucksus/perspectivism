@@ -2,7 +2,7 @@
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import Button from '@smui/button'
     import type LanguageRef from "../acai/LanguageRef";
-    import type { LanguageController } from "../main-thread/LanguageController";
+    import type { LanguageController } from "../core/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
     import { LANGUAGES_WITH_SETTINGS, SET_LANGUAGE_SETTINGS } from "./graphql_queries"
     import { getClient, mutation } from "svelte-apollo"
