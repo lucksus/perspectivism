@@ -8,7 +8,6 @@ import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
-import multihashes from 'multihashes'
 import * as Config from './Config'
 import type HolochainService from './storage-services/Holochain/HolochainService';
 import type AgentService from './agent/AgentService'
@@ -23,13 +22,15 @@ const builtInLanguages = [
     'gun-links',
     'ipfs-links',
     'junto-hc-shortform',
-    'agent-profiles'
+    'agent-profiles',
+    'languages'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
     'http': 'url-iframe',
     'https': 'url-iframe',
-    'did': 'agent-profiles'
+    'did': 'agent-profiles',
+    'lang': 'languages'
 }
 
 type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;
@@ -39,6 +40,10 @@ export default class LanguageController {
     #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: object;
     #linkObservers: LinkObservers[];
+
+    #agentLanguage: Language
+    #languageLanguage: Language
+    #perspectiveLanguage: Language
 
 
     constructor(context: object, holochainService: HolochainService) {
@@ -58,11 +63,19 @@ export default class LanguageController {
             const language = create({...context, customSettings, storageDirectory, Holochain})
 
             let isAgentLanguage = false
+            let isLanguageLanguage = false
+            let isPerspectiveLanguage = false
             Object.keys(aliases).forEach(alias => {
                 if(language.name === aliases[alias]) {
                     aliases[alias] = hash
                     if(alias === 'did') {
                         isAgentLanguage = true
+                    }
+                    if(alias === 'lang') {
+                        isLanguageLanguage = true
+                    }
+                    if(alias === 'perspective') {
+                        isPerspectiveLanguage = true
                     }
                 }
             })
@@ -79,7 +92,16 @@ export default class LanguageController {
             this.#languageConstructors.set(hash, create)
 
             if(isAgentLanguage) {
+                this.#agentLanguage = language;
                 ((context as LanguageContext).agent as AgentService).setAgentLanguage(language)
+            }
+
+            if(isLanguageLanguage) {
+                this.#languageLanguage = language
+            }
+
+            if(isPerspectiveLanguage) {
+                this.#perspectiveLanguage = language
             }
         })
     }
@@ -127,6 +149,27 @@ export default class LanguageController {
 
     getLanguagesWithLinksAdapter(): LanguageRef[] {
         return this.filteredLanguageRefs("linksAdapter")
+    }
+
+    getAgentLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Agent Language installed!")
+        }
+        return this.#agentLanguage
+    }
+
+    getLanguageLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Language Language installed!")
+        }
+        return this.#languageLanguage
+    }
+
+    getPerspectiveLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Perspective Language installed!")
+        }
+        return this.#perspectiveLanguage
     }
 
     getConstructorIcon(lang: LanguageRef): void | string {

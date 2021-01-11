@@ -115,7 +115,12 @@ export const PERSPECTIVE = gql`
         perspective(uuid: $uuid) {
             uuid
             name
-            linksSharingLanguage
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
         }
     }
 `
@@ -125,7 +130,12 @@ export const ADD_PERSPECTIVE = gql`
         addPerspective(input: {name: $name}) {
             uuid
             name
-            linksSharingLanguage
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
         }
     }
 `
@@ -135,7 +145,27 @@ export const UPDATE_PERSPECTIVE = gql`
         updatePerspective(input: {uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage}) {
             uuid
             name
-            linksSharingLanguage
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
+        }
+    }
+`
+
+export const PUBLISH_PERSPECTIVE = gql`
+    mutation publishPerspective($uuid: String, $name: String, $description: String, $type: String) {
+        publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type}) {
+            uuid
+            name
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
         }
     }
 `
@@ -151,7 +181,12 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
-            linksSharingLanguage
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
 		}
 	}  
 `
@@ -161,7 +196,12 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
-            linksSharingLanguage
+            sharedPerspective {
+                name
+                description
+                type
+                url
+            }
 		}
 	}  
 `
