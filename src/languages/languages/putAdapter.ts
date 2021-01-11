@@ -27,6 +27,7 @@ export class IpfsPutAdapter implements PublicSharing {
         
         const agent = this.#agent
         const expression = agent.createSignedExpression({name, description})
+        expression.data = Buffer.from(JSON.stringify(expression.data))
         await this.#holochain.call(DNA_NICK, "anchored-expression", "store_expression", {
             key: hash,
             expression
