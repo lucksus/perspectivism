@@ -1,4 +1,4 @@
-import type HolochainLanguageDelegate from "../core/storage-services/Holochain";
+import type HolochainLanguageDelegate from "../core/storage-services/Holochain/HolochainLanguageDelegate";
 import type AgentService from "./AgentService";
 import type SignaturesService from "./SignaturesService";
 
