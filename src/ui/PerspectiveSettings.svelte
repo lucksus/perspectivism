@@ -13,13 +13,11 @@
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import { LANGUAGES, PERSPECTIVE, PERSPECTIVE_UPDATED, PUBLISH_PERSPECTIVE, UPDATE_PERSPECTIVE } from './graphql_queries'
     import { getClient, mutation, query } from 'svelte-apollo'
-import Perspective from '../acai/Perspective';
-import SharedPerspective from '../acai/SharedPerspective';
 
     let showPublishPanel = false
-    let publishType
-    let publishName
-    let publishDescription
+    let publishType = ''
+    let publishName = ''
+    let publishDescription = ''
     let isPublishing = false
 
     const dispatch = createEventDispatcher();
@@ -28,10 +26,12 @@ import SharedPerspective from '../acai/SharedPerspective';
     const M_PUBLISH_PERSPECTIVE = mutation(PUBLISH_PERSPECTIVE)
 
     function update() {
+        const uuid = perspective ? perspective.uuid : perspectiveId
         gqlClient.query({
             query: PERSPECTIVE,
-            variables: { uuid: perspectiveId }
-        }).then(p => {
+            variables: { uuid }
+        }).then(result => {
+            const p = result.data.perspective
             perspective = {
                 name: p.name,
                 uuid: p.uuid,
@@ -41,9 +41,7 @@ import SharedPerspective from '../acai/SharedPerspective';
         })
     }
 
-    if(!perspective && perspectiveId) {
-        update()
-    }
+    update()
 
     getClient().subscribe({
 		query: PERSPECTIVE_UPDATED
@@ -74,9 +72,14 @@ import SharedPerspective from '../acai/SharedPerspective';
         })
         isPublishing = true
     }
+
+    if(!perspective)
+        perspective = {}
+    if(!perspective.name)
+        perspective.name = '<loading>'
+
 </script>
 
-{#if perspective.name}
 <div class="perspective-settings-container">
     <h1>Perspective Settings</h1>
     <DataTable>
@@ -159,9 +162,6 @@ import SharedPerspective from '../acai/SharedPerspective';
 <Button variant="outlined" on:click={cancel}>
     <Label>Cancel</Label>
 </Button>
-{:else}
-    Loading...
-{/if}
 
 <style>
     .perspective-settings-container {
