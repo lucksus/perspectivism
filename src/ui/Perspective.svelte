@@ -8,6 +8,7 @@
     import Link, { hashLinkExpression, linkEqual } from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
+    import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
     import PerspectiveSettings from './PerspectiveSettings.svelte';
@@ -119,6 +120,7 @@
     let dropMoveTarget
 
     let showSettings = false
+    let showExpressionBrwoser = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -464,12 +466,30 @@
 </div>
 
 <div id="side-bar-container">
-    <div id="settings-panel" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <div class="button" on:click={() => showSettings = !showSettings}>
+    <div class="side-bar-panel panel-1" style={`transform: rotateY(${showExpressionBrwoser? '90deg' : '0' })`}>
+        <div class="side-bar-button" on:click={() => showExpressionBrwoser = !showExpressionBrwoser}>
+            <span class="float-right"><Icon class="material-icons">web</Icon></span>
+            <Label>Expression Browser</Label>
+        </div>
+        <div class="side-panel-content expression-browser-panel">
+            <ExpressionBrowser
+                on:close={()=> showExpressionBrwoser = false}
+                on:link-expresson={event => ADD_LINK({variables: {
+                    link: JSON.stringify({
+                        source: 'root',
+                        target: event.detail
+                    })
+                }})}
+            ></ExpressionBrowser>
+        </div>
+    </div>
+
+    <div class="side-bar-panel panel-2" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
+        <div class="side-bar-button" on:click={() => showSettings = !showSettings}>
             <span class="float-right"><Icon class="material-icons">settings</Icon></span>
             <Label>Perspective Settings</Label>
         </div>
-        <div id="settings">
+        <div class="side-panel-content ">
             <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
                 on:submit={()=> {
                     showSettings = false
@@ -516,17 +536,33 @@
         perspective-origin: rightpo;
     }
 
-    #settings-panel {
+    .side-bar-panel {
         position: absolute;
         right: 0;
-        top: 100px;
         transform-style: preserve-3d;
         transition: transform 0.5s;
     }
 
-    .button {
+    .panel-1 {
+        top: 115px;
+    }
+
+    .panel-2 {
+        top: 425px;
+    }
+    
+    .expression-browser-panel {
+        height: 545px;
+        width: 380px;
+    }
+
+    .settings-panel {
+        width: 204px;
+    }
+
+    .side-bar-button {
         position: absolute;
-        width: 230px;
+        width: 175px;
         height: 45px;
         padding: 10px 50px 0 25px;
         transform-origin: right bottom;
@@ -542,7 +578,7 @@
         float: right;
     }
 
-    #settings {
+    .side-panel-content {
         position: absolute;
         transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
         padding: 40px;
