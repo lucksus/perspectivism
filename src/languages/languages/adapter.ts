@@ -2,8 +2,9 @@ import type Address from '../../acai/Address'
 import type Expression from '../../acai/Expression'
 import type { ExpressionAdapter, PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
-import type { IPFSNode } from '../../acai/LanguageContext'
+import type HolochainLanguageDelegate from '../../core/storage-services/Holochain/HolochainLanguageDelegate'
 import { IpfsPutAdapter } from './putAdapter'
+import { DNA_NICK } from './dna'
 
 const _appendBuffer = (buffer1, buffer2) => {
     const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -19,27 +20,25 @@ const uint8ArrayConcat = (chunks) => {
 
 
 export default class Adapter implements ExpressionAdapter {
-    #IPFS: IPFSNode
+    #holochain: HolochainLanguageDelegate
 
     putAdapter: PublicSharing
 
     constructor(context: LanguageContext) {
-        this.#IPFS = context.IPFS
+        this.#holochain = context.Holochain as HolochainLanguageDelegate
         this.putAdapter = new IpfsPutAdapter(context)
     }
 
     async get(address: Address): Promise<void | Expression> {
-        const cid = address.toString()
 
-        const chunks = []
-        // @ts-ignore
-        for await (const chunk of this.#IPFS.cat(cid)) {
-            chunks.push(chunk)
-        }
+        const { expressions } = await this.#holochain.call(DNA_NICK, "anchored-expression", "get_expressions", { key: address });
 
-        const fileString = uint8ArrayConcat(chunks).toString();
-        const fileJson = JSON.parse(fileString)
-        return fileJson
+        if(expressions.length === 0)
+            return null
+
+        const expression = expressions.pop()
+        expressions.data = JSON.parse(Buffer.from(expression.data).toString())
+        return expression
 
     }
 }

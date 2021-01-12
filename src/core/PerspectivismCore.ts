@@ -11,6 +11,11 @@ import * as DIDs from './agent/DIDs'
 import type { DIDResolver } from './agent/DIDs'
 import Signatures from './agent/Signatures'
 import type Perspective from './Perspective'
+import SharedPerspective from '../acai/SharedPerspective'
+import type { SharingType } from '../acai/SharedPerspective'
+import LinkLanguageFactory from './LinkLanguageFactory'
+import type { PublicSharing } from '../acai/Language'
+import type PerspectiveID from './PerspectiveID'
 
 
 export default class PerspectivismCore {
@@ -24,6 +29,8 @@ export default class PerspectivismCore {
 
     #perspectivesController: PerspectivesController
     #languageController: LanguageController
+
+    #linkLanguageFactory: LinkLanguageFactory
 
     constructor() {
         Config.init()
@@ -62,18 +69,47 @@ export default class PerspectivismCore {
         return this.#agentService.ready
     }
 
-    initControllers() {
+    async initControllers() {
         this.#languageController = new LanguageController({
             agent: this.#agentService,
             IPFS: this.#IPFS,
             signatures: this.#signatures
         }, this.#holochain)
 
+        await this.#languageController.loadLanguages()
+
         this.#perspectivesController = new PerspectivesController(Config.rootConfigPath, {
             db: this.#db,
             agentService: this.agentService,
             languageController: this.#languageController
         })
+
+        this.#linkLanguageFactory = new LinkLanguageFactory(this.#agentService, this.#languageController.getLanguageLanguage())
+    }
+
+    async publishPerspective(uuid: string, name: string, description: string, sharingType: SharingType): Promise<PerspectiveID> {
+        // We only work on the PerspectiveID object.
+        // On PerspectiveController.update() below, the instance will get updated as well, but we don't need the
+        // instance object here
+        const perspectiveID = this.#perspectivesController.perspective(uuid).plain()
+
+        const sharedPerspective = new SharedPerspective(name, description, sharingType)
+
+        // Create LinkLanguage
+        const linkLanguageRef = await this.#linkLanguageFactory.createLinkLanguageForSharedPerspective(sharedPerspective)
+        sharedPerspective.linkLanguages = [linkLanguageRef]
+        await this.#languageController.installLanguage(linkLanguageRef.address)
+
+        // Create SharedPerspective
+        const perspectiveAddress = await (this.languageController.getPerspectiveLanguage().expressionAdapter.putAdapter as PublicSharing).createPublic(sharedPerspective)
+        const perspectiveUrl = `perspective://${perspectiveAddress}`
+
+        // Put it back together and safe new Perspective state
+        perspectiveID.sharedURL = perspectiveUrl
+        perspectiveID.sharedPerspective = sharedPerspective
+        this.#perspectivesController.update(perspectiveID)
+
+        return perspectiveID
     }
 }
 

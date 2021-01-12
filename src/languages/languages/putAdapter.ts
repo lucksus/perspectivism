@@ -3,7 +3,7 @@ import type AgentService from '../../acai/AgentService'
 import type { PublicSharing } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { IPFSNode } from '../../acai/LanguageContext'
-import type HolochainLanguageDelegate from '../../core/Holochain'
+import type HolochainLanguageDelegate from '../../core/storage-services/Holochain/HolochainLanguageDelegate'
 import { DNA_NICK } from './dna'
 
 export class IpfsPutAdapter implements PublicSharing {
@@ -21,12 +21,13 @@ export class IpfsPutAdapter implements PublicSharing {
         // @ts-ignore
         const { bundleFile, name, description } = languageData
         
-        const ipfsAddress = await this.#IPFS.add({content: bundleFile})
+        const ipfsAddress = await this.#IPFS.add({content: bundleFile.toString()})
         // @ts-ignore
         const hash = ipfsAddress.cid.toString()
         
         const agent = this.#agent
         const expression = agent.createSignedExpression({name, description})
+        expression.data = Buffer.from(JSON.stringify(expression.data))
         await this.#holochain.call(DNA_NICK, "anchored-expression", "store_expression", {
             key: hash,
             expression

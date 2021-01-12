@@ -81,8 +81,15 @@ type Language {
 type Perspective {
     uuid: String
     name: String
-    linksSharingLanguage: String
+    sharedPerspective: SharedPerspective
+    sharedURL: String
     links(query: LinkQuery): [LinkExpression]
+}
+
+type SharedPerspective {
+    name: String
+    description: String
+    type: String
 }
 
 type Query {
@@ -134,6 +141,13 @@ input UpdatePerspectiveInput {
     linksSharingLanguage: String
 }
 
+input PublishPerspectiveInput {
+    uuid: String
+    name: String
+    description: String
+    type: String
+}
+
 input UpdateAgentProfileInput {
     name: String
     email: String
@@ -146,6 +160,7 @@ type Mutation {
     addPerspective(input: AddPerspectiveInput): Perspective
     updatePerspective(input: UpdatePerspectiveInput): Perspective
     removePerspective(uuid: String): Boolean
+    publishPerspective(input: PublishPerspectiveInput): Perspective
     addLink(input: AddLinkInput): LinkExpression
     updateLink(input: UpdateLinkInput): LinkExpression
     removeLink(input: RemoveLinkInput): Boolean
@@ -288,6 +303,14 @@ function createResolvers(core: PerspectivismCore) {
                 const perspective = args.input
                 core.perspectivesController.update(perspective)
                 return perspective
+            },
+            publishPerspective: (parent, args, context, info) => {
+                const { uuid, name, description, type } = args.input
+                const perspective = core.perspectivesController.perspectiveID(uuid)
+                // @ts-ignore
+                if(perspective.sharedPerspective && perspective.sharedURL)
+                    throw new Error(`Perspective ${name} (${uuid}) is already shared`)
+                return core.publishPerspective(uuid, name, description, type)
             },
             removePerspective: (parent, args, context, info) => {
                 const { uuid } = args

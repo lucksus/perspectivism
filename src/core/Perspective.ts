@@ -7,6 +7,7 @@ import type LanguageController from "./LanguageController";
 import type LanguageRef from "../acai/LanguageRef";
 import * as PubSub from './PubSub'
 import type PerspectiveID from "./PerspectiveID"
+import type SharedPerspective from "../acai/SharedPerspective";
 import type PerspectiveContext from "./PerspectiveContext"
 
 export default class Perspective {
@@ -14,7 +15,8 @@ export default class Perspective {
     uuid: string;
     author: Agent;
     timestamp: string;
-    linksSharingLanguage: string;
+    sharedPerspective: SharedPerspective;
+    sharedURL: string;
 
     #db: any;
     #agent: AgentService;
@@ -22,10 +24,7 @@ export default class Perspective {
     #pubsub: any
 
     constructor(id: PerspectiveID, context: PerspectiveContext) {
-        this.uuid = id.uuid
-        this.name = id.name
-        this.author = id.author
-        this.timestamp = id.timestamp
+        this.updateFromId(id)
 
         this.#db = context.db
         this.#agent = context.agentService
@@ -35,7 +34,7 @@ export default class Perspective {
     }
 
     plain(): PerspectiveID {
-        const { name, uuid, author, timestamp } = this
+        const { name, uuid, author, timestamp, sharedPerspective, sharedURL } = this
         return JSON.parse(JSON.stringify({
             name, uuid, author, timestamp
         }))
@@ -46,6 +45,8 @@ export default class Perspective {
         if(id.uuid) this.uuid = id.uuid
         if(id.author) this.author = id.author
         if(id.timestamp) this.timestamp = id.timestamp
+        if(id.sharedPerspective) this.sharedPerspective = id.sharedPerspective
+        if(id.sharedURL) this.sharedURL = id.sharedURL
     }
 
     linkToExpression(link: Link): Expression {
@@ -65,28 +66,30 @@ export default class Perspective {
     }
 
     private callLinksAdapter(functionName: string, ...args): Promise<any> {
-        if(this.linksSharingLanguage && this.linksSharingLanguage !== "") {
-            return new Promise(async (resolve, reject) => {
-                setTimeout(() => resolve([]), 2000)
-                try {
-                    const langRef = {address: this.linksSharingLanguage, name: ''} as LanguageRef
-                    const linksAdapter = this.#languageController.getLinksAdapter(langRef)
-                    if(linksAdapter) {
-                        console.debug(`Calling linksAdapter.${functionName}(${args})`)
-                        const result = await linksAdapter[functionName](...args)
-                        console.debug("Got result:", result)
-                        resolve(result)
-                    } else {
-                        throw new Error("LinksSharingLanguage '"+this.linksSharingLanguage+"' set in perspective '"+this.name+"' not installed!")
-                    }
-                } catch(e) {
-                    console.error("Error while trying to call links adapter:", e)
-                    reject(e)
-                }
-            })
-        } else {
+        if(!this.sharedPerspective || !this.sharedPerspective.linkLanguages || this.sharedPerspective.linkLanguages.length === 0) {
             return Promise.resolve([])
         }
+
+        return new Promise(async (resolve, reject) => {
+            setTimeout(() => resolve([]), 2000)
+            try {
+                const langRef = this.sharedPerspective.linkLanguages[0]
+                const linksAdapter = this.#languageController.getLinksAdapter(langRef)
+                if(linksAdapter) {
+                    console.debug(`Calling linksAdapter.${functionName}(${JSON.stringify(args)})`)
+                    const result = await linksAdapter[functionName](...args)
+                    console.debug("Got result:", result)
+                    resolve(result)
+                } else {
+                    console.error("LinksSharingLanguage", langRef.address, "set in perspective '"+this.name+"' not installed!")
+                    // TODO: request install
+                    resolve([])
+                }
+            } catch(e) {
+                console.error("Error while trying to call links adapter:", e)
+                reject(e)
+            }
+        })
     }
 
     async syncWithSharingAdapter() {

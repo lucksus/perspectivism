@@ -8,11 +8,11 @@ import type LanguageRef from '../acai/LanguageRef'
 import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
-import multihashes from 'multihashes'
 import * as Config from './Config'
 import type HolochainService from './storage-services/Holochain/HolochainService';
 import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
+import type Address from '../acai/Address';
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = baseX(BASE58)
@@ -23,13 +23,17 @@ const builtInLanguages = [
     //'gun-links',
     'ipfs-links',
     'junto-hc-shortform',
-    'agent-profiles'
+    'agent-profiles',
+    'languages',
+    'shared-perspectives'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
     'http': 'url-iframe',
     'https': 'url-iframe',
-    'did': 'agent-profiles'
+    'did': 'agent-profiles',
+    'lang': 'languages',
+    'perspective': 'shared-perspectives'
 }
 
 type LinkObservers = (added: Expression[], removed: Expression[], lang: LanguageRef)=>void;
@@ -39,49 +43,141 @@ export default class LanguageController {
     #languageConstructors: Map<string, (LanguageContext)=>Language>
     #context: object;
     #linkObservers: LinkObservers[];
+    #holochainService: HolochainService
+
+    #agentLanguage: Language
+    #languageLanguage: Language
+    #perspectiveLanguage: Language
 
 
     constructor(context: object, holochainService: HolochainService) {
         this.#context = context
+        this.#holochainService = holochainService
         this.#languages = new Map()
         this.#languageConstructors = new Map()
-        this.#linkObservers = []
+        this.#linkObservers = []   
+    }
 
-        builtInLanguages.forEach( bundle => {
-            const bundleBytes = fs.readFileSync(bundle)
-            const hash = bs58.encode(multihashing(bundleBytes, 'sha2-256'))
-            const { default: create, name } = require(path.join(process.env.PWD, bundle))
+    async loadLanguages() {
+        await this.loadBuiltInLanguages()
+        await this.loadInstalledLanguages()
+    }
 
-            const customSettings = this.getSettings({name, address: hash} as LanguageRef)
-            const storageDirectory = Config.getLanguageStoragePath(name)
-            const Holochain = holochainService.getDelegateForLanguage(hash)
-            const language = create({...context, customSettings, storageDirectory, Holochain})
-
-            let isAgentLanguage = false
+    async loadBuiltInLanguages() {
+        await Promise.all(builtInLanguages.map( async bundle => {
+            const { hash, language } = await this.loadLanguage(bundle)
+            
+            // Do special stuff for ACAI languages:
             Object.keys(aliases).forEach(alias => {
                 if(language.name === aliases[alias]) {
                     aliases[alias] = hash
                     if(alias === 'did') {
-                        isAgentLanguage = true
+                        this.#agentLanguage = language;
+                        ((this.#context as LanguageContext).agent as AgentService).setAgentLanguage(language)
+                    }
+                    if(alias === 'lang') {
+                        this.#languageLanguage = language
+                    }
+                    if(alias === 'perspective') {
+                        this.#perspectiveLanguage = language
                     }
                 }
             })
+        }))
+    }
 
-            if(language.linksAdapter) {
-                language.linksAdapter.addCallback((added, removed) => {
-                    this.#linkObservers.forEach(o => {
-                        o(added, removed, {name, address: hash} as LanguageRef)
-                    })
+    async loadInstalledLanguages() {
+        const files = fs.readdirSync(Config.languagesPath)
+        await Promise.all(files.map(async file => {
+            const bundlePath = path.join(Config.languagesPath, file, 'bundle.js')
+            if(fs.existsSync(bundlePath)) {
+                try {
+                    await this.loadLanguage(bundlePath)
+                } catch(e) {
+                    console.error("LanguageController.loadInstalledLanguages()=========================")
+                    console.error("LanguageController.loadInstalledLanguages(): COULDN'T LOAD LANGUAGE:", bundlePath)
+                    console.error(e)
+                    console.error("LanguageController.loadInstalledLanguages()=========================")
+                }
+            }
+        }))
+    }
+
+    async loadLanguage(sourceFilePath: string): Promise<any> {
+        if(!path.isAbsolute(sourceFilePath))
+            sourceFilePath = path.join(process.env.PWD, sourceFilePath)
+
+        const bundleBytes = fs.readFileSync(sourceFilePath)
+        // @ts-ignore
+        const hash = await this.ipfsHash(bundleBytes)
+        
+        const { default: create, name } = require(sourceFilePath)
+
+        const customSettings = this.getSettings({name, address: hash} as LanguageRef)
+        const storageDirectory = Config.getLanguageStoragePath(name)
+        const Holochain = this.#holochainService.getDelegateForLanguage(hash)
+        const language = create({...this.#context, customSettings, storageDirectory, Holochain})
+
+        if(language.linksAdapter) {
+            language.linksAdapter.addCallback((added, removed) => {
+                this.#linkObservers.forEach(o => {
+                    o(added, removed, {name, address: hash} as LanguageRef)
                 })
-            }
+            })
+        }
 
-            this.#languages.set(hash, language)
-            this.#languageConstructors.set(hash, create)
+        this.#languages.set(hash, language)
+        this.#languageConstructors.set(hash, create)
 
-            if(isAgentLanguage) {
-                ((context as LanguageContext).agent as AgentService).setAgentLanguage(language)
-            }
-        })
+        return { hash, language }
+    }
+
+    async ipfsHash(data: Buffer|string): Promise<string> {
+        // @ts-ignore
+        const ipfsAddress = await this.#context.IPFS.add({content: data.toString()}, {onlyHash: true})
+        return ipfsAddress.cid.toString()
+    }
+
+    async installLanguage(address: Address, languageMeta: void|Expression) {
+        if(!languageMeta) {
+            languageMeta = await this.#languageLanguage.expressionAdapter.get(address)
+        }
+        // @ts-ignore
+        console.log("LanguageController: INSTALLING NEW LANGUAGE:", languageMeta.data)
+        const source = await this.#languageLanguage.languageAdapter.getLanguageSource(address)
+
+        const hash = await this.ipfsHash(source)
+        if(hash === 'asdf') {
+            console.error("LanguageController.installLanguage: COULDN'T VERIFY HASH OF LANGUAGE!")
+            console.error("LanguageController.installLanguage: Address:", address)
+            console.error("LanguageController.installLanguage: Computed hash:", hash)
+            console.error("LanguageController.installLanguage: =================================")
+            console.error("LanguageController.installLanguage: LANGUAGE WILL BE IGNORED")
+            console.error("LanguageController.installLanguage: =================================")
+            console.error("LanguageController.installLanguage:", languageMeta)
+            console.error("LanguageController.installLanguage: =================================")
+            console.error("LanguageController.installLanguage: =================================")
+            console.error("LanguageController.installLanguage: CONTENT:")
+            //console.error(source)
+            //console.error("LanguageController.installLanguage: =================================")
+            //console.error("LanguageController.installLanguage: LANGUAGE WILL BE IGNORED")
+            //console.error("LanguageController.installLanguage: =================================")
+            return
+        }
+
+        const sourcePath = path.join(Config.languagesPath, address, 'bundle.js')
+        const metaPath = path.join(Config.languagesPath, address, 'meta.json')
+        fs.mkdirSync(path.join(Config.languagesPath, address))
+        fs.writeFileSync(sourcePath, source)
+        fs.writeFileSync(metaPath, JSON.stringify(languageMeta))
+        try {
+            this.loadLanguage(sourcePath)
+        } catch(e) {
+            console.error("LanguageController.installLanguage: ERROR LOADING NEWLY INSTALLED LANGUAGE")
+            console.error("LanguageController.installLanguage: ======================================")
+            console.error(e)
+        }
+        
     }
 
     languageForExpression(e: ExpressionRef): Language {
@@ -100,6 +196,12 @@ export default class LanguageController {
         if(language) {
             return language
         } else {
+            this.#languageLanguage.expressionAdapter.get(address).then(languageMeta => {
+                if(languageMeta) {
+                    this.installLanguage(address, languageMeta)
+                }
+            })
+            
             throw new Error("Language not found by reference: " + JSON.stringify(ref))
         }
     }
@@ -127,6 +229,27 @@ export default class LanguageController {
 
     getLanguagesWithLinksAdapter(): LanguageRef[] {
         return this.filteredLanguageRefs("linksAdapter")
+    }
+
+    getAgentLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Agent Language installed!")
+        }
+        return this.#agentLanguage
+    }
+
+    getLanguageLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Language Language installed!")
+        }
+        return this.#languageLanguage
+    }
+
+    getPerspectiveLanguage(): Language {
+        if(!this.#agentLanguage) {
+            throw new Error("No Perspective Language installed!")
+        }
+        return this.#perspectiveLanguage
     }
 
     getConstructorIcon(lang: LanguageRef): void | string {
@@ -223,7 +346,12 @@ export default class LanguageController {
     }
 
     getLinksAdapter(lang: LanguageRef): void | LinksAdapter {
-        return this.languageByRef(lang).linksAdapter
+        try {
+            return this.languageByRef(lang).linksAdapter
+        } catch(e) {
+            return null
+        }
+        
     }
 
     addLinkObserver(observer) {

@@ -15,9 +15,9 @@ pub struct ExpressionProof {
 #[hdk_entry(id = "expression", visibility = "public")]
 #[derive(Clone)]
 pub struct Expression {
-    pub agent: Agent,
+    pub author: Agent,
     pub timestamp: String,
-    pub data: Vec<u8>,
+    pub data: String,
     pub proof: ExpressionProof
 }
 
