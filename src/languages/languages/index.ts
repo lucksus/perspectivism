@@ -4,12 +4,12 @@ import type Language from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
 import type { Interaction } from '../../acai/Language'
 import type HolochainLanguageDelegate from '../../core/Holochain'
-import AgentAdapter from './agentAdapter'
-import ExpressionAdapter from './expressionAdapter'
-import AgentExpressionUI from './expressionUI'
+import Adapter from './adapter'
+import { ExpressionUI } from './expressionUI'
 import { DNA, DNA_NICK } from './dna'
+import LanguageAdapter from './languageAdapter'
 
-export const name: string = "agent-profiles"
+export const name: string = "languages"
 
 function interactions(a: Agent, expression: Address): Interaction[] {
     return []
@@ -19,15 +19,15 @@ export default function create(context: LanguageContext): Language {
     const Holochain = context.Holochain as HolochainLanguageDelegate
     Holochain.registerDNAs([{file: DNA, nick: DNA_NICK}])
 
-    const agentAdapter = new AgentAdapter(context)
-    const expressionAdapter = new ExpressionAdapter(context)
-    const expressionUI = new AgentExpressionUI()
+    const expressionAdapter = new Adapter(context)
+    const expressionUI = new ExpressionUI()
+    const languageAdapter = new LanguageAdapter(context)
 
     return {
         name,
-        agentAdapter,
         expressionAdapter,
         expressionUI,
+        languageAdapter,
         interactions,
     } as Language
 }

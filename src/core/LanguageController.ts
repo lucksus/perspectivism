@@ -10,8 +10,8 @@ import path from 'path'
 import multihashing from 'multihashing'
 import multihashes from 'multihashes'
 import * as Config from './Config'
-import type { HolochainService } from './Holochain';
-import type AgentService from './AgentService'
+import type HolochainService from './storage-services/Holochain/HolochainService';
+import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -187,13 +187,13 @@ export default class LanguageController {
 
         // This makes sure that Expression references used in Links (i.e. in Perspectives) use the aliased Language schemas.
         // Especially important for DIDs
-        for(const alias in aliases) {
+        for(const alias of Object.keys(aliases)) {
             const target = aliases[alias]
             if(lang.address === target) {
                 lang.address = alias
             }
         }
-        
+
         return new ExpressionRef(lang, address)
     }
 
@@ -206,7 +206,7 @@ export default class LanguageController {
                     console.error("BROKEN SIGNATURE FOR EXPRESSION:", expr)
                     expr.proof.invalid = true
                 } else {
-                    //console.debug("Valid expr:", ref)
+                    // console.debug("Valid expr:", ref)
                     expr.proof.valid = true
                 }
             } catch(e) {

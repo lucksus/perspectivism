@@ -15,6 +15,9 @@ export default interface Language {
     // Implementation of a Language that defines Agent Expressions
     readonly agentAdapter?: AgentAdapter;
 
+    // Implementation of a Language that defines and stores Languages
+    readonly languageAdapter?: LanguageAdapter;
+
     // Optional adapter for getting Expressions by author
     readonly getByAuthorAdapter?: GetByAuthorAdapter;
     // Optional adapter for getting all Expressions
@@ -83,6 +86,10 @@ export interface ReadOnlyLanguage {
 export interface AgentAdapter {
     setProfile(agent: Agent);
     getProfile(did: string): Promise<Agent|void>;
+}
+
+export interface LanguageAdapter {
+    getLanguageSource(address: Address): Promise<String>;
 }
 
 // Implement this if your Language supports retrieval of all Expressions

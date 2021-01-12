@@ -10,23 +10,23 @@ export class PerspectivismDb {
         this.#db = db
     }
 
-    linkKey(pUUID: String, linkName: String) {
+    linkKey(pUUID: string, linkName: string) {
         return `${pUUID}-link-${linkName}`
     }
 
-    allLinksKey(pUUID: String) {
+    allLinksKey(pUUID: string) {
         return `${pUUID}-all_links`
     }
 
-    sourceKey(pUUID: String, source: String) {
+    sourceKey(pUUID: string, source: string) {
         return `${pUUID}-from_source-${source}`
     }
 
-    targetKey(pUUID: String, target: String) {
+    targetKey(pUUID: string, target: string) {
         return `${pUUID}-to_target-${target}`
     }
 
-    storeLink(pUUID: String, link: object, linkName: String) {
+    storeLink(pUUID: string, link: object, linkName: string) {
         this.#db.set(this.linkKey(pUUID, linkName), [link]).write()
 
         const key = this.allLinksKey(pUUID)
@@ -39,7 +39,7 @@ export class PerspectivismDb {
             .write()
     }
 
-    updateLink(pUUID: String, link: object, linkName: String) {
+    updateLink(pUUID: string, link: object, linkName: string) {
         const key = this.linkKey(pUUID, linkName)
 
         if(!this.#db.has(key).value()) {
@@ -52,33 +52,33 @@ export class PerspectivismDb {
             .write()
     }
 
-    getLink(pUUID: String, linkName: String): object|void {
+    getLink(pUUID: string, linkName: string): object|void {
         const key = this.linkKey(pUUID, linkName)
         const versions = this.#db.get(key).value()
         return versions[versions.length-1]
     }
 
-    getAllLinks(pUUID: String): any[] {
+    getAllLinks(pUUID: string): any[] {
         return this.getLinksByKey(pUUID, this.allLinksKey(pUUID))
     }
 
-    getLinksBySource(pUUID: String, source: String): any[] {
+    getLinksBySource(pUUID: string, source: string): any[] {
         const key = this.sourceKey(pUUID, source)
         return this.getLinksByKey(pUUID, key)
     }
 
-    getLinksByTarget(pUUID: String, target: String): any[] {
+    getLinksByTarget(pUUID: string, target: string): any[] {
         const key = this.targetKey(pUUID, target)
         return this.getLinksByKey(pUUID, key)
     }
 
-    getLinksByKey(pUUID: String, key: String): any[] {
+    getLinksByKey(pUUID: string, key: string): any[] {
         let allLinkNames = this.#db.get(key).value()
         if(!allLinkNames) {
             allLinkNames = []
         }
 
-        let allLinks = []
+        const allLinks = []
         for(const linkName of allLinkNames) {
             allLinks.push({
                 name: linkName,
@@ -88,17 +88,17 @@ export class PerspectivismDb {
         return allLinks
     }
 
-    attachSource(pUUID: String, source: String, linkName: String) {
+    attachSource(pUUID: string, source: string, linkName: string) {
         const key = this.sourceKey(pUUID, source)
         this.attach(key, linkName)
     }
 
-    attachTarget(pUUID: String, target: String, linkName: String) {
+    attachTarget(pUUID: string, target: string, linkName: string) {
         const key = this.targetKey(pUUID, target)
         this.attach(key, linkName)
     }
 
-    attach(key: String, linkName: String) {
+    attach(key: string, linkName: string) {
         if(!this.#db.has(key).value()) {
             this.#db.set(key, []).write()
         }
@@ -107,24 +107,24 @@ export class PerspectivismDb {
             this.#db.get(key)
                 .push(linkName)
                 .write()
-        } 
+        }
     }
 
-    removeSource(pUUID: String, source: String, linkName: String) {
+    removeSource(pUUID: string, source: string, linkName: string) {
         const key = this.sourceKey(pUUID, source)
         this.remove(key, linkName)
     }
 
-    removeTarget(pUUID: String, target: String, linkName: String) {
+    removeTarget(pUUID: string, target: string, linkName: string) {
         const key = this.targetKey(pUUID, target)
         this.remove(key, linkName)
     }
 
 
-    remove(key: String, linkName: String) {
+    remove(key: string, linkName: string) {
         this.#db.get(key).remove(linkName).write()
     }
-    
+
 }
 
 export function init(dbFilePath): PerspectivismDb {

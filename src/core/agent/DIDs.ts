@@ -24,7 +24,7 @@ export class DIDResolver {
                 if(didDocument) {
                     this.#cacheDB.set(did, didDocument).write()
                 } else {
-                    throw "Empty JSON response"
+                    throw new Error("Empty JSON response")
                 }
 
                 return didDocument
@@ -32,7 +32,7 @@ export class DIDResolver {
                 console.error("Could not resolve DID:", did)
                 console.error("Error:", e)
             }
-            
+
         }
     }
 }

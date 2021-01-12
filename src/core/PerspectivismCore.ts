@@ -1,20 +1,20 @@
 import * as Config from './Config'
 import * as Db from './db'
 import type { PerspectivismDb } from './db'
-import * as Holochain from './Holochain'
-import * as IPFS from './IPFS'
-import AgentService from './AgentService'
+import HolochainService from './storage-services/Holochain/HolochainService'
+import * as IPFS from './storage-services/IPFS'
+import AgentService from './agent/AgentService'
 import PerspectivesController from './PerspectivesController'
-import LinkRepoController from './LinkRepoController'
 import LanguageController from './LanguageController'
-import * as GraphQL from './GraphQL'
-import * as DIDs from './DIDs'
-import type { DIDResolver } from './DIDs'
-import Signatures from './Signatures'
+import * as GraphQL from './graphQL-interface/GraphQL'
+import * as DIDs from './agent/DIDs'
+import type { DIDResolver } from './agent/DIDs'
+import Signatures from './agent/Signatures'
+import type Perspective from './Perspective'
 
 
 export default class PerspectivismCore {
-    #holochain: any
+    #holochain: HolochainService
     #IPFS: any
 
     #agentService: AgentService
@@ -24,11 +24,10 @@ export default class PerspectivismCore {
 
     #perspectivesController: PerspectivesController
     #languageController: LanguageController
-    #linkRepoController: LinkRepoController
 
     constructor() {
         Config.init()
-        
+
         this.#agentService = new AgentService(Config.rootConfigPath)
         this.#agentService.load()
         this.#db = Db.init(Config.dataPath)
@@ -48,10 +47,6 @@ export default class PerspectivismCore {
         return this.#languageController
     }
 
-    get linkRepoController(): LinkRepoController {
-        return this.#linkRepoController
-    }
-
     async startGraphQLServer() {
         const { url, subscriptionsUrl } = await GraphQL.startServer(this)
         console.log(`🚀  GraphQL Server ready at ${url}`)
@@ -59,7 +54,7 @@ export default class PerspectivismCore {
     }
 
     async initServices() {
-        this.#holochain = Holochain.init(Config.holochainConfigPath, Config.holochainDataPath)
+        this.#holochain = new HolochainService(Config.holochainConfigPath, Config.holochainDataPath)
         this.#IPFS = await IPFS.init()
     }
 
@@ -68,16 +63,16 @@ export default class PerspectivismCore {
     }
 
     initControllers() {
-        this.#perspectivesController = new PerspectivesController(Config.rootConfigPath)
         this.#languageController = new LanguageController({
             agent: this.#agentService,
             IPFS: this.#IPFS,
             signatures: this.#signatures
         }, this.#holochain)
-        this.#linkRepoController = new LinkRepoController({
-            db: this.#db, 
-            languageController: this.#languageController, 
-            agent: this.#agentService
+
+        this.#perspectivesController = new PerspectivesController(Config.rootConfigPath, {
+            db: this.#db,
+            agentService: this.agentService,
+            languageController: this.#languageController
         })
     }
 }

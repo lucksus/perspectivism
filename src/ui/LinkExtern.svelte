@@ -10,6 +10,7 @@
     }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <a class="link" href="#" on:click={click}><slot></slot></a>
 
 <style>

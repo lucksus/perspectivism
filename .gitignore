@@ -4,24 +4,16 @@
 .DS_Store
 
 /src/acai/*.js
-/src/main-thread/AgentService.js
-/src/main-thread/PerspectivesController.js
-/src/main-thread/LanguageController.js
-/src/main-thread/LinkRepoController.js
-/src/main-thread/PerspectivismCore.js
-/src/main-thread/GraphQL.js
-/src/main-thread/Holochain.js
-/src/main-thread/PubSub.js
-/src/main-thread/db.js
-/src/main-thread/db.test.js
-/src/main-thread/LinkRepoController.test.js
-/src/main-thread/DIDs.js
-/src/main-thread/Signatures.js
+/src/core/*.js
+/src/core/**/*.js
 /src/**/*.js.map
 /src/languages/**/*.js
 /src/languages/**/*.js.map
 /src/languages/**/build
 /src/languages/**/node_modules
+/src/languages/**/hc-dna/target
+/src/languages/**/hc-dna/tests/node_modules
+/src/languages/**/hc-dna/*.dna.gz
 /src/stores/LinksStore.js
 
 holochain

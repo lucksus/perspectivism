@@ -106,7 +106,6 @@ export const PERSPECTIVES = gql`
         perspectives {
             uuid
             name
-            linksSharingLanguage
         }
     }
 `

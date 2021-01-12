@@ -2,7 +2,7 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
-const PerspectivismCore = require('./src/main-thread/PerspectivismCore')
+const PerspectivismCore = require('./src/core/PerspectivismCore')
 const core = PerspectivismCore.create()
 
 app.whenReady().then(() => {  

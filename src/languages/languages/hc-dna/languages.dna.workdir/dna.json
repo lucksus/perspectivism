@@ -1,0 +1,11 @@
+{
+    "name": "languages",
+    "uuid": "",
+    "properties": null,
+    "zomes": {
+      "anchored-expression": {
+        "wasm_path": "../target/wasm32-unknown-unknown/release/anchored_expression.wasm"
+      }
+    }
+  }
+  

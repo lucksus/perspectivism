@@ -1,13 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import didWallet from '@transmute/did-wallet'
-import Expression, { ExpressionProof } from '../acai/Expression';
+import Expression, { ExpressionProof } from '../../acai/Expression';
 import secp256k1 from 'secp256k1'
 
 import Signatures from './Signatures';
-import Agent from '../acai/Agent';
-import type Language from '../acai/Language';
-import * as PubSubInstance from './PubSub'
+import Agent from '../../acai/Agent';
+import type Language from '../../acai/Language';
+import * as PubSubInstance from '../PubSub'
 import type { PubSub } from 'apollo-server';
 
 export default class AgentService {
@@ -46,18 +46,18 @@ export default class AgentService {
 
     createSignedExpression(data: any): Expression {
         if(!this.isInitialized){
-            throw "Can't sign without keystore"
+            throw new Error("Can't sign without keystore")
         }
         if(!this.isUnlocked()) {
-            throw "Can't sign with locked keystore"
+            throw new Error("Can't sign with locked keystore")
         }
 
         const timestamp = new Date().toString()
         const payloadBytes = Signatures.buildMessage(data, timestamp)
-        
+
         const key = this.getSigningKey()
         const privKey = Uint8Array.from(Buffer.from(key.privateKey, key.encoding))
-        
+
         const sigObj = secp256k1.ecdsaSign(payloadBytes, privKey)
         const sigBuffer = Buffer.from(sigObj.signature)
         const sigHex = sigBuffer.toString('hex')
@@ -104,10 +104,10 @@ export default class AgentService {
         // @ts-ignore
         const keys = this.#wallet.extractByTags(["#primary"])
         if(keys.length === 0) {
-            throw "No '#primary' key found in keystore. Abort signing."
+            throw new Error("No '#primary' key found in keystore. Abort signing.")
         }
         if(keys.length > 1) {
-            throw "Multiple '#primary' keys found in keystore. Abort signing."
+            throw new Error("Multiple '#primary' keys found in keystore. Abort signing.")
         }
 
         const key = keys[0]
@@ -132,7 +132,7 @@ export default class AgentService {
             console.error(e)
             return
         }
-        
+
         console.debug("done.")
 
         console.debug("Saving wallet...")
@@ -202,7 +202,7 @@ export default class AgentService {
             // @ts-ignore
             isUnlocked= this.#wallet.keys ? true : false
         }
-        
+
         const dump = {
             agent: this.#agent,
             isInitialized,
