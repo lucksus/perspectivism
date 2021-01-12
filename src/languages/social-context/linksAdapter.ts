@@ -26,17 +26,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     }
 
     async others(): Promise<Agent[]> {
-        let others = await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_others", {})
-        let out = [];
-        others.forEach(did => {
-            out.push({
-                //Might need to resolve creator to did information
-                did: did,
-                name: undefined,
-                email: undefined
-            });
-        });
-        return out;
+        return await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_others", {})
     }
 
     async addLink(link: Expression) {
