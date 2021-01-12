@@ -21,7 +21,7 @@ export class IpfsPutAdapter implements PublicSharing {
         // @ts-ignore
         const { bundleFile, name, description } = languageData
         
-        const ipfsAddress = await this.#IPFS.add({content: bundleFile})
+        const ipfsAddress = await this.#IPFS.add({content: bundleFile.toString()})
         // @ts-ignore
         const hash = ipfsAddress.cid.toString()
         

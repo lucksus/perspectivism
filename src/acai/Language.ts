@@ -89,7 +89,7 @@ export interface AgentAdapter {
 }
 
 export interface LanguageAdapter {
-    getLanguageSource(address: Address): Promise<String>;
+    getLanguageSource(address: Address): Promise<string>;
 }
 
 // Implement this if your Language supports retrieval of all Expressions

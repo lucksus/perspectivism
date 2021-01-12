@@ -25,7 +25,7 @@ export default class LanguageAdapter implements Interface {
         this.#IPFS = context.IPFS
     }
 
-    async getLanguageSource(address: Address): Promise<String> {
+    async getLanguageSource(address: Address): Promise<string> {
         const cid = address.toString()
 
         const chunks = []
@@ -34,7 +34,7 @@ export default class LanguageAdapter implements Interface {
             chunks.push(chunk)
         }
 
-        const fileString = uint8ArrayConcat(chunks).toString();
+        const fileString = Buffer.from(uint8ArrayConcat(chunks)).toString();
         return fileString
 
     }

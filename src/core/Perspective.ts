@@ -76,12 +76,14 @@ export default class Perspective {
                 const langRef = this.sharedPerspective.linkLanguages[0]
                 const linksAdapter = this.#languageController.getLinksAdapter(langRef)
                 if(linksAdapter) {
-                    console.debug(`Calling linksAdapter.${functionName}(${args})`)
+                    console.debug(`Calling linksAdapter.${functionName}(${JSON.stringify(args)})`)
                     const result = await linksAdapter[functionName](...args)
                     console.debug("Got result:", result)
                     resolve(result)
                 } else {
-                    throw new Error("LinksSharingLanguage '"+langRef+"' set in perspective '"+this.name+"' not installed!")
+                    console.error("LinksSharingLanguage", langRef.address, "set in perspective '"+this.name+"' not installed!")
+                    // TODO: request install
+                    resolve([])
                 }
             } catch(e) {
                 console.error("Error while trying to call links adapter:", e)

@@ -69,12 +69,14 @@ export default class PerspectivismCore {
         return this.#agentService.ready
     }
 
-    initControllers() {
+    async initControllers() {
         this.#languageController = new LanguageController({
             agent: this.#agentService,
             IPFS: this.#IPFS,
             signatures: this.#signatures
         }, this.#holochain)
+
+        await this.#languageController.loadLanguages()
 
         this.#perspectivesController = new PerspectivesController(Config.rootConfigPath, {
             db: this.#db,
@@ -96,6 +98,7 @@ export default class PerspectivismCore {
         // Create LinkLanguage
         const linkLanguageRef = await this.#linkLanguageFactory.createLinkLanguageForSharedPerspective(sharedPerspective)
         sharedPerspective.linkLanguages = [linkLanguageRef]
+        await this.#languageController.installLanguage(linkLanguageRef.address)
 
         // Create SharedPerspective
         const perspectiveAddress = await (this.languageController.getPerspectiveLanguage().expressionAdapter.putAdapter as PublicSharing).createPublic(sharedPerspective)

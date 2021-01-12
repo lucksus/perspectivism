@@ -35,7 +35,7 @@ export default class LinkLanguageFactory {
         const templateInfo = JSON.stringify(this.#agentService.createSignedExpression(sharedPerspective))
         const UUID = bs58.encode(multihashing(templateInfo, 'sha2-256'))
 
-        const injection = `var TEMPLATE_INFO="${templateInfo}"; var TEMPLATE_UUID="${UUID}"`
+        const injection = `var TEMPLATE_INFO=${templateInfo}; var TEMPLATE_UUID="${UUID};"`
 
         let template
         switch(sharedPerspective.type) {
@@ -49,16 +49,14 @@ export default class LinkLanguageFactory {
                 throw new Error(`SharingType ${sharedPerspective.type} not yet implementent`)
         }
 
-        console.debug("LinkLanguageFactory: template:", template)
         const lines = template.split('\n') 
         lines.splice(1, 0, injection) 
         const code = lines.join('\n')
-        console.debug("LinkLanguageFactory: new code:", code)
 
         const newLanguageObj = {
             name,
             description: `UUID: ${UUID}`,
-            bundleFile: code
+            bundleFile: code.toString()
         }
 
         try {
