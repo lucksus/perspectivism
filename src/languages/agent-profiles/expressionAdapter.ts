@@ -4,7 +4,7 @@ import Agent from '../../acai/Agent'
 import type Expression from '../../acai/Expression'
 import type LanguageContext from '../../acai/LanguageContext'
 import AgentPutAdapter from './putAdapter'
-import type HolochainLanguageDelegate from '../../core/Holochain'
+import type HolochainLanguageDelegate from "../../core/storage-services/Holochain/HolochainLanguageDelegate"
 import { DNA_NICK } from './dna'
 import { PERSPECTIVISM_PROFILE } from './agentAdapter'
 

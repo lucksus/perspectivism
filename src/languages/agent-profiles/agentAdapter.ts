@@ -3,7 +3,7 @@ import type Agent from '../../acai/Agent'
 import type Expression from '../../acai/Expression'
 import type { AgentAdapter as Interface } from '../../acai/Language'
 import type LanguageContext from '../../acai/LanguageContext'
-import type HolochainLanguageDelegate from '../../core/Holochain'
+import type HolochainLanguageDelegate from "../../core/storage-services/Holochain/HolochainLanguageDelegate"
 import { DNA_NICK } from './dna'
 
 export const PERSPECTIVISM_PROFILE = "PERSPECTIVISM_PROFILE"

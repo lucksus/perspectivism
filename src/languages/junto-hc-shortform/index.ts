@@ -10,7 +10,7 @@ import ConstructorIcon from './build/ConstructorIcon.js'
 import { JuntoSettingsUI } from './SettingsUI'
 import { ShortFormExpressionUI } from './shortFormExpressionUI'
 import { DNA, DNA_NICK } from './dna'
-import type HolochainLanguageDelegate from '../../core/Holochain'
+import type HolochainLanguageDelegate from "../../core/storage-services/Holochain/HolochainLanguageDelegate"
 
 function iconFor(expression: Address): string {
     return Icon
