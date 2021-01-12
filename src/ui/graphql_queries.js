@@ -115,11 +115,11 @@ export const PERSPECTIVE = gql`
         perspective(uuid: $uuid) {
             uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
-                type
-                url
+                type 
             }
         }
     }
@@ -130,11 +130,11 @@ export const ADD_PERSPECTIVE = gql`
         addPerspective(input: {name: $name}) {
             uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
-                type
-                url
+                type 
             }
         }
     }
@@ -145,11 +145,11 @@ export const UPDATE_PERSPECTIVE = gql`
         updatePerspective(input: {uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage}) {
             uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
                 type
-                url
             }
         }
     }
@@ -160,11 +160,11 @@ export const PUBLISH_PERSPECTIVE = gql`
         publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type}) {
             uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
-                type
-                url
+                type 
             }
         }
     }
@@ -181,11 +181,11 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
-                type
-                url
+                type 
             }
 		}
 	}  
@@ -196,11 +196,11 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
+            sharedURL
             sharedPerspective {
                 name
                 description
-                type
-                url
+                type                
             }
 		}
 	}  

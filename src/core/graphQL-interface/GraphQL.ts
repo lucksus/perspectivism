@@ -82,6 +82,7 @@ type Perspective {
     uuid: String
     name: String
     sharedPerspective: SharedPerspective
+    sharedURL: String
     links(query: LinkQuery): [LinkExpression]
 }
 
@@ -89,7 +90,6 @@ type SharedPerspective {
     name: String
     description: String
     type: String
-    url: String
 }
 
 type Query {
@@ -306,6 +306,10 @@ function createResolvers(core: PerspectivismCore) {
             },
             publishPerspective: (parent, args, context, info) => {
                 const { uuid, name, description, type } = args.input
+                const perspective = core.perspectivesController.perspectiveID(uuid)
+                // @ts-ignore
+                if(perspective.sharedPerspective && perspective.sharedURL)
+                    throw new Error(`Perspective ${name} (${uuid}) is already shared`)
                 return core.publishPerspective(uuid, name, description, type)
             },
             removePerspective: (parent, args, context, info) => {
