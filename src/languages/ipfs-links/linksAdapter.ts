@@ -2,8 +2,6 @@ import type Expression from "../../acai/Expression";
 import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
 import Link, { hashLinkExpression, LinkQuery } from "../../acai/Links";
 import type LanguageContext from "../../acai/LanguageContext";
-import { SHA3 } from "sha3";
-import type ExpressionRef from "../../acai/ExpressionRef";
 import Room from 'ipfs-pubsub-room'
 import path from 'path'
 import fs from 'fs'
@@ -40,14 +38,38 @@ export class IpfsLinksAdapter implements LinksAdapter {
     #room: any
     #peerList: object
     #mutex: Mutex
-
+    
     constructor(context: LanguageContext) {
         this.#callbacks = []
         this.#IPFS = context.IPFS
         this.#storage = context.storageDirectory
         this.#mutex = new Mutex()
-        // @ts-ignore
-        this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
+
+        let templated = false
+        try {
+            // @ts-ignore
+            if(TEMPLATE_INFO && TEMPLATE_UUID) {
+                // @ts-ignore
+                console.debug("ipfs-links: TEMPLATE_INFO:", TEMPLATE_INFO)
+                // @ts-ignore
+                console.debug("ipfs-links: TEMPLATE_UUID:", TEMPLATE_UUID)
+                // @ts-ignore
+                this.#roomName = `${TEMPLATE_INFO.data.name}-${TEMPLATE_UUID}`
+                // @ts-ignore
+                context.customSettings.roomName = this.#roomName
+                // @ts-ignore
+                context.customSettings.readonly = true
+                templated = true
+            }
+        } catch(e) {
+            console.debug("ipfs-links:", e)
+        }
+        
+        if(!templated) {
+            // @ts-ignore
+            this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
+        }
+        
         this.#room = new Room(this.#IPFS, this.#roomName)
         this.#room.on('message', message => this.handlePubSubMessage(message))
         this.#room.on('peer joined', peer => this.handlePubSubPeerJoined(peer))
