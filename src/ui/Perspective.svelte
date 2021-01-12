@@ -471,7 +471,7 @@
             <span class="float-right"><Icon class="material-icons">web</Icon></span>
             <Label>Expression Browser</Label>
         </div>
-        <div class="side-panel-content expression-browser-panel">
+        <div class="side-panel-content expression-browser-panel" style={`opacity: ${showExpressionBrwoser? '1' : '0'}`}>
             <ExpressionBrowser
                 on:close={()=> showExpressionBrwoser = false}
                 on:link-expresson={event => ADD_LINK({variables: {
@@ -489,7 +489,7 @@
             <span class="float-right"><Icon class="material-icons">settings</Icon></span>
             <Label>Perspective Settings</Label>
         </div>
-        <div class="side-panel-content ">
+        <div class="side-panel-content settings-panel" style={`opacity: ${showSettings? '1' : '0'}`}>
             <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
                 on:submit={()=> {
                     showSettings = false
@@ -581,6 +581,7 @@
     .side-panel-content {
         position: absolute;
         transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
+        transition: opacity 0.5s;
         padding: 40px;
         border: 1px solid rgb(127, 129, 255);
         background-color: white;
