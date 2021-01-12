@@ -10,7 +10,7 @@ function interactions(a: Agent, expression: Address): Interaction[] {
     return []
 }
 
-export const name: string = "junto-public-social-context"
+export const name: string = "social-context"
 
 export default function create(context: LanguageContext): Language {
     const linksAdapter = new JuntoSocialContextLinkAdapter(context)
