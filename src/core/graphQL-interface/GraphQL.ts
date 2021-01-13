@@ -155,6 +155,7 @@ input UpdateAgentProfileInput {
 
 type Mutation {
     initializeAgent(input: InitializeAgent): AgentService
+    lockAgent(passphrase: String): AgentService
     unlockAgent(passphrase: String): AgentService
     updateAgentProfile(input: UpdateAgentProfileInput): AgentService
     addPerspective(input: AddPerspectiveInput): Perspective
@@ -228,9 +229,16 @@ function createResolvers(core: PerspectivismCore) {
             }
         },
         Mutation: {
-            initializeAgent: (parent, args, context, info) => {
+            initializeAgent: async (parent, args, context, info) => {
                 const { did, didDocument, keystore, passphrase } = args.input
-                core.agentService.initialize(did, didDocument, keystore, passphrase)
+                if(did)
+                    core.agentService.initialize(did, didDocument, keystore, passphrase)
+                else
+                    await core.agentService.createNewKeys()
+                return core.agentService.dump()
+            },
+            lockAgent: (parent, args, context, info) => {
+                core.agentService.save(args.passphrase)
                 return core.agentService.dump()
             },
             unlockAgent:  (parent, args, context, info) => {
