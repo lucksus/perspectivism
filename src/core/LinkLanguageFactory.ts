@@ -13,7 +13,8 @@ const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = baseX(BASE58)
 
 const templates = {
-    permissionless: './src/languages/ipfs-links/build/bundle.js'
+    permissionless: './src/languages/ipfs-links/build/bundle.js',
+    holochain: './src/languages/social-context/build/bundle.js'
 }
 
 export default class LinkLanguageFactory {
@@ -42,8 +43,14 @@ export default class LinkLanguageFactory {
             case SharingType.Permissionless:
                 console.debug("LinkLanguageFactory: Permissionless language")
                 const templateFilePath = path.join(process.env.PWD, templates.permissionless)
-                console.debug("LinkLanguageFactor: reading template file", templateFilePath)
+                console.debug("LinkLanguageFactory: reading template file", templateFilePath)
                 template = fs.readFileSync(templateFilePath).toString()
+                break;
+            case SharingType.Holochain:
+                console.debug("LinkLanguageFactory: Holochain language")
+                const hcTemplateFilePath = path.join(process.env.PWD, templates.holochain)
+                console.debug("LinkLanguageFactory: reading template file", hcTemplateFilePath)
+                template = fs.readFileSync(hcTemplateFilePath).toString()
                 break;
             default:
                 throw new Error(`SharingType ${sharedPerspective.type} not yet implementent`)

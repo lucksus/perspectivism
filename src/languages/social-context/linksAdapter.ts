@@ -30,7 +30,9 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     }
 
     async addLink(link: Expression) {
-        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "add_link", link)
+        let data = prepareExpressionLink(link);
+        console.debug("Holochain Social Context: ADDING LINK!: ", data);
+        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "add_link", data)
     }
 
     async updateLink(oldLinkExpression: Expression, newLinkExpression: Expression) {
@@ -39,12 +41,33 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     async removeLink(link: Expression) {
     }
 
-    async getLinks(query: LinkQuery): Promise<Expression[]> {   
-        let links = await this.#socialContextDna.call(DNA_NICK, "social_context_acai", query)
+    async getLinks(query: LinkQuery): Promise<Expression[]> {
+        let link_query = Object.assign(query);  
+        if (!link_query.source) {
+            link_query.source = "root";
+        };
+        console.debug("Holochain Social Context: Getting Links With: ", link_query); 
+        let links = await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_links", link_query)
+        console.debug("Holchain Social Context: Got Links", links);
         return links
     }
 
     addCallback(callback: NewLinksObserver) {
-        throw Error("No callbacks can be added to this link language")
+        console.error("No callbacks can be added to this link language");
+        return 0
     }
+}
+
+function prepareExpressionLink(link: Expression): object {
+    let data = Object.assign(link);
+    if (data.data.subject == '') {
+        data.data.subject = null;
+    };
+    if (data.data.target == '') {
+        data.data.target = null;
+    };
+    if (data.data.predicate == '') {
+        data.data.predicate = null;
+    };
+    return data
 }

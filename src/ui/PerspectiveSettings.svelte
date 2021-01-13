@@ -132,6 +132,7 @@
                                 <Option value={'broadcast'} selected={false}>Broadcast</Option>
                                 <Option value={'permissionless'} selected={true}>Permissionless</Option>
                                 <Option value={'permissioned'} selected={false} deactivated={true}>Permissioned</Option>
+                                <Option value={'holochain'} selected={false} deactivated={true}>Holochain</Option>
                             </Select>
 
                             <p></p>

@@ -25,7 +25,8 @@ const builtInLanguages = [
     'junto-hc-shortform',
     'agent-profiles',
     'languages',
-    'shared-perspectives'
+    'shared-perspectives',
+    'social-context'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
@@ -124,8 +125,7 @@ export default class LanguageController {
                     o(added, removed, {name, address: hash} as LanguageRef)
                 })
             })
-        }
-
+        } 
         this.#languages.set(hash, language)
         this.#languageConstructors.set(hash, create)
 
@@ -167,7 +167,11 @@ export default class LanguageController {
 
         const sourcePath = path.join(Config.languagesPath, address, 'bundle.js')
         const metaPath = path.join(Config.languagesPath, address, 'meta.json')
-        fs.mkdirSync(path.join(Config.languagesPath, address))
+        try {
+            fs.mkdirSync(path.join(Config.languagesPath, address))
+        } catch {
+            console.warn("Already got directory for language at", path.join(Config.languagesPath, address))
+        };
         fs.writeFileSync(sourcePath, source)
         fs.writeFileSync(metaPath, JSON.stringify(languageMeta))
         try {
