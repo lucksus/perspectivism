@@ -16,7 +16,7 @@
         <table>
             <tr>
                 <td>PubSub room:</td>
-                <td><input bind:value={settings.roomName}></td>
+                <td><input bind:value={settings.roomName} disabled={settings.readonly}></td>
             </tr>
         </table>
     {:else}

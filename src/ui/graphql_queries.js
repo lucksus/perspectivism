@@ -46,6 +46,16 @@ export const INITIALIZE_AGENT = gql `
     }
 `
 
+export const LOCK_AGENT = gql `
+    mutation lockAgent($passphrase: String) {
+        lockAgent(passphrase: $passphrase) {
+            isInitialized
+            isUnlocked
+            did
+        }
+    }
+`
+
 export const UNLOCK_AGENT = gql `
     mutation unlockAgent($passphrase: String) {
         unlockAgent(passphrase: $passphrase) {

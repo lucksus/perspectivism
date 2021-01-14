@@ -7,24 +7,32 @@
 
 <div class="container">
     {#if expression}
-        <input disabled bind:value={expression.data}>
+        <h3>Shared Perspective</h3>
+        <div>
+            <span class="label">Name: </span>
+            <span class="value">{expression.data.name}</span>
+        </div>
+        <div>
+            <span class="label">Description: </span>
+            <span class="value">{expression.data.description}</span>
+        </div>
+        <div>
+            <span class="label">Sharing Type: </span>
+            <span class="value">{expression.data.type}</span>
+        </div>
     {/if}
 </div>
 
 
 <style>
     .container {
-        color: burlywood;
+        color: white;
         width: 400px;
         height: 300px;
+        padding: 20px;
     }
 
-    input {
-        width: 100%;
-        height: 300px;
-        color: black;
-        background: yellowgreen;
-        text-align: center;
-        font-size: 20px;
+    .label {
+        font-weight: bold;
     }
 </style>

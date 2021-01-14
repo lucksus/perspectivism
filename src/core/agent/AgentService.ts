@@ -3,16 +3,20 @@ import * as fs from 'fs';
 import didWallet from '@transmute/did-wallet'
 import Expression, { ExpressionProof } from '../../acai/Expression';
 import secp256k1 from 'secp256k1'
-
+import * as ed25519 from '@transmute/did-key-ed25519';
+import * as secp256k1DIDKey from '@transmute/did-key-secp256k1';
 import Signatures from './Signatures';
 import Agent from '../../acai/Agent';
 import type Language from '../../acai/Language';
 import * as PubSubInstance from '../PubSub'
 import type { PubSub } from 'apollo-server';
+import crypto from 'crypto'
+import { resolver } from '@transmute/did-key.js';
 
 export default class AgentService {
     #did: string
-    #didDocument: object
+    #didDocument: string
+    #signingKeyId: string
     #wallet: object
     #file: string
     #fileProfile: string
@@ -66,7 +70,7 @@ export default class AgentService {
             author: { did: this.#did },
             timestamp,
             data,
-            proof: new ExpressionProof(sigHex, `${this.#did}#primary`)
+            proof: new ExpressionProof(sigHex, this.#signingKeyId)
         } as Expression
 
         console.debug("Signed Expression:", signedExpresssion)
@@ -102,12 +106,12 @@ export default class AgentService {
 
     private getSigningKey() {
         // @ts-ignore
-        const keys = this.#wallet.extractByTags(["#primary"])
+        const keys = this.#wallet.extractByTags([this.#signingKeyId])
         if(keys.length === 0) {
-            throw new Error("No '#primary' key found in keystore. Abort signing.")
+            throw new Error(`Signing key '${this.#signingKeyId}' key found in keystore. Abort signing.`)
         }
         if(keys.length > 1) {
-            throw new Error("Multiple '#primary' keys found in keystore. Abort signing.")
+            throw new Error(`Multiple '${this.#signingKeyId}' keys found in keystore. Abort signing.`)
         }
 
         const key = keys[0]
@@ -115,10 +119,36 @@ export default class AgentService {
         return key
     }
 
+    async createNewKeys() {
+        const key = await secp256k1DIDKey.Secp256k1KeyPair.generate({
+            // @ts-ignore
+            secureRandom: () => crypto.randomBytes(32)
+        });
+
+        this.#did = key.controller
+        this.#didDocument = JSON.stringify(await resolver.resolve(this.#did))
+        this.#agent = new Agent(this.#did)
+        this.#signingKeyId = key.id
+
+        const keys = [{
+            type: 'assymetric',
+            encoding: "hex",
+            publicKey: key.publicKeyBuffer.toString('hex'),
+            privateKey: key.privateKeyBuffer.toString('hex'),
+            tags: [key.type, key.id]
+        }]
+
+        this.#wallet = didWallet.create({keys})
+
+        console.debug(key)
+        console.debug(JSON.stringify(key))
+    }
+
     initialize(did, didDocument, keystore, password) {
         this.#did = did
         this.#didDocument = didDocument
         this.#agent = new Agent(did)
+        this.#signingKeyId = did+'#primary'
 
         console.debug("Creating wallet...")
         this.#wallet = didWallet.create(keystore)
@@ -169,6 +199,7 @@ export default class AgentService {
         const dump = {
             did: this.#did,
             didDocument: this.#didDocument,
+            signingKeyId: this.#signingKeyId,
             // @ts-ignore
             keystore: this.#wallet.export(),
             agent: this.#agent
@@ -178,6 +209,7 @@ export default class AgentService {
 
         // @ts-ignore
         this.#wallet.unlock(password)
+        this.#readyPromiseResolve()
     }
 
     load() {
@@ -187,6 +219,7 @@ export default class AgentService {
 
         this.#did = dump.did
         this.#didDocument = dump.didDocument
+        this.#signingKeyId = dump.signingKeyId
         this.#wallet = didWallet.create(dump.keystore)
         if(fs.existsSync(this.#fileProfile))
             this.#agent = JSON.parse(fs.readFileSync(this.#fileProfile).toString())

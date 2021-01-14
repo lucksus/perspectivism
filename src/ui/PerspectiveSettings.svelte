@@ -36,6 +36,7 @@
                 name: p.name,
                 uuid: p.uuid,
                 sharedPerspective: p.sharedPerspective,
+                sharedURL: p.sharedURL,
             }
             isPublishing = false
         })
@@ -95,7 +96,7 @@
                         <h3>This Perspective is shared</h3>
                         <div>
                             <span>URL: </span>
-                            <span>{perspective.sharedPerspective.url}</span>
+                            <span>{perspective.sharedURL}</span>
                         </div>
                         <div>
                             <span>Name: </span>
@@ -165,7 +166,5 @@
 </Button>
 
 <style>
-    .perspective-settings-container {
-        min-width: 400px;
-    }
+
 </style>

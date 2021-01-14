@@ -10,6 +10,7 @@
     import emailValidator from 'email-validator'
     import md5 from 'md5'
     import {Graphic} from '@smui/list';
+    import { DoubleBounce } from 'svelte-loading-spinners'
 
 
     export let expressionURL: string
@@ -140,8 +141,7 @@
 <div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg)`}>
 <div class="displacement-container" style={`transform: translateX(-${width/2}px);`}>
     {#if $queryResult.loading}
-        Loading...
-        {JSON.stringify(expressionRef)}
+        <DoubleBounce size="60" color="#7f81ff" unit="px" duration="1s"></DoubleBounce>
     {:else if $queryResult.error}
         Loading failed!
         {$queryResult.error}
