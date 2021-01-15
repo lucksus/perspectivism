@@ -36,9 +36,14 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     }
 
     async updateLink(oldLinkExpression: Expression, newLinkExpression: Expression) {
+        let source_link = prepareExpressionLink(oldLinkExpression);
+        let target_link = prepareExpressionLink(newLinkExpression);
+        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "update_link", {source: source_link, target: target_link})
     }
 
     async removeLink(link: Expression) {
+        let data = prepareExpressionLink(link);
+        await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "remove_link", data)
     }
 
     async getLinks(query: LinkQuery): Promise<Expression[]> {
