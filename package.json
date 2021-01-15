@@ -15,7 +15,6 @@
     "lint:fix": "tslint --fix -c tslint.json \"src/core/**/*.ts\"",
     "test": "tsc && jest",
     "rebuild": "electron-rebuild -f -w serialport",
-    "dev-cleanup": "rm -rf ~/.config/Perspectivism/holochain && cd src/languages/junto-hc-shortform && cd ../../../ && npm run dev",
     "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png"
   },
   "devDependencies": {
