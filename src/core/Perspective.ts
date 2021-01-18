@@ -76,9 +76,9 @@ export default class Perspective {
                 const langRef = this.sharedPerspective.linkLanguages[0]
                 const linksAdapter = this.#languageController.getLinksAdapter(langRef)
                 if(linksAdapter) {
-                    console.debug(`Calling linksAdapter.${functionName}(${JSON.stringify(args)})`)
+                    //console.debug(`Calling linksAdapter.${functionName}(${JSON.stringify(args)})`)
                     const result = await linksAdapter[functionName](...args)
-                    console.debug("Got result:", result)
+                    //console.debug("Got result:", result)
                     resolve(result)
                 } else {
                     console.error("LinksSharingLanguage", langRef.address, "set in perspective '"+this.name+"' not installed!")
@@ -146,9 +146,9 @@ export default class Perspective {
     }
 
     async updateLink(oldLink: Expression, newLink: Expression) {
-        console.debug("LINK REPO: updating link:", oldLink, newLink)
+        //console.debug("LINK REPO: updating link:", oldLink, newLink)
         const addr = this.findLink(oldLink)
-        console.debug("hash:", addr)
+        //console.debug("hash:", addr)
 
         const _old = oldLink.data as Link
         const _new = newLink.data as Link
