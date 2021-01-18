@@ -93,7 +93,7 @@ export default class Perspective {
     }
 
     async syncWithSharingAdapter() {
-        const localLinks = this.#db.getAllLinks(this.uuid)
+        const localLinks = this.#db.getAllLinks(this.uuid).map(l => l.link)
         const remoteLinks = await this.callLinksAdapter('getLinks')
         const includes = (link, list) => {
             return undefined !== list.find(e =>

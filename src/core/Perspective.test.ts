@@ -186,6 +186,24 @@ describe('Perspective', () => {
             expect(linksAdapter.addLink.mock.calls.length).toBe(1)
         })
 
+        describe('syncWithSharingAdpater', () => {
+            it('adds all missing links from local DB to linksAdapter', async () => {
+                perspective.sharedPerspective = null
+    
+                const link = createLink()
+                const linkExpression = await perspective.addLink(link)
+    
+                perspective.sharedPerspective = {
+                    linkLanguages: [sharingLanguage]
+                }
+
+                await perspective.syncWithSharingAdapter()
+
+                expect(linksAdapter.addLink.mock.calls.length).toBe(1)
+                expect(linksAdapter.addLink.mock.calls[0][0]).toEqual(linkExpression)
+            })
+        })
+        
     })
 
 })
