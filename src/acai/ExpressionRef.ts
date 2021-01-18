@@ -15,24 +15,36 @@ export default class ExpressionRef {
 // Creates unique expression URI like this:
 // expr:Qm3490gfwe489hf34:Qm90ghjoaw4iehioefwe4ort
 export function exprRef2String(ref: ExpressionRef): string {
-    return `${ref.language.address}://${ref.expression}`
+    if(ref.language.address === 'did')
+        return ref.expression.toString()
+    else
+        return `${ref.language.address}://${ref.expression}`
 }
 
 export function parseExprURL(url: string): ExpressionRef {
-    const re = /^([^:^\s]+):\/\/([^\s]+)$/
-    const matches = re.exec(url)
+    const URIregexp = /^([^:^\s]+):\/\/([^\s]+)$/
+    const URImatches = URIregexp.exec(url)
 
-    if(!matches || matches.length != 3) {
-        throw new Error("Couldn't parse string as expression URL: " + url)
+    if(URImatches && URImatches.length == 3) {
+        const language = URImatches[1]
+        const expression = URImatches[2]
+    
+        const languageRef = new LanguageRef()
+        languageRef.address = language
+    
+        const ref = new ExpressionRef(languageRef, expression)
+        return ref
     }
 
-    const language = matches[1]
-    const expression = matches[2]
+    const DIDregexp = /^did:([^\s]+)$/
+    const DIDmatches = DIDregexp.exec(url)
 
-    const languageRef = new LanguageRef()
-    languageRef.address = language
+    if(DIDmatches && DIDmatches.length == 2) {
+        const languageRef = new LanguageRef()
+        languageRef.address = 'did'
+        const ref = new ExpressionRef(languageRef, url)
+        return ref
+    }
 
-    const ref = new ExpressionRef(languageRef, expression)
-    console.debug(`Parsed ${url} to ${JSON.stringify(ref)}`)
-    return ref
+    throw new Error("Couldn't parse string as expression URL or DID: " + url)
 }

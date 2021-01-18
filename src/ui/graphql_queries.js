@@ -1,5 +1,88 @@
 import { gql } from '@apollo/client'
 
+export const OPEN_LINK = gql `
+    mutation openLinkExtern($url: String) {
+        openLinkExtern(url: $url)
+    }
+`
+
+export const QUIT = gql `
+    mutation quit {
+        quit
+    }
+`
+
+export const AGENT_SERVICE_STATUS = gql `
+    query agent {
+        agent {
+            isInitialized
+            isUnlocked
+            did
+            didDocument
+        }
+    }
+`
+
+export const AGENT = gql `
+    query agent {
+        agent {
+            agent {
+                did
+                name
+                email
+            }
+        }
+    }
+`
+
+export const INITIALIZE_AGENT = gql `
+    mutation initializeAgent($did: String, $didDocument: String, $keystore: String, $passphrase: String) {
+        initializeAgent(input: { did: $did, didDocument: $didDocument, keystore: $keystore, passphrase: $passphrase }) {
+            isInitialized
+            isUnlocked
+            did
+            didDocument
+        }
+    }
+`
+
+export const LOCK_AGENT = gql `
+    mutation lockAgent($passphrase: String) {
+        lockAgent(passphrase: $passphrase) {
+            isInitialized
+            isUnlocked
+            did
+        }
+    }
+`
+
+export const UNLOCK_AGENT = gql `
+    mutation unlockAgent($passphrase: String) {
+        unlockAgent(passphrase: $passphrase) {
+            isInitialized
+            isUnlocked
+            did
+            error
+        }
+    }
+`
+
+export const UPDATE_AGENT_PROFILE = gql `
+    mutation updateAgentProfile($name: String, $email: String) {
+        updateAgentProfile(input: {name: $name, email: $email}) {
+            agent {
+                did
+                name
+                email
+            }
+            isInitialized
+            isUnlocked
+            did
+            error
+        }
+    }
+`
+
 export const LANGUAGES = gql `
     query languages($filter: String = ""){
         languages(filter: $filter) {
@@ -33,7 +116,6 @@ export const PERSPECTIVES = gql`
         perspectives {
             uuid
             name
-            linksSharingLanguage
         }
     }
 `
@@ -43,7 +125,12 @@ export const PERSPECTIVE = gql`
         perspective(uuid: $uuid) {
             uuid
             name
-            linksSharingLanguage
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type 
+            }
         }
     }
 `
@@ -53,7 +140,12 @@ export const ADD_PERSPECTIVE = gql`
         addPerspective(input: {name: $name}) {
             uuid
             name
-            linksSharingLanguage
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type 
+            }
         }
     }
 `
@@ -63,7 +155,27 @@ export const UPDATE_PERSPECTIVE = gql`
         updatePerspective(input: {uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage}) {
             uuid
             name
-            linksSharingLanguage
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type
+            }
+        }
+    }
+`
+
+export const PUBLISH_PERSPECTIVE = gql`
+    mutation publishPerspective($uuid: String, $name: String, $description: String, $type: String) {
+        publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type}) {
+            uuid
+            name
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type 
+            }
         }
     }
 `
@@ -79,7 +191,12 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
-            linksSharingLanguage
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type 
+            }
 		}
 	}  
 `
@@ -89,7 +206,12 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
-            linksSharingLanguage
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type                
+            }
 		}
 	}  
 `
@@ -98,4 +220,32 @@ export const PERSPECTIVE_REMOVED = gql`
     subscription {
 		perspectiveRemoved
 	}  
+`
+
+export const ALL_LINKS_QUERY = gql`
+    query links($perspectiveUUID: String) {
+        links(perspectiveUUID: $perspectiveUUID, query: { }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
+`
+
+export const CHILD_LINKS_QUERY = gql`
+    query links($perspectiveUUID: String, $source: String) {
+        links(perspectiveUUID: $perspectiveUUID, query: { source: $source }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
 `

@@ -63,7 +63,7 @@ Since this might be perceived as a big and unreasonable claim, **Perspectivism**
 ### Code overview
 
 * Electron app with all the UI code (which gets bundled to `public/build/bundle.js`) in [src/ui](src/ui) - based on Svelte.
-* Code that runs in the Node main thread resides in [src/main-thread](src/main-thread) - that includes:
+* Code that runs in the Node main thread resides in [src/core](src/core) - that includes:
     1. LanguageController - loads language bundles and provide access to installed languages
     2. LinkRepoController - build around GunDB / stores links per Perspective
     3. IPFS adapter and GunDB initialization code

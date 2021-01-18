@@ -1,0 +1,13 @@
+@font-face {
+    font-family: Monoton;
+    src: url(fonts/Monoton/Monoton-Regular.ttf);
+}
+
+.title {
+    position: absolute;
+    left: 100px;
+    top: 15px;
+    font-size: 56px;
+    font-family: Monoton;
+    color: white;
+}

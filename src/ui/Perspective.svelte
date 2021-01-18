@@ -8,6 +8,7 @@
     import Link, { hashLinkExpression, linkEqual } from '../acai/Links';
     import { exprRef2String } from '../acai/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
+    import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
     import PerspectiveSettings from './PerspectiveSettings.svelte';
@@ -17,9 +18,12 @@
     import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from '@apollo/client';
     import { LANGUAGES } from './graphql_queries'
+    import { linkTo2D, coordToPredicate } from './uiUtils';
+
+    const gqlClient = getClient()
 
     $: if(perspective) {
-        getClient().subscribe({
+        gqlClient.subscribe({
         query: gql`
             subscription {
                 linkAdded(perspectiveUUID: "${perspective.uuid}") {
@@ -31,7 +35,7 @@
             error: (e) => console.error(e)
         })
 
-        getClient().subscribe({
+        gqlClient.subscribe({
         query: gql`
             subscription {
                 linkRemoved(perspectiveUUID: "${perspective.uuid}") {
@@ -113,8 +117,10 @@
     let linkingSource
     let linkingCursor = {}
     let dropMove = false
+    let dropMoveTarget
 
     let showSettings = false
+    let showExpressionBrwoser = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -190,7 +196,8 @@
             point.x += d.x
             point.y += d.y
             movingLink.data.predicate = coordToPredicate(point)
-            if(hoveredLink(point, movingLink.data)) {
+            dropMoveTarget = hoveredLink(point, movingLink.data)
+            if(dropMoveTarget) {
                 dropMove = true
                 console.log("drop move!")
             } else {
@@ -266,7 +273,10 @@
     function handleMouseUp(event) {
         console.debug(isMovingExpression, movingLink, movingLinkOriginal)
         if(isMovingExpression && !linkEqual(movingLink, movingLinkOriginal)) {
-            const newLinkObject = JSON.parse(JSON.stringify(movingLink))
+            let newLinkObject = JSON.parse(JSON.stringify(movingLink))
+            if(dropMove) {
+                newLinkObject.data.source = dropMoveTarget.data.target
+            }
             delete newLinkObject.id
             console.debug("Updating link:", JSON.stringify(movingLinkOriginal), JSON.stringify(movingLinkOriginal))
             UPDATE_LINK({
@@ -289,7 +299,7 @@
         constructionMenu.open(event.clientX, event.clientY)
     }
 
-    getClient().query({
+    gqlClient.query({
         query: LANGUAGES,
         variables: { filter: "expressionUI" }
     }).then( expressionUILanguages => {
@@ -302,7 +312,7 @@
         const creationResult = await CREATE_EXPRESSION({
             variables: {
                 languageAddress: lang.address,
-                content
+                content: JSON.stringify(content)
             }
         })
 
@@ -321,7 +331,7 @@
     async function createExpression(lang) {
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
-            const { data } = await getClient().query({
+            const { data } = await gqlClient.query({
                 query: gql`
                 { 
                     language(address: "${lang.address}") {
@@ -356,21 +366,6 @@
         linksStore = query(ALL_LINKS_QUERY)
     }
 
-    function linkTo2D(link) {
-        const origin = {x: 0, y: 0}
-        if(!link.data.predicate)
-            return origin
-        const pred = link.data.predicate
-        if(!pred.startsWith("coord2d://"))
-            return origin
-        
-        const [x,y] = pred.substr(10).split('_').map(s => parseInt(s))
-        return {x,y}
-    }
-
-    function coordToPredicate(coords) {
-        return `coord2d://${coords.x}_${coords.y}`
-    }
 
     let expressionContextMenu
 
@@ -438,7 +433,7 @@
                             data-link-id={hashLinkExpression(link)}
                             >
                             <div class="drop-move-container" style={`transform: translateZ(${dropMove ? -2000 : 0}px);`}>
-                                <ExpressionIcon expressionURL={link.data.target}/>
+                                <ExpressionIcon expressionURL={link.data.target} perspectiveUUID={perspective.uuid}/>
                             </div>
                         </li>
                         {:else}
@@ -449,6 +444,7 @@
                             <ExpressionIcon
                                 expressionURL={link.data.target}
                                 parentLink={link}
+                                perspectiveUUID={perspective.uuid}
                                 on:context-menu={onExpressionContextMenu} 
                                 rotated={iconStates[link.data.target] === 'rotated'}
                                 selected={linkingSource?.data?.target === link.data.target}>
@@ -470,12 +466,30 @@
 </div>
 
 <div id="side-bar-container">
-    <div id="settings-panel" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <div class="button" on:click={() => showSettings = !showSettings}>
+    <div class="side-bar-panel panel-1" style={`transform: rotateY(${showExpressionBrwoser? '90deg' : '0' })`}>
+        <div class="side-bar-button" on:click={() => showExpressionBrwoser = !showExpressionBrwoser}>
+            <span class="float-right"><Icon class="material-icons">web</Icon></span>
+            <Label>Expression Browser</Label>
+        </div>
+        <div class="side-panel-content expression-browser-panel" style={`opacity: ${showExpressionBrwoser? '1' : '0'}`}>
+            <ExpressionBrowser
+                on:close={()=> showExpressionBrwoser = false}
+                on:link-expresson={event => ADD_LINK({variables: {
+                    link: JSON.stringify({
+                        source: 'root',
+                        target: event.detail
+                    })
+                }})}
+            ></ExpressionBrowser>
+        </div>
+    </div>
+
+    <div class="side-bar-panel panel-2" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
+        <div class="side-bar-button" on:click={() => showSettings = !showSettings}>
             <span class="float-right"><Icon class="material-icons">settings</Icon></span>
             <Label>Perspective Settings</Label>
         </div>
-        <div id="settings">
+        <div class="side-panel-content settings-panel" style={`opacity: ${showSettings? '1' : '0'}`}>
             <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
                 on:submit={()=> {
                     showSettings = false
@@ -505,6 +519,10 @@
 
 <style>
     .perspective-container {
+        position: absolute;
+        top: 30px;
+        left: 0;
+        right: 0;
         height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
@@ -518,17 +536,33 @@
         perspective-origin: rightpo;
     }
 
-    #settings-panel {
+    .side-bar-panel {
         position: absolute;
         right: 0;
-        top: 100px;
         transform-style: preserve-3d;
         transition: transform 0.5s;
     }
 
-    .button {
+    .panel-1 {
+        top: 115px;
+    }
+
+    .panel-2 {
+        top: 425px;
+    }
+    
+    .expression-browser-panel {
+        height: 545px;
+        width: 380px;
+    }
+
+    .settings-panel {
+        width: 204px;
+    }
+
+    .side-bar-button {
         position: absolute;
-        width: 230px;
+        width: 175px;
         height: 45px;
         padding: 10px 50px 0 25px;
         transform-origin: right bottom;
@@ -544,9 +578,10 @@
         float: right;
     }
 
-    #settings {
+    .side-panel-content {
         position: absolute;
         transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
+        transition: opacity 0.5s;
         padding: 40px;
         border: 1px solid rgb(127, 129, 255);
         background-color: white;

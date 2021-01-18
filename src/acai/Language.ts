@@ -12,6 +12,12 @@ export default interface Language {
     // by address and putting an expression
     readonly expressionAdapter?: ExpressionAdapter;
 
+    // Implementation of a Language that defines Agent Expressions
+    readonly agentAdapter?: AgentAdapter;
+
+    // Implementation of a Language that defines and stores Languages
+    readonly languageAdapter?: LanguageAdapter;
+
     // Optional adapter for getting Expressions by author
     readonly getByAuthorAdapter?: GetByAuthorAdapter;
     // Optional adapter for getting all Expressions
@@ -73,6 +79,17 @@ export interface ReadOnlyLanguage {
     // This just calculates the address of an object
     // * content is the object created by the constructorIcon component
     addressOf(content: object): Promise<Address>;
+}
+
+// Interface for Agent Languages.
+// Class Agent in Agent.ts is what these Languages store and retrieve via DID
+export interface AgentAdapter {
+    setProfile(agent: Agent);
+    getProfile(did: string): Promise<Agent|void>;
+}
+
+export interface LanguageAdapter {
+    getLanguageSource(address: Address): Promise<string>;
 }
 
 // Implement this if your Language supports retrieval of all Expressions
