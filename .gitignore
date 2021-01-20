@@ -16,6 +16,7 @@
 /src/languages/**/hc-dna/*.dna.gz
 /src/stores/LinksStore.js
 /src/main-thread
+/src/languages/**/*.dna.workdir
 
 holochain
 lair-keystore
