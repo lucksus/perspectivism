@@ -146,3 +146,23 @@ export class InteractionCall {
     name: string;
     parameters: object;
 }
+
+export class OnlineAgent {
+    did: string
+    status: string
+}
+
+export class TelepresenceRpcCall {
+    fn_name: string
+    params: object
+}
+
+export type TelepresenceRpcCallback = (call: TelepresenceRpcCall) => object;
+
+export interface TelepresenceAdapter {
+    setOnlineStatus(status: string);
+    getOnlineAgents(): [OnlineAgent];
+
+    rpcCall(remoteAgentDid: string, call: TelepresenceRpcCall): object;
+    registerRpcCallback(callback: TelepresenceRpcCall);
+}

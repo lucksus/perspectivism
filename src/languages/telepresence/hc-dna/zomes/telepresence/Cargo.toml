@@ -1,0 +1,17 @@
+[package]
+name = "telepresence"
+version = "0.1.0"
+authors = ["Nicolas Luck <nicolas@lucksus.eu>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "telepresence"
+
+[dependencies]
+derive_more = "0"
+serde = "1"
+chrono = "0.4.19"
+
+hdk3 = "0"
+hc_utils = "0"
