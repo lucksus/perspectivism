@@ -69,6 +69,8 @@ export default class LinkLanguageFactory {
                     console.debug("LinkLanguageFactory: reading template file", hcTemplateFilePath)
                     template = fs.readFileSync(hcTemplateFilePath).toString()
                     const lines = template.split('\n') 
+                    //ERROR: This code is not stable; if you import some other object (not type) before importing dna.js into language then this will splice
+                    //at the wrong line location
                     lines.splice(4, 1, dnaCode)
                     template = lines.join('\n')
                 } else {

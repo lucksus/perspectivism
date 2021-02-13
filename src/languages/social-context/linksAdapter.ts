@@ -1,6 +1,5 @@
 import type Expression from "../../acai/Expression";
 import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
-import type { LinkQuery } from "../../acai/Links";
 import { parseExprURL } from "../../acai/ExpressionRef";
 import type Agent from "../../acai/Agent";
 import type Link from "../../acai/Links";
@@ -8,6 +7,7 @@ import type LanguageContext from "../../acai/LanguageContext";
 import type ExpressionRef from "../../acai/ExpressionRef";
 import type { default as HolochainLanguageDelegate, HolochainService } from "../../main-thread/Holochain";
 import { DNA_NICK } from './dna'
+import { LinkQuery } from "../../acai/Links";
 
 export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     #socialContextDna: HolochainLanguageDelegate
@@ -47,6 +47,7 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
     }
 
     async getLinks(query: LinkQuery): Promise<Expression[]> {
+        query = new LinkQuery(query)
         let link_query = Object.assign(query);  
         if (!link_query.source) {
             link_query.source = "root";
@@ -54,7 +55,8 @@ export class JuntoSocialContextLinkAdapter implements LinksAdapter {
         console.debug("Holochain Social Context: Getting Links With: ", link_query); 
         let links = await this.#socialContextDna.call(DNA_NICK, "social_context_acai", "get_links", link_query)
         console.debug("Holchain Social Context: Got Links", links);
-        return links
+
+        return links.filter(link => query.isMatch(link.data as Link))
     }
 
     addCallback(callback: NewLinksObserver) {
