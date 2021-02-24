@@ -1,0 +1,35 @@
+# import Expression, Link, LinkExpression from "../ad4m/ad4m.graphql"
+
+input LinkQuery {
+    source: String
+    predicate: String
+    target: String
+}
+
+input LinkInput {
+    source: String
+    predicate: String
+    target: String
+}
+
+input AgentInput {
+    did: String
+}
+
+input LinkExpressionInput {
+    author: AgentInput
+    timestamp: String
+    data: LinkInput
+}
+
+type Query {
+    hello: String
+    links(perspectiveUUID: String, query: LinkQuery): [LinkExpression]
+    expression(url: String): Expression
+}
+
+type Mutation {
+    addLink(perspectiveUUID: String, link: LinkInput): LinkExpression
+    updateLink(perspectiveUUID: String, oldLink: LinkExpressionInput, newLink: LinkExpressionInput): LinkExpression
+    removeLink(perspectiveUUID: String, oldLink: LinkExpressionInput): Boolean
+}

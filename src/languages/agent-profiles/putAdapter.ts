@@ -1,6 +1,6 @@
-import type Address from "../../acai/Address";
-import type Agent from "../../acai/Agent";
-import type { ReadOnlyLanguage } from "../../acai/Language";
+import type Address from "../../ad4m/Address";
+import type Agent from "../../ad4m/Agent";
+import type { ReadOnlyLanguage } from "../../ad4m/Language";
 
 export default class AgentPutAdapter implements ReadOnlyLanguage {
     async addressOf(agent: object): Promise<Address> {

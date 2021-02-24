@@ -3,7 +3,7 @@
 
 .DS_Store
 
-/src/acai/*.js
+/src/ad4m/*.js
 /src/core/*.js
 /src/core/**/*.js
 /src/**/*.js.map

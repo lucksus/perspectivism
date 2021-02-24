@@ -1,7 +1,7 @@
 <svelte:options tag={null}/>
 
 <script lang="ts">
-    import type Expression from "../../acai/Expression";
+    import type Expression from "../../ad4m/Expression";
     export let expression: Expression
     let url = null
     $: if(expression && expression.data) {

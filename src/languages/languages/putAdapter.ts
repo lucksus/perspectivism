@@ -1,8 +1,8 @@
-import type Address from '../../acai/Address'
-import type AgentService from '../../acai/AgentService'
-import type { PublicSharing } from '../../acai/Language'
-import type LanguageContext from '../../acai/LanguageContext'
-import type { IPFSNode } from '../../acai/LanguageContext'
+import type Address from '../../ad4m/Address'
+import type AgentService from '../../ad4m/AgentService'
+import type { PublicSharing } from '../../ad4m/Language'
+import type LanguageContext from '../../ad4m/LanguageContext'
+import type { IPFSNode } from '../../ad4m/LanguageContext'
 import type HolochainLanguageDelegate from '../../core/storage-services/Holochain/HolochainLanguageDelegate'
 import { DNA_NICK } from './dna'
 

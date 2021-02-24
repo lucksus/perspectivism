@@ -1,7 +1,7 @@
 {
   "name": "ipfs-links",
   "version": "0.0.1",
-  "description": "An ACAI Language for sharing link expression over IPFS",
+  "description": "An AD4M Language for sharing link expression over IPFS",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

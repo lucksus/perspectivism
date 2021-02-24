@@ -1,18 +1,18 @@
-# Perspectivism and ACAI
+# Perspect3ve and AD4M
 
 **WIP and under heavy development**
 
 This repository contains two parts that will soon get separated:
-1. **ACAI** (The *Agent-Centric Application Interface*)
+1. **AD4M** (The *Agent-Centric Application Interface*)
     This is an abstract interface definition that tries to distill the quintessence of agent-centric software architecture such that applications can choose to become interoprable by building components congruent to this interface. It introduces a simple and powerful ontology consisting of three entities
     1. **Agent** (=user/human)
     2. **Language** (=space of expressions / combining storage and UI on an abstract level)
     3. **Perspective** (=what an agent perceives / spaces of links (triplets) between expressions)
     
-    See [src/acai](src/acai) for a more detailed description as well as TypeScript classes and interfaces.
+    See [src/ad4m](src/ad4m) for a more detailed description as well as TypeScript classes and interfaces.
 
-2. **Perspectivism**
-    This is an agent-centric browser and example implementation of ACAI. Its a desktop GUI application that provides means for creating Perspectives and creating and linking expressions inside these Perspectives. It therefore holds a set of Languages in which expressions can be created. Languages have access to a list of storage backe-ends (currently implemented only IPFS, Holochain and others will follow soon).
+2. **Perspect3ve**
+    This is an agent-centric browser and example implementation of AD4M. Its a desktop GUI application that provides means for creating Perspectives and creating and linking expressions inside these Perspectives. It therefore holds a set of Languages in which expressions can be created. Languages have access to a list of storage backe-ends (currently implemented only IPFS, Holochain and others will follow soon).
 
     ![welcome open drawer](screenshots/welcome_open_drawer.png)
     
@@ -40,11 +40,11 @@ orthodoxy. We need to be able to communicate complex stuff efficiently and freel
 
 ## Solution
 
-The core intention of ACAI is to **suggest a minimal and quintessential ontology** to help think about software in a way that interoperability and multi-perspectivistic subjectivity is inherently baked-in.
+The core intention of AD4M is to **suggest a minimal and quintessential ontology** to help think about software in a way that interoperability and multi-perspectivistic subjectivity is inherently baked-in.
 
 It needs to be minimal in order to get buy-in by enough projects creating a piece of software targeted at social interaction and coordination.
 
-It needs to be quintessential so that every app that currently is build in a centralized and/or monolithic style *can* be implemented on top of ACAI.
+It needs to be quintessential so that every app that currently is build in a centralized and/or monolithic style *can* be implemented on top of AD4M.
 
 ### *Why should the triplet of Agent, Language and Perspective be minimal and quintessential?*
 
@@ -71,7 +71,7 @@ Since this might be perceived as a big and unreasonable claim, **Perspectivism**
 * [src/services](src/services) contains proxy objects for the controllers and storage services that are used
     from the UI thread and that use Electron IPC to connect to the instances in the main thread
 
-LanguageController can load and store Languages in the form of JavaScript bundles assuming they are CommonJS modules exporting a function that creates an object of type Language as defined in [src/acai/Language.ts](src/acai/Language.ts).
+LanguageController can load and store Languages in the form of JavaScript bundles assuming they are CommonJS modules exporting a function that creates an object of type Language as defined in [src/ad4m/Language.ts](src/ad4m/Language.ts).
 
 [src/languages/note-ipfs](src/languages/note-ipfs) contains a full sub-project of a language including UI components.
 
