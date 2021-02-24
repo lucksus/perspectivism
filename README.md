@@ -2,7 +2,7 @@
 
 **WIP and under heavy development**
 
-![Logo](graphics/Perspet3veLogo.png)
+![Logo](graphics/Perspect3veLogo.png)
 
 This repository contains two parts that will soon get separated:
 1. **AD4M** (The *Agent-Centric Application Interface*)
@@ -19,7 +19,7 @@ This repository contains two parts that will soon get separated:
     currently under development.
     
     It includes an [example Language](src/languages/note-ipfs) for simple text notes, implemented on top of IPFS.
-    
+
     TODO: add list of features here.
     
     
