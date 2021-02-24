@@ -1,0 +1,11 @@
+{
+    "name": "telepresence",
+    "uuid": "",
+    "properties": null,
+    "zomes": {
+      "telepresence": {
+        "wasm_path": "../target/wasm32-unknown-unknown/release/telepresence.wasm"
+      }
+    }
+  }
+  
