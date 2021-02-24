@@ -1,13 +1,13 @@
-import type Agent from "../acai/Agent"
-import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../acai/Links";
+import type Agent from "../ad4m/Agent"
+import Link, { hashLinkExpression, linkEqual, LinkQuery } from "../ad4m/Links";
 import { SHA3 } from "sha3";
-import type Expression from "../acai/Expression";
+import type Expression from "../ad4m/Expression";
 import type AgentService from "./agent/AgentService";
 import type LanguageController from "./LanguageController";
-import type LanguageRef from "../acai/LanguageRef";
+import type LanguageRef from "../ad4m/LanguageRef";
 import * as PubSub from './PubSub'
 import type PerspectiveID from "./PerspectiveID"
-import type SharedPerspective from "../acai/SharedPerspective";
+import type SharedPerspective from "../ad4m/SharedPerspective";
 import type PerspectiveContext from "./PerspectiveContext"
 
 export default class Perspective {
