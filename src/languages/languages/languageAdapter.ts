@@ -1,7 +1,7 @@
-import type Address from '../../acai/Address';
-import type { LanguageAdapter as Interface, PublicSharing} from '../../acai/Language'
-import type LanguageContext from '../../acai/LanguageContext';
-import type { IPFSNode } from '../../acai/LanguageContext';
+import type Address from '../../ad4m/Address';
+import type { LanguageAdapter as Interface, PublicSharing} from '../../ad4m/Language'
+import type LanguageContext from '../../ad4m/LanguageContext';
+import type { IPFSNode } from '../../ad4m/LanguageContext';
 
 
 const _appendBuffer = (buffer1, buffer2) => {

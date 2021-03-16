@@ -1,7 +1,7 @@
 <script lang="ts">
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import Button from '@smui/button'
-    import type LanguageRef from "../acai/LanguageRef";
+    import type LanguageRef from "../ad4m/LanguageRef";
     import type { LanguageController } from "../core/LanguageController";
     import iconComponentFromString from "./iconComponentFromString";
     import { LANGUAGES_WITH_SETTINGS, SET_LANGUAGE_SETTINGS } from "./graphql_queries"

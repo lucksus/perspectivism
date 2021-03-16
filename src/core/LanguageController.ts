@@ -1,10 +1,10 @@
-import type Expression from '../acai/Expression';
-import ExpressionRef from '../acai/ExpressionRef';
-import type Language from '../acai/Language'
-import type { LinksAdapter } from '../acai/Language'
-import type { InteractionCall } from '../acai/Language'
-import type LanguageContext from '../acai/LanguageContext';
-import type LanguageRef from '../acai/LanguageRef'
+import type Expression from '../ad4m/Expression';
+import ExpressionRef from '../ad4m/ExpressionRef';
+import type Language from '../ad4m/Language'
+import type { LinksAdapter } from '../ad4m/Language'
+import type { InteractionCall } from '../ad4m/Language'
+import type LanguageContext from '../ad4m/LanguageContext';
+import type LanguageRef from '../ad4m/LanguageRef'
 import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
@@ -12,7 +12,7 @@ import * as Config from './Config'
 import type HolochainService from './storage-services/Holochain/HolochainService';
 import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
-import type Address from '../acai/Address';
+import type Address from '../ad4m/Address';
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = baseX(BASE58)
@@ -68,7 +68,7 @@ export default class LanguageController {
         await Promise.all(builtInLanguages.map( async bundle => {
             const { hash, language } = await this.loadLanguage(bundle)
             
-            // Do special stuff for ACAI languages:
+            // Do special stuff for AD4M languages:
             Object.keys(aliases).forEach(alias => {
                 if(language.name === aliases[alias]) {
                     aliases[alias] = hash

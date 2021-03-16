@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type Expression from "../acai/Expression"
+    import type Expression from "../ad4m/Expression"
     import iconComponentFromString from "./iconComponentFromString";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();

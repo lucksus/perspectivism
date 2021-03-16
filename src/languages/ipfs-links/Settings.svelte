@@ -4,7 +4,7 @@
     export let settings: object
 
     $: if(settings && !settings.roomName) {
-        settings.roomName = 'acai-ipfs-links-default-room'
+        settings.roomName = 'ad4m-ipfs-links-default-room'
     }
 
     

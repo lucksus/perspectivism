@@ -1,12 +1,12 @@
-import type Expression from "../../acai/Expression";
-import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
-import type Link from "../../acai/Links";
+import type Expression from "../../ad4m/Expression";
+import type { LinksAdapter, NewLinksObserver } from "../../ad4m/Language";
+import type Link from "../../ad4m/Links";
 const Gun = require("gun")
 require('gun/lib/load.js')
 require('gun/nts.js')
-import type LanguageContext from "../../acai/LanguageContext";
+import type LanguageContext from "../../ad4m/LanguageContext";
 import { SHA3 } from "sha3";
-import type ExpressionRef from "../../acai/ExpressionRef";
+import type ExpressionRef from "../../ad4m/ExpressionRef";
 
 export class GunLinksAdapter implements LinksAdapter {
     #callbacks: NewLinksObserver[];

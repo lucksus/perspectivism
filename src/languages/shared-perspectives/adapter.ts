@@ -1,8 +1,8 @@
-import type Address from '../../acai/Address'
-import type Expression from '../../acai/Expression'
-import type { ExpressionAdapter, PublicSharing } from '../../acai/Language'
-import type LanguageContext from '../../acai/LanguageContext'
-import type { IPFSNode } from '../../acai/LanguageContext'
+import type Address from '../../ad4m/Address'
+import type Expression from '../../ad4m/Expression'
+import type { ExpressionAdapter, PublicSharing } from '../../ad4m/Language'
+import type LanguageContext from '../../ad4m/LanguageContext'
+import type { IPFSNode } from '../../ad4m/LanguageContext'
 import { IpfsPutAdapter } from './putAdapter'
 
 const _appendBuffer = (buffer1, buffer2) => {

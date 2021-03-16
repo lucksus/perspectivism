@@ -1,4 +1,4 @@
-import type { ExpressionUI as ExpressionUIInterface } from "../../acai/Language";
+import type { ExpressionUI as ExpressionUIInterface } from "../../ad4m/Language";
 import Icon from './build/Icon.js'
 import ConstructorIcon from './build/ConstructorIcon.js'
 

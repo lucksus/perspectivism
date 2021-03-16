@@ -1,8 +1,8 @@
-import type { ExpressionAdapter as Interface } from '../../acai/Language'
-import type Address from '../../acai/Address'
-import Agent from '../../acai/Agent'
-import type Expression from '../../acai/Expression'
-import type LanguageContext from '../../acai/LanguageContext'
+import type { ExpressionAdapter as Interface } from '../../ad4m/Language'
+import type Address from '../../ad4m/Address'
+import Agent from '../../ad4m/Agent'
+import type Expression from '../../ad4m/Expression'
+import type LanguageContext from '../../ad4m/LanguageContext'
 import AgentPutAdapter from './putAdapter'
 import type HolochainLanguageDelegate from "../../core/storage-services/Holochain/HolochainLanguageDelegate"
 import { DNA_NICK } from './dna'
