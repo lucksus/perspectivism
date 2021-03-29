@@ -18,6 +18,7 @@
     let publishType = ''
     let publishName = ''
     let publishDescription = ''
+    let hcDnaSeed = ''
     let isPublishing = false
 
     const dispatch = createEventDispatcher();
@@ -68,7 +69,8 @@
                 uuid: perspective.uuid,
                 name: publishName,
                 description: publishDescription,
-                type: publishType
+                type: publishType,
+                hcDnaSeed: hcDnaSeed
             }
         })
         isPublishing = true
@@ -133,7 +135,16 @@
                                 <Option value={'broadcast'} selected={false}>Broadcast</Option>
                                 <Option value={'permissionless'} selected={true}>Permissionless</Option>
                                 <Option value={'permissioned'} selected={false} deactivated={true}>Permissioned</Option>
+                                <Option value={'holochain'} selected={false}>Holochain</Option>
                             </Select>
+
+                            {#if publishType === 'holochain'}
+                                <Textfield fullwidth lineRipple={false} label="Holochain Perspective Password">
+                                    <Input bind:value={hcDnaSeed} id="input-hc-seed" aria-controls="input-hc-helper-text" aria-describedby="input-hc-helper-text" />
+                                    <FloatingLabel for="input-hc-seed">Holochain Perspective Password</FloatingLabel>
+                                    <LineRipple />
+                                </Textfield>
+                            {/if}
 
                             <p></p>
 

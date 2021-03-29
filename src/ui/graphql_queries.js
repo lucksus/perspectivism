@@ -166,8 +166,8 @@ export const UPDATE_PERSPECTIVE = gql`
 `
 
 export const PUBLISH_PERSPECTIVE = gql`
-    mutation publishPerspective($uuid: String, $name: String, $description: String, $type: String) {
-        publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type}) {
+    mutation publishPerspective($uuid: String, $name: String, $description: String, $type: String, $hcDnaSeed: String) {
+        publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type, hcDnaSeed: $hcDnaSeed}) {
             uuid
             name
             sharedURL

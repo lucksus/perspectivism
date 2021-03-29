@@ -1,5 +1,5 @@
-import type Address from '../../acai/Address'
-import type { ReadOnlyLanguage } from '../../acai/Language'
+import type Address from '../../ad4m/Address'
+import type { ReadOnlyLanguage } from '../../ad4m/Language'
 
 export class UrlPutAdapter implements ReadOnlyLanguage {
     async addressOf(data: object): Promise<Address> {

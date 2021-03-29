@@ -1,7 +1,7 @@
 import { ApolloServer, gql, withFilter } from 'apollo-server'
-import type Agent from '../../acai/Agent'
-import { exprRef2String, parseExprURL } from '../../acai/ExpressionRef'
-import type LanguageRef from '../../acai/LanguageRef'
+import type Agent from '../../ad4m/Agent'
+import { exprRef2String, parseExprURL } from '../../ad4m/ExpressionRef'
+import type LanguageRef from '../../ad4m/LanguageRef'
 import type PerspectivismCore from '../PerspectivismCore'
 import * as PubSub from '../PubSub'
 import { shell } from 'electron'
@@ -146,6 +146,7 @@ input PublishPerspectiveInput {
     name: String
     description: String
     type: String
+    hcDnaSeed: String
 }
 
 input UpdateAgentProfileInput {
@@ -313,12 +314,12 @@ function createResolvers(core: PerspectivismCore) {
                 return perspective
             },
             publishPerspective: (parent, args, context, info) => {
-                const { uuid, name, description, type } = args.input
+                const { uuid, name, description, type, hcDnaSeed } = args.input
                 const perspective = core.perspectivesController.perspectiveID(uuid)
                 // @ts-ignore
                 if(perspective.sharedPerspective && perspective.sharedURL)
                     throw new Error(`Perspective ${name} (${uuid}) is already shared`)
-                return core.publishPerspective(uuid, name, description, type)
+                return core.publishPerspective(uuid, name, description, type, hcDnaSeed)
             },
             removePerspective: (parent, args, context, info) => {
                 const { uuid } = args

@@ -1,7 +1,7 @@
-import type Expression from "../../acai/Expression";
-import type { LinksAdapter, NewLinksObserver } from "../../acai/Language";
-import Link, { hashLinkExpression, LinkQuery } from "../../acai/Links";
-import type LanguageContext from "../../acai/LanguageContext";
+import type Expression from "../../ad4m/Expression";
+import type { LinksAdapter, NewLinksObserver } from "../../ad4m/Language";
+import Link, { hashLinkExpression, LinkQuery } from "../../ad4m/Links";
+import type LanguageContext from "../../ad4m/LanguageContext";
 import Room from 'ipfs-pubsub-room'
 import path from 'path'
 import fs from 'fs'
@@ -67,7 +67,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         
         if(!templated) {
             // @ts-ignore
-            this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'acai-ipfs-links-default-room'
+            this.#roomName = context.customSettings.roomName ? context.customSettings.roomName : 'ad4m-ipfs-links-default-room'
         }
         
         this.#room = new Room(this.#IPFS, this.#roomName)
@@ -199,7 +199,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return true
     }
 
-    others() {
+    async others() {
         return []
     }
 

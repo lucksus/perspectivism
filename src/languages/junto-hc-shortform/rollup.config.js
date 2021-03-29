@@ -12,7 +12,7 @@ const production = !process.env.ROLLUP_WATCH;
 
 export default {
 	input: 'index.js',
-	external: ["aws-sdk"],
+	external: [],
 	output: {
 		sourcemap: true,
 		format: 'cjs',

@@ -2,18 +2,20 @@ import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
 import baseX from 'base-x'
-import SharedPerspective, { SharingType } from "../acai/SharedPerspective";
+import SharedPerspective, { SharingType } from "../ad4m/SharedPerspective";
 import type AgentService from "./agent/AgentService";
-import type Language from "../acai/Language";
-import type { PublicSharing } from "../acai/Language";
-import type LanguageRef from "../acai/LanguageRef";
+import type Language from "../ad4m/Language";
+import type { PublicSharing } from "../ad4m/Language";
+import type LanguageRef from "../ad4m/LanguageRef";
 
+const exec = child_process.execSync;
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = baseX(BASE58)
 
 const templates = {
-    permissionless: './src/languages/ipfs-links/build/bundle.js'
+    permissionless: './src/languages/ipfs-links/build/bundle.js',
+    holochain: './src/languages/social-context/build/bundle.js'
 }
 
 export default class LinkLanguageFactory {
@@ -27,7 +29,7 @@ export default class LinkLanguageFactory {
         this.#agentService = agentService
     }
 
-    async createLinkLanguageForSharedPerspective(sharedPerspective: SharedPerspective): Promise<LanguageRef> {
+    async createLinkLanguageForSharedPerspective(sharedPerspective: SharedPerspective, hcDnaSeed: string): Promise<LanguageRef> {
         console.debug("LinkLanguageFactory: creating new link language for shared perspective:", sharedPerspective.name)
 
         const name = `${sharedPerspective.name}-${sharedPerspective.type}-LinkLanguage`
@@ -42,8 +44,37 @@ export default class LinkLanguageFactory {
             case SharingType.Permissionless:
                 console.debug("LinkLanguageFactory: Permissionless language")
                 const templateFilePath = path.join(process.env.PWD, templates.permissionless)
-                console.debug("LinkLanguageFactor: reading template file", templateFilePath)
+                console.debug("LinkLanguageFactory: reading template file", templateFilePath)
                 template = fs.readFileSync(templateFilePath).toString()
+                break;
+            case SharingType.Holochain:
+                console.debug("LinkLanguageFactory: Holochain language")
+                const hcTemplateFilePath = path.join(process.env.PWD, templates.holochain)
+                const hcDnaPath = path.join(process.env.PWD, "./src/languages/social-context/social-context.dna.gz")
+
+                if (hcDnaSeed != '') {
+                    exec(`dna-util --expand ${hcDnaPath}`);
+                    const hcDna = path.join(process.env.PWD, "./src/languages/social-context/social-context.dna.workdir")
+                    const hcDnaJson = path.join(hcDna, "./dna.json")
+                    var dnaJson = JSON.parse(fs.readFileSync(hcDnaJson).toString());
+                    dnaJson["properties"] = {
+                        "seed": hcDnaSeed
+                    };
+                    fs.writeFileSync(hcDnaJson, JSON.stringify(dnaJson));
+                    exec(`dna-util --compress ${hcDna}`)
+
+                    var base64 = fs.readFileSync(hcDnaPath, "base64").replace(/[\r\n]+/gm, '');
+                    var dnaCode = `var dna = "${base64}";`.trim();
+                    console.debug("LinkLanguageFactory: reading template file", hcTemplateFilePath)
+                    template = fs.readFileSync(hcTemplateFilePath).toString()
+                    const lines = template.split('\n') 
+                    //ERROR: This code is not stable; if you import some other object (not type) before importing dna.js into language then this will splice
+                    //at the wrong line location
+                    lines.splice(4, 1, dnaCode)
+                    template = lines.join('\n')
+                } else {
+                    template = fs.readFileSync(hcTemplateFilePath).toString()
+                };
                 break;
             default:
                 throw new Error(`SharingType ${sharedPerspective.type} not yet implementent`)

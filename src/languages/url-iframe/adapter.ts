@@ -1,8 +1,8 @@
-import type Address from '../../acai/Address'
-import Agent from '../../acai/Agent'
-import type Expression from '../../acai/Expression'
-import type { ExpressionAdapter, ReadOnlyLanguage } from '../../acai/Language'
-import type LanguageContext from '../../acai/LanguageContext'
+import type Address from '../../ad4m/Address'
+import Agent from '../../ad4m/Agent'
+import type Expression from '../../ad4m/Expression'
+import type { ExpressionAdapter, ReadOnlyLanguage } from '../../ad4m/Language'
+import type LanguageContext from '../../ad4m/LanguageContext'
 import { UrlPutAdapter } from './putAdapter'
 
 export default class Adapter implements ExpressionAdapter {
@@ -27,6 +27,7 @@ export default class Adapter implements ExpressionAdapter {
             author: new Agent(url.hostname),
             timestamp: 'unknown',
             data,
+            proof: undefined 
         };
 
         return expression

@@ -11,10 +11,10 @@ import * as DIDs from './agent/DIDs'
 import type { DIDResolver } from './agent/DIDs'
 import Signatures from './agent/Signatures'
 import type Perspective from './Perspective'
-import SharedPerspective from '../acai/SharedPerspective'
-import type { SharingType } from '../acai/SharedPerspective'
+import SharedPerspective from '../ad4m/SharedPerspective'
+import type { SharingType } from '../ad4m/SharedPerspective'
 import LinkLanguageFactory from './LinkLanguageFactory'
-import type { PublicSharing } from '../acai/Language'
+import type { PublicSharing } from '../ad4m/Language'
 import type PerspectiveID from './PerspectiveID'
 
 
@@ -87,7 +87,7 @@ export default class PerspectivismCore {
         this.#linkLanguageFactory = new LinkLanguageFactory(this.#agentService, this.#languageController.getLanguageLanguage())
     }
 
-    async publishPerspective(uuid: string, name: string, description: string, sharingType: SharingType): Promise<PerspectiveID> {
+    async publishPerspective(uuid: string, name: string, description: string, sharingType: SharingType, hcDnaSeed: string): Promise<PerspectiveID> {
         // We only work on the PerspectiveID object.
         // On PerspectiveController.update() below, the instance will get updated as well, but we don't need the
         // instance object here
@@ -96,7 +96,7 @@ export default class PerspectivismCore {
         const sharedPerspective = new SharedPerspective(name, description, sharingType)
 
         // Create LinkLanguage
-        const linkLanguageRef = await this.#linkLanguageFactory.createLinkLanguageForSharedPerspective(sharedPerspective)
+        const linkLanguageRef = await this.#linkLanguageFactory.createLinkLanguageForSharedPerspective(sharedPerspective, hcDnaSeed)
         sharedPerspective.linkLanguages = [linkLanguageRef]
         await this.#languageController.installLanguage(linkLanguageRef.address)
 

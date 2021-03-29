@@ -114,7 +114,7 @@ export type NewLinksObserver = (added: Expression[], removed: Expression[])=>voi
 export interface LinksAdapter {
     writable(): boolean;
     public(): boolean;
-    others(): Agent[];
+    others(): Promise<Agent[]>;
 
     addLink(linkExpression: Expression);
     updateLink(oldLinkExpression: Expression, newLinkExpression: Expression);

@@ -1,8 +1,8 @@
-import type Address from '../../acai/Address'
-import type Agent from '../../acai/Agent'
-import type Language from '../../acai/Language'
-import type LanguageContext from '../../acai/LanguageContext'
-import type { Interaction } from '../../acai/Language'
+import type Address from '../../ad4m/Address'
+import type Agent from '../../ad4m/Agent'
+import type Language from '../../ad4m/Language'
+import type LanguageContext from '../../ad4m/LanguageContext'
+import type { Interaction } from '../../ad4m/Language'
 import ShortFormAdapter from './adapter'
 import ShortFormAuthorAdapter from './authorAdapter'
 import Icon from './build/Icon.js'
@@ -10,7 +10,7 @@ import ConstructorIcon from './build/ConstructorIcon.js'
 import { JuntoSettingsUI } from './SettingsUI'
 import { ShortFormExpressionUI } from './shortFormExpressionUI'
 import { DNA, DNA_NICK } from './dna'
-import type HolochainLanguageDelegate from '../../core/Holochain'
+import type HolochainLanguageDelegate from "../../core/storage-services/Holochain/HolochainLanguageDelegate"
 
 function iconFor(expression: Address): string {
     return Icon

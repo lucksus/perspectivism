@@ -1,10 +1,10 @@
-import type Expression from '../acai/Expression';
-import ExpressionRef from '../acai/ExpressionRef';
-import type Language from '../acai/Language'
-import type { LinksAdapter } from '../acai/Language'
-import type { InteractionCall } from '../acai/Language'
-import type LanguageContext from '../acai/LanguageContext';
-import type LanguageRef from '../acai/LanguageRef'
+import type Expression from '../ad4m/Expression';
+import ExpressionRef from '../ad4m/ExpressionRef';
+import type Language from '../ad4m/Language'
+import type { LinksAdapter } from '../ad4m/Language'
+import type { InteractionCall } from '../ad4m/Language'
+import type LanguageContext from '../ad4m/LanguageContext';
+import type LanguageRef from '../ad4m/LanguageRef'
 import fs from 'fs'
 import path from 'path'
 import multihashing from 'multihashing'
@@ -12,7 +12,7 @@ import * as Config from './Config'
 import type HolochainService from './storage-services/Holochain/HolochainService';
 import type AgentService from './agent/AgentService'
 import baseX from 'base-x'
-import type Address from '../acai/Address';
+import type Address from '../ad4m/Address';
 
 const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const bs58 = baseX(BASE58)
@@ -20,12 +20,13 @@ const bs58 = baseX(BASE58)
 const builtInLanguages = [
     'note-ipfs',
     'url-iframe',
-    'gun-links',
+    //'gun-links',
     'ipfs-links',
     'junto-hc-shortform',
     'agent-profiles',
     'languages',
-    'shared-perspectives'
+    'shared-perspectives',
+    'social-context'
 ].map(l => `./src/languages/${l}/build/bundle.js`)
 
 const aliases = {
@@ -67,7 +68,7 @@ export default class LanguageController {
         await Promise.all(builtInLanguages.map( async bundle => {
             const { hash, language } = await this.loadLanguage(bundle)
             
-            // Do special stuff for ACAI languages:
+            // Do special stuff for AD4M languages:
             Object.keys(aliases).forEach(alias => {
                 if(language.name === aliases[alias]) {
                     aliases[alias] = hash
@@ -124,8 +125,7 @@ export default class LanguageController {
                     o(added, removed, {name, address: hash} as LanguageRef)
                 })
             })
-        }
-
+        } 
         this.#languages.set(hash, language)
         this.#languageConstructors.set(hash, create)
 
@@ -167,7 +167,11 @@ export default class LanguageController {
 
         const sourcePath = path.join(Config.languagesPath, address, 'bundle.js')
         const metaPath = path.join(Config.languagesPath, address, 'meta.json')
-        fs.mkdirSync(path.join(Config.languagesPath, address))
+        try {
+            fs.mkdirSync(path.join(Config.languagesPath, address))
+        } catch {
+            console.warn("Already got directory for language at", path.join(Config.languagesPath, address))
+        };
         fs.writeFileSync(sourcePath, source)
         fs.writeFileSync(metaPath, JSON.stringify(languageMeta))
         try {
