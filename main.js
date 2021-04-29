@@ -2,18 +2,47 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
-const PerspectivismCore = require('./src/core/PerspectivismCore')
-const core = PerspectivismCore.create()
+const ad4m = require('ad4m-executor')
 
-app.whenReady().then(() => {  
-  core.initServices()
-  core.startGraphQLServer()
-  const splash = createSplash()
-  core.waitForAgent().then(() => {
-    core.initControllers()
-    createWindow()
-    splash.close()
-  })
+function handleAppSignalCallback(signal) {
+  console.log("Got signal inside communities app!", signal);
+}
+
+app.whenReady().then(() => {
+  ad4m
+  .init(
+    app.getPath("appData"),
+    __dirname,
+    "./src/languages",
+    [
+      "languages",
+      "agent-profiles",
+      "shared-perspectives",
+      "ipfs-links",
+      "note-ipfs"
+    ],
+    handleAppSignalCallback
+  )
+  .then((ad4mCore) => {
+    console.log(
+      "\x1b[36m%s\x1b[0m",
+      "Starting account creation splash screen"
+    );
+
+    const splash = createSplash()
+    ad4mCore.waitForAgent().then(() => {
+      console.log(
+        "\x1b[36m%s\x1b[0m",
+        "Agent has been init'd. Controllers now starting init..."
+      );
+      ad4mCore.initControllers();
+      console.log("\x1b[32m", "Controllers init complete!");
+
+      createWindow()
+      splash.close()
+    });
+  });
+
 })
 
 function createSplash () {

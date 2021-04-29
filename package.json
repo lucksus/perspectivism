@@ -76,6 +76,8 @@
     "@transmute/did-key-secp256k1": "^0.2.1-unstable.29",
     "@transmute/did-key.js": "^0.2.1-unstable.29",
     "@transmute/did-wallet": "lucksus/did-wallet",
+    "ad4m": "file:../ad4m",
+    "ad4m-executor": "file:../ad4m-executor",
     "apollo-server": "^2.18.2",
     "base-x": "^3.0.8",
     "electron-graphql": "^0.2.1",
