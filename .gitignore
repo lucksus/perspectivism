@@ -13,7 +13,7 @@
 /src/languages/**/node_modules
 /src/languages/**/hc-dna/target
 /src/languages/**/hc-dna/tests/node_modules
-/src/languages/**/hc-dna/*.dna.gz
+/src/languages/**/hc-dna/*.dna
 /src/stores/LinksStore.js
 
 holochain
