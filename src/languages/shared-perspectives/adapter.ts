@@ -1,8 +1,8 @@
-import type Address from '../../ad4m/Address'
-import type Expression from '../../ad4m/Expression'
-import type { ExpressionAdapter, PublicSharing } from '../../ad4m/Language'
-import type LanguageContext from '../../ad4m/LanguageContext'
-import type { IPFSNode } from '../../ad4m/LanguageContext'
+import type Address from '@perspect3vism/ad4m/Address'
+import type Expression from '@perspect3vism/ad4m/Expression'
+import type { ExpressionAdapter, PublicSharing } from '@perspect3vism/ad4m/Language'
+import type LanguageContext from '@perspect3vism/ad4m-language-context/LanguageContext'
+import type { IPFSNode } from '@perspect3vism/ad4m-language-context/LanguageContext'
 import { IpfsPutAdapter } from './putAdapter'
 
 const _appendBuffer = (buffer1, buffer2) => {
