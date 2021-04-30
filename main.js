@@ -2,7 +2,7 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
-const ad4m = require('ad4m-executor')
+const ad4m = require('@perspect3vism/ad4m-executor')
 
 function handleAppSignalCallback(signal) {
   console.log("Got signal inside communities app!", signal);
