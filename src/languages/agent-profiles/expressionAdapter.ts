@@ -1,10 +1,10 @@
-import type { ExpressionAdapter as Interface } from '../../ad4m/Language'
-import type Address from '../../ad4m/Address'
-import type Expression from '../../ad4m/Expression'
+import type { ExpressionAdapter as Interface } from '@perspect3vism/ad4m/Language'
+import type Address from '@perspect3vism/ad4m/Address'
+import type Expression from '@perspect3vism/ad4m/Expression'
 import AgentPutAdapter from './putAdapter'
 import { DNA_NICK } from './dna'
-import type LanguageContext from '../../../../language-context/LanguageContext'
-import type HolochainLanguageDelegate from '../../../../language-context/Holochain/HolochainLanguageDelegate'
+import type LanguageContext from '@perspect3vism/ad4m-language-context/LanguageContext'
+import type HolochainLanguageDelegate from '@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate'
 import { PERSPECTIVISM_PROFILE } from './agentAdapter'
 
 export default class ExpressionAdapter implements Interface {

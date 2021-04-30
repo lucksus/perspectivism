@@ -1,8 +1,8 @@
 <svelte:options tag={null}/>
 
 <script lang="ts">
-    import type Expression from "../../ad4m/Expression";
-    import type Agent from "../../ad4m/Agent"
+    import type Expression from "@perspect3vism/ad4m/Expression";
+    import type Agent from "@perspect3vism/ad4m/Agent"
     import emailValidator from 'email-validator'
     import md5 from 'md5'
 
