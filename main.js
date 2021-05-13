@@ -18,7 +18,7 @@ app.whenReady().then(() => {
       "languages",
       "agent-profiles",
       "shared-perspectives",
-      "ipfs-links",
+      "social-context",
       "note-ipfs"
     ],
     handleAppSignalCallback
