@@ -4,8 +4,9 @@
   "license": "CAL-1.0",
   "main": "main.js",
   "scripts": {
+    "build": "npm run build-ui && npm run get-languages && npm run build-languages",
+    "build-ui": "rollup -c",
     "build-languages": "./build_languages.sh",
-    "build": "rollup -c && npm run get-languages && npm run build-languages",
     "get-languages": "node get-languages.js",
     "dev": "rollup -c -w",
     "serve": "sirv public",
