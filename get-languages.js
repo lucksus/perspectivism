@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const wget = require('node-wget-js')
 
 const languages = {
-    'social-context': 'ttps://github.com/juntofoundation/Social-Context/releases/download/0.0.1/bundle.js'
+    'social-context': 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.1/bundle.js'
 }
 
 for(lang in languages) {
