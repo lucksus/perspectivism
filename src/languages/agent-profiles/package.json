@@ -14,6 +14,7 @@
   "devDependencies": {
     "@perspect3vism/ad4m": "^0.0.4",
     "@perspect3vism/ad4m-language-context": "^0.0.1",
+    "@perspect3vism/rollup-plugin-dna": "0.0.2",
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
     "@rollup/plugin-typescript": "^4.0.0",
