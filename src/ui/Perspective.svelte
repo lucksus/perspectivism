@@ -5,7 +5,9 @@
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
-    import Link, { hashLinkExpression, linkEqual } from '@perspect3vism/ad4m/Links';
+    import Links from '@perspect3vism/ad4m/Links';
+    const Link = Links.default
+    import { hashLinkExpression, linkEqual } from '@perspect3vism/ad4m/Links';
     import { exprRef2String } from '@perspect3vism/ad4m/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import ExpressionBrowser from './ExpressionBrowser.svelte';
