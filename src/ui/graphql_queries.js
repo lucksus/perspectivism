@@ -168,14 +168,9 @@ export const UPDATE_PERSPECTIVE = gql`
 export const PUBLISH_PERSPECTIVE = gql`
     mutation publishPerspective($uuid: String, $name: String, $description: String, $type: String) {
         publishPerspective(input: {uuid: $uuid, name: $name, description: $description, type: $type}) {
-            uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type 
-            }
+            description
+            type 
         }
     }
 `
@@ -248,4 +243,32 @@ export const CHILD_LINKS_QUERY = gql`
             }
         }
     }
+`
+
+export const LINKS_DATED = gql`
+    query links($perspectiveUUID: String, $fromDate: Date, $untilDate: Date) {
+        links(perspectiveUUID: $perspectiveUUID, query: { fromDate: $fromDate, untilDate: $untilDate }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
+`
+
+export const ADD_LINK = gql`
+        mutation AddLink($perspectiveUUID: String, $link: String){
+            addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
+                author { did }
+                timestamp
+                data {
+                    source
+                    predicate
+                    target
+                }
+            }
+        }
 `

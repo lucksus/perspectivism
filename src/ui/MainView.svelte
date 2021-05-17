@@ -11,6 +11,7 @@
 	import { getClient, mutation, query } from "svelte-apollo";
 	import { ADD_PERSPECTIVE, PERSPECTIVES, PERSPECTIVE_ADDED, PERSPECTIVE_REMOVED, PERSPECTIVE_UPDATED, REMOVE_PERSPECTIVE } from './graphql_queries';
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
+	import PeersView from './PeersView.svelte'
 
 
 	let perspectives = query(PERSPECTIVES)
@@ -210,6 +211,8 @@
 		</Row>
 	</TopAppBar>
 
+	<PeersView></PeersView>
+	
 	{#if selectedMainView.perspective}
 		<Perspective perspective={selectedMainView.perspective} 
 			on:settings-changed={editPerspectiveSubmit}
