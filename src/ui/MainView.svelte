@@ -232,7 +232,7 @@
 			on:cancel={() => selectedMainView.edit = null}
 		></PerspectiveSettings>
 	{:else}
-		<h1>Welcome to Perspectivism!</h1>
+		<h1>Welcome to Perspect3ve!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>
     {/if}
     
