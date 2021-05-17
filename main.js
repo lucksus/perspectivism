@@ -4,10 +4,6 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
 
-function handleAppSignalCallback(signal) {
-  console.log("Got signal inside communities app!", signal);
-}
-
 app.whenReady().then(() => {
   ad4m
   .init(
@@ -21,7 +17,7 @@ app.whenReady().then(() => {
       "social-context",
       "note-ipfs"
     ],
-    handleAppSignalCallback
+    false
   )
   .then((ad4mCore) => {
     console.log(
