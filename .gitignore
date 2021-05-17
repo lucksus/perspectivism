@@ -14,6 +14,7 @@
 /src/languages/**/hc-dna/target
 /src/languages/**/hc-dna/tests/node_modules
 /src/languages/**/hc-dna/*.dna
+/src/languages/social-context/*
 /src/stores/LinksStore.js
 
 holochain
