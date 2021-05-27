@@ -1,12 +1,12 @@
-use hdk3::prelude::*;
+use hdk::prelude::*;
 
-#[derive(Clone, Serialize, Deserialize, SerializedBytes)]
+#[derive(Clone, Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct Agent {
     pub did: String,
     pub name: Option<String>,
     pub email: Option<String>
 }
-#[derive(Clone, Serialize, Deserialize, SerializedBytes)]
+#[derive(Clone, Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct ExpressionProof {
     pub signature: String,
     pub key: String
@@ -26,7 +26,7 @@ entry_defs![
     Expression::entry_def()
 ];
 
-#[derive(Serialize, Deserialize, SerializedBytes)]
+#[derive(Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct StoreInput {
     pub key: String,
     pub expression: Expression
@@ -44,12 +44,12 @@ pub fn store_expression(input: StoreInput) -> ExternResult<()> {
     Ok(())
 }
 
-#[derive(Serialize, Deserialize, SerializedBytes)]
+#[derive(Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct GetInput {
     pub key: String,
 }
 
-#[derive(Serialize, Deserialize, SerializedBytes)]
+#[derive(Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct GetOutput {
     pub expressions: Vec<Expression>
 }
