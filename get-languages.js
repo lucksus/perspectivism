@@ -3,8 +3,8 @@ const wget = require('node-wget-js')
 
 const languages = {
     'social-context': {
-        bundle: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.1/bundle.js',
-        dna: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.1/social-context.dna'
+        bundle: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.2/bundle.js',
+        dna: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.2/social-context.dna'
     }
 }
 
