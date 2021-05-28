@@ -255,6 +255,20 @@ export const ALL_LINKS_QUERY = gql`
     }
 `
 
+export const LINKS_SOURCE_PREDICATE_QUERY = gql`
+    query links($perspectiveUUID: String, $source: String, $predicate: String) {
+        links(perspectiveUUID: $perspectiveUUID, query: { source: $source, predicate: $predicate }) {
+            author { did }
+            timestamp
+            data {
+                source
+                predicate
+                target
+            }
+        }
+    }
+`
+
 export const CHILD_LINKS_QUERY = gql`
     query links($perspectiveUUID: String, $source: String) {
         links(perspectiveUUID: $perspectiveUUID, query: { source: $source }) {

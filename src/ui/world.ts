@@ -1,16 +1,9 @@
-import { PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED } from './graphql_queries'
+import { PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED, LINKS_SOURCE_PREDICATE_QUERY } from './graphql_queries'
 import subMinutes from 'date-fns/subMinutes'
 import type { ApolloClient } from '@apollo/client';
+import { logError } from './logUtils'
 
 const WORLD_PERSPECTIVE_NAME = '__WORLD'
-
-
-function logError(result) {
-    if(result.error) {
-        console.error(result)
-    }
-    return result
-}
 
 export default class World {
     #perspectiveUUID: string
@@ -114,6 +107,45 @@ export default class World {
                 perspectiveUUID: this.#perspectiveUUID,
                 link: JSON.stringify(newLink)
             }
+        }))
+    }
+
+    async getAgentPublicPerspective(did: string): Promise<string> {
+        await this.#initialized
+
+        const variables = {
+            perspectiveUUID: this.#perspectiveUUID,
+            source: did,
+            predicate: 'public_perspective'
+        }
+    
+        const result = logError(await this.#gqlClient.query({ 
+            query: LINKS_SOURCE_PREDICATE_QUERY,
+            variables
+        }))
+
+        if(result.data.links.length < 1) {
+            throw `No public perspective found for ${did}`
+        }
+
+        return result.data.links[0].data.target
+    }
+
+    async setAgentPublicPerspective(did: string, url: string) {
+        await this.#initialized
+
+        const variables = {
+            perspectiveUUID: this.#perspectiveUUID,
+            link: JSON.stringify({
+                source: did,
+                predicate: 'public_perspective',
+                target: url
+            })
+        }
+    
+        logError(await this.#gqlClient.mutate({ 
+            mutation: ADD_LINK,
+            variables
         }))
     }
     

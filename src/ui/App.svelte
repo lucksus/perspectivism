@@ -5,6 +5,7 @@
 	import { setContext } from "svelte"
 	import MainView from "./MainView.svelte";
 	import World from "./world";
+	import User from "./user";
 
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:4000/graphql`,
@@ -28,6 +29,8 @@
 	  
 	const world = new World(client);
 	setContext('world', world)
+	const user = new User(world, client);
+	setContext('user', user)
 </script>
 
 <svelte:head>

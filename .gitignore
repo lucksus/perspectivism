@@ -13,6 +13,8 @@
 /src/languages/**/hc-dna/*.dna
 /src/languages/social-context/*
 /src/ui/world.js
+/src/ui/user.js
+/src/ui/logUtils.js
 
 holochain
 lair-keystore
