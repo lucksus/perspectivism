@@ -1,5 +1,22 @@
 import { gql } from '@apollo/client'
 
+export const EXPRESSION = gql`
+    query expression($url: String) {
+        expression(url: $url) {
+            author { did, name, email }
+            timestamp
+            data
+            language {
+                address
+            }
+            proof {
+                valid
+                invalid
+            }
+        }
+    }
+`
+
 export const OPEN_LINK = gql `
     mutation openLinkExtern($url: String) {
         openLinkExtern(url: $url)

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type Expression from "../ad4m/Expression"
+    import type Expression from "@perspect3vism/ad4m/Expression"
     import iconComponentFromString from "./iconComponentFromString";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
@@ -11,6 +11,7 @@
     import md5 from 'md5'
     import {Graphic} from '@smui/list';
     import { DoubleBounce } from 'svelte-loading-spinners'
+    import { EXPRESSION } from './graphql_queries'
 
 
     export let expressionURL: string
@@ -26,22 +27,7 @@
     let childLinks
 
     
-    $: if(expressionURL) queryResult = query(gql`
-        { 
-            expression(url: "${expressionURL}") {
-                author { did, name, email }
-                timestamp
-                data
-                language {
-                    address
-                }
-                proof {
-                    valid
-                    invalid
-                }
-            }
-        }
-    `)
+    $: if(expressionURL) queryResult = query(EXPRESSION, { variables: {url: expressionURL} })
 
     $: if(expressionURL && perspectiveUUID) {
         childLinks = query(CHILD_LINKS_QUERY, {
