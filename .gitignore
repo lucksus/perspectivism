@@ -17,5 +17,7 @@
 holochain
 lair-keystore
 hc
+.hc
+.hc_live*
 
 Perspectivism-linux-x64
