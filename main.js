@@ -26,13 +26,21 @@ app.whenReady().then(() => {
     );
 
     const splash = createSplash()
-    ad4mCore.waitForAgent().then(() => {
+    ad4mCore.waitForAgent().then(async () => {
       console.log(
         "\x1b[36m%s\x1b[0m",
         "Agent has been init'd. Controllers now starting init..."
       );
       ad4mCore.initControllers();
       console.log("\x1b[32m", "Controllers init complete!");
+
+      console.log(
+        "\x1b[36m%s\x1b[0m",
+        "Initializing languages..."
+      );
+      await ad4mCore.initLanguages()
+      console.log("\x1b[32m", "All languages initialized!");
+
 
       createWindow()
       splash.close()
