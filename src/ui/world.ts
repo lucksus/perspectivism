@@ -95,7 +95,9 @@ export default class World {
             variables
         }))
     
-        return result.data.links.map(l => l.author.did)
+        const authorsOfLinks = result.data.links.map(l => l.author.did)
+        const uniqueAuthors = [... new Set(authorsOfLinks)]
+        return uniqueAuthors
     }
     
     async publishOnlineStatus() {
