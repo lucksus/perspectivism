@@ -5,6 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import sveltePreprocess from 'svelte-preprocess';
 import postcss from "rollup-plugin-postcss";
+import typescript from '@rollup/plugin-typescript';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -169,7 +170,7 @@ export default [
 				}]
 				]
 			}),
-			//typescript({ sourceMap: !production }),
+			typescript({ sourceMap: !production }),
 		
 			// In dev mode, call `npm run start` once
 			// the bundle has been generated

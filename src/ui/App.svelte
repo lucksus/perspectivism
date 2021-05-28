@@ -2,7 +2,9 @@
 	import { ApolloClient, InMemoryCache } from "@apollo/client";
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import { setClient } from "svelte-apollo";
+	import { setContext } from "svelte"
 	import MainView from "./MainView.svelte";
+	import World from "./world";
 
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:4000/graphql`,
@@ -22,7 +24,10 @@
 			},
 		},
   	});
-  	setClient(client);
+	setClient(client);
+	  
+	const world = new World(client);
+	setContext('world', world)
 </script>
 
 <svelte:head>

@@ -3,9 +3,6 @@
 
 .DS_Store
 
-/src/ad4m/*.js
-/src/core/*.js
-/src/core/**/*.js
 /src/**/*.js.map
 /src/languages/**/*.js
 /src/languages/**/*.js.map
@@ -15,7 +12,7 @@
 /src/languages/**/hc-dna/tests/node_modules
 /src/languages/**/hc-dna/*.dna
 /src/languages/social-context/*
-/src/stores/LinksStore.js
+/src/ui/world.js
 
 holochain
 lair-keystore
