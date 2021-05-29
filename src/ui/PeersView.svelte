@@ -7,6 +7,9 @@
     import emailValidator from 'email-validator'
     import md5 from 'md5'
     import { logError } from './logUtils'
+    import Button, {Group, Label} from '@smui/button';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
 
     const world = getContext('world')
     const gqlClient = getClient()
@@ -51,6 +54,10 @@
         })
     }
 
+    function requestOpenPerspective(perspectiveURL: string) {
+        dispatch('request-open-perspective', {perspectiveURL})
+    }
+
     init()
 </script>
 
@@ -64,8 +71,15 @@
                     <img class="avatar" src="http://www.gravatar.com/avatar/{md5(peerProperties[peer].profile?.email)}?s=75" alt="gravatar">
                 {/if}
                 {peerProperties[peer].profile.name}
-                <br>
-                ({peerProperties[peer].publicPerspective})
+                <Button 
+                    variant="unelevated" 
+                    color="primary" 
+                    on:click={()=>{
+                        requestOpenPerspective(peerProperties[peer].publicPerspective)
+                    }}
+                >
+                    Visit
+                </Button>
             {:else} 
                 {peer}
             {/if}

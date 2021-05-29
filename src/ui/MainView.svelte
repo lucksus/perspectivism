@@ -108,6 +108,17 @@
 		}
 	}
 
+	function openPerspectiveByURL(perspectiveURL) {
+		console.log("openPerspectiveByURL:", perspectiveURL)
+		const found = $perspectives.data.perspectives.find(p => p.sharedURL == perspectiveURL)
+		if(found) {
+			console.log("Found perspective! Opening...")
+			selectedMainView = { perspective: found, settings: null }
+		} else {
+			console.log("TODO: install perspective")
+		}
+	}
+
 </script>
 
 	<Drawer variant="modal" bind:this={drawer} bind:open={drawerOpen}>
@@ -211,7 +222,11 @@
 		</Row>
 	</TopAppBar>
 
-	<PeersView></PeersView>
+	<PeersView on:request-open-perspective={(event)=>{
+		console.log("on:request-open-perspective:", event)
+		openPerspectiveByURL(event.detail.perspectiveURL)
+	}}>
+	</PeersView>
 	
 	{#if selectedMainView.perspective}
 		<Perspective perspective={selectedMainView.perspective} 
