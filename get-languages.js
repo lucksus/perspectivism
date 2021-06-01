@@ -5,6 +5,9 @@ const languages = {
     'social-context': {
         bundle: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.2/bundle.js',
         dna: 'https://github.com/juntofoundation/Social-Context/releases/download/0.0.2/social-context.dna'
+    },
+    'agent-profiles': {
+        dna: 'https://github.com/perspect3vism/profiles/releases/download/0.0.1-alpha/agent-profiles.dna'
     }
 }
 
@@ -13,10 +16,12 @@ for(lang in languages) {
     fs.ensureDir(dir + '/build')
 
     // bundle
-    let url = languages[lang].bundle
-    let dest = dir + '/build/bundle.js'
-    wget({url, dest})
-
+    if(languages[lang].bundle) {
+        let url = languages[lang].bundle
+        let dest = dir + '/build/bundle.js'
+        wget({url, dest})
+    }
+    
     // dna
     if(languages[lang].dna) {
         url = languages[lang].dna

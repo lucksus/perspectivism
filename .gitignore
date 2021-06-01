@@ -24,3 +24,4 @@ hc
 
 Perspectivism-linux-x64
 .cargo
+src/languages/agent-profiles/agent-profiles.dna
