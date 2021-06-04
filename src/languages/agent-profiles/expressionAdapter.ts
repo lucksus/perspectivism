@@ -5,7 +5,7 @@ import AgentPutAdapter from './putAdapter'
 import { DNA_NICK } from './dna'
 import type LanguageContext from '@perspect3vism/ad4m-language-context/LanguageContext'
 import type HolochainLanguageDelegate from '@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate'
-import { PERSPECTIVISM_PROFILE } from './agentAdapter'
+import { agentFromExpression } from './profile'
 
 export default class ExpressionAdapter implements Interface {
     putAdapter: AgentPutAdapter
@@ -17,13 +17,18 @@ export default class ExpressionAdapter implements Interface {
     }
 
     async get(address: Address): Promise<void | Expression> {
-        const result = await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", address)
-        if(result && result[PERSPECTIVISM_PROFILE] && result[PERSPECTIVISM_PROFILE] != "") {
-            const expr = JSON.parse(result[PERSPECTIVISM_PROFILE])
-            const agentExpression = expr as Expression
-            return agentExpression
-        } else {
+        const expression = await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", address)
+        console.log("agent-profiles got expression from HC:", expression)
+        if(!expression) {
             return null
         }
+
+        const did = expression.data.signed_agent
+        const agent = agentFromExpression(expression)
+        // TODO: this is a quick-hack - it will break the expression's validity/signature
+        // The DNA's expression structure needs to be changed..
+        expression.data = agent
+        expression.author = { did }
+        return expression
     }
 }

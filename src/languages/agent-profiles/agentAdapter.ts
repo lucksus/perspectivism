@@ -4,8 +4,8 @@ import type { AgentAdapter as Interface } from '@perspect3vism/ad4m/Language'
 import type LanguageContext from '@perspect3vism/ad4m-language-context/LanguageContext'
 import type HolochainLanguageDelegate from '@perspect3vism/ad4m-language-context/Holochain/HolochainLanguageDelegate'
 import { DNA_NICK } from './dna'
+import { agentFromExpression, profileExpressionFromAgent } from './profile'
 
-export const PERSPECTIVISM_PROFILE = "PERSPECTIVISM_PROFILE"
 
 export default class AgentAdapter implements Interface {
     #holochain: HolochainLanguageDelegate
@@ -26,35 +26,17 @@ export default class AgentAdapter implements Interface {
         if(!changed)
             return
 
-        const expr = this.#context.agent.createSignedExpression(agent)
-        const profile = { PERSPECTIVISM_PROFILE: JSON.stringify(expr)}
+        const expression = profileExpressionFromAgent(agent, this.#context)
 
         if(!existingProfile) {
-            const params = {
-                did: agent.did,
-                signed_agent: "TODO",
-                profile
-            }
-            await this.#holochain.call(DNA_NICK, "did-profiles", "create_profile", params)
+            await this.#holochain.call(DNA_NICK, "did-profiles", "create_profile", expression)
         }
         else if (changed) {
-            const params = {
-                did: agent.did,
-                profile
-            }
-            await this.#holochain.call(DNA_NICK, "did-profiles", "update_profile", params)
+            await this.#holochain.call(DNA_NICK, "did-profiles", "update_profile", expression)
         }
     }
 
     async getProfile(did: string): Promise<Agent|void> {
-        const result = await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", did)
-        if(result && result[PERSPECTIVISM_PROFILE] && result[PERSPECTIVISM_PROFILE] != "") {
-            const agentExpression = JSON.parse(result[PERSPECTIVISM_PROFILE])
-            const expr = agentExpression as Expression
-            const agent = expr.data as Agent
-            return agent
-        } else {
-            return null
-        }
+        return agentFromExpression(await this.#holochain.call(DNA_NICK, "did-profiles", "get_profile", did))
     }
 }
