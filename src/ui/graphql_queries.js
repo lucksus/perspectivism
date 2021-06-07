@@ -223,6 +223,25 @@ export const PUBLISH_PERSPECTIVE = gql`
     }
 `
 
+export const INSTALL_SHARED_PERSPECTIVE = gql`
+    mutation installSharedPerspective($url: String) {
+        installSharedPerspective(url: $url) {
+            uuid
+            name
+            sharedURL
+            sharedPerspective {
+                name
+                description
+                type
+                linkLanguages { address }
+                allowedExpressionLanguages
+                requiredExpressionLanguages
+                sharedExpressionLanguages
+            }
+        }
+    }
+`
+
 export const REMOVE_PERSPECTIVE = gql`
     mutation removePerspective($uuid: String) {
         removePerspective(uuid: $uuid)

@@ -1,8 +1,9 @@
-import { PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED, LINKS_SOURCE_PREDICATE_QUERY } from './graphql_queries'
+import { PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED, LINKS_SOURCE_PREDICATE_QUERY, INSTALL_SHARED_PERSPECTIVE } from './graphql_queries'
 import subMinutes from 'date-fns/subMinutes'
 import type { ApolloClient } from '@apollo/client';
 import { logError } from './logUtils'
 
+const WORLD_PERSPECTIVE_FIXTURE_URL = 'perspective://__world'
 const WORLD_PERSPECTIVE_NAME = '__WORLD'
 
 export default class World {
@@ -17,27 +18,14 @@ export default class World {
         })
     }
 
-    async ensureGlobalAppPerspective() {
-        console.log("Ensure global shared app perspective '__WORLD'")
-        const result = await this.#gqlClient.query({query: PERSPECTIVES})
-        if(!result.data) {
-            console.error(result)
-        }
-        const perspectives = result.data.perspectives
-    
-        let found = perspectives.find( e => e.name === WORLD_PERSPECTIVE_NAME)
-    
-        if(!found) {
-            console.log("'__WORLD' not found locally - creating..")
-            const add_result = logError(await this.#gqlClient.mutate({
-                mutation: ADD_PERSPECTIVE,
-                variables: { name: WORLD_PERSPECTIVE_NAME }
-            }))
-    
-            found = add_result.data.addPerspective
-        }
-    
-        this.#perspectiveUUID = found.uuid
+    async createGlobalAppPerspective() {
+        console.log("'__WORLD' not found locally - creating..")
+        const add_result = logError(await this.#gqlClient.mutate({
+            mutation: ADD_PERSPECTIVE,
+            variables: { name: WORLD_PERSPECTIVE_NAME }
+        }))
+
+        this.#perspectiveUUID = add_result.data.addPerspective
     
         console.log("'__WORLD' UUID is:", this.#perspectiveUUID)
     
@@ -69,6 +57,36 @@ export default class World {
         } else {
             console.log("'__WORLD' was published before")
         }
+    }
+
+    async installGlobalAppPerspectiveFromFixtures() {
+        console.log("Installing global app perspective from fixture:" + WORLD_PERSPECTIVE_FIXTURE_URL)
+        const result = logError(await this.#gqlClient.mutate({
+            mutation: INSTALL_SHARED_PERSPECTIVE,
+            variables: {
+                url: WORLD_PERSPECTIVE_FIXTURE_URL,
+            }
+        }))
+
+        if(!result?.data?.installSharedPerspective?.uuid) {
+            throw `COULD NOT INSTALL WORLD PERSPECTIVE FIXTURE!\nGot result: ${JSON.stringify(result)}`
+        }
+
+        console.log("Global app perspective successfully installed from fixture.")
+        this.#perspectiveUUID = result.data.installSharedPerspective.uuid
+    }
+
+    async ensureGlobalAppPerspective() {
+        console.log("Ensure global shared app perspective '__WORLD'")
+        const result = await this.#gqlClient.query({query: PERSPECTIVES})
+        if(!result.data) {
+            console.error(result)
+        }
+        const perspectives = result.data.perspectives
+    
+        let found = perspectives.find( e => e.name === WORLD_PERSPECTIVE_NAME)
+        if(!found) await this.installGlobalAppPerspectiveFromFixtures()
+        else this.#perspectiveUUID = found.uuid
     }
 
     async getOnlinePeers() {

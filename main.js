@@ -4,6 +4,17 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
 
+const fs = require('fs')
+const path = require('path')
+
+const worldLinkLanguageHash = 'QmchPr6NgxFUrrETHrd49DSRdfFMdn6A5sw2JSXhujy4gS'
+let bootstrapFixtures = {
+  worldPerspective: JSON.parse(fs.readFileSync('./bootstrap/world.perspective.json')),
+  worldLinkLanguageHash,
+  worldLinkLinguageBundle:  fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'bundle.js')),
+  worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
+}
+
 app.whenReady().then(() => {
   ad4m
   .init({
@@ -14,6 +25,17 @@ app.whenReady().then(() => {
       agents: "agent-profiles",
       languages: "languages",
       perspectives: "shared-perspectives"
+    },
+    ad4mBootstrapFixtures: {
+      languages: [{
+        address: bootstrapFixtures.worldLinkLanguageHash,
+        meta: bootstrapFixtures.worldLinkLinguageMeta,
+        bundle: bootstrapFixtures.worldLinkLinguageBundle
+      }],
+      perspectives: [{
+        address: '__world',
+        expression: bootstrapFixtures.worldPerspective
+      }]
     },
     appBuiltInLangs: [
       "social-context",
