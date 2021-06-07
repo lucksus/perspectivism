@@ -11,7 +11,7 @@
     import md5 from 'md5'
     import {Graphic} from '@smui/list';
     import { DoubleBounce } from 'svelte-loading-spinners'
-    import { EXPRESSION } from './graphql_queries'
+    import { EXPRESSION, EXPRESSION_RAW } from './graphql_queries'
 
 
     export let expressionURL: string
@@ -19,15 +19,20 @@
     export let componentConstructor
     export let selected: boolean
     export let perspectiveUUID: string
+    export let plain: boolean
 
     let expression = null
+    let expressionRaw = null
     let queryResult = null
+    let rawQueryResult = null
     let expressionRef = null
     let iconReady = false
     let childLinks
 
     
     $: if(expressionURL) queryResult = query(EXPRESSION, { variables: {url: expressionURL} })
+
+    $: if(expressionURL && plain) rawQueryResult = query(EXPRESSION_RAW, { variables: {url: expressionURL} })
 
     $: if(expressionURL && perspectiveUUID) {
         childLinks = query(CHILD_LINKS_QUERY, {
@@ -124,6 +129,18 @@
 
 </script>
 
+{#if plain }
+<div>
+    {#if $rawQueryResult.loading}
+        <DoubleBounce size="60" color="#7f81ff" unit="px" duration="1s"></DoubleBounce>
+    {:else if $rawQueryResult.error}
+        Loading failed!
+        {$rawQueryResult.error}
+    {:else}
+    {$rawQueryResult.data.expressionRaw}
+    {/if}
+</div>
+{:else}
 <div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg)`}>
 <div class="displacement-container" style={`transform: translateX(-${width/2}px);`}>
     {#if $queryResult.loading}
@@ -182,6 +199,7 @@
     {/if}
 </div>
 </div>
+{/if}
 <!--
 {#if childLinks}
     {JSON.stringify($childLinks)}

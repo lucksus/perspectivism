@@ -17,6 +17,12 @@ export const EXPRESSION = gql`
     }
 `
 
+export const EXPRESSION_RAW = gql`
+    query expressionRaw($url: String) {
+        expressionRaw(url: $url)
+    }
+`
+
 export const OPEN_LINK = gql `
     mutation openLinkExtern($url: String) {
         openLinkExtern(url: $url)
