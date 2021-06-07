@@ -6,19 +6,21 @@ const ad4m = require('@perspect3vism/ad4m-executor')
 
 app.whenReady().then(() => {
   ad4m
-  .init(
-    app.getPath("appData"),
-    __dirname,
-    "./src/languages",
-    [
-      "languages",
-      "agent-profiles",
-      "shared-perspectives",
+  .init({
+    appDataPath: app.getPath("appData"),
+    resourcePath: __dirname,
+    appDefaultLangPath: "./src/languages",
+    ad4mBootstrapLanguages: {
+      agents: "agent-profiles",
+      languages: "languages",
+      perspectives: "shared-perspectives"
+    },
+    appBuiltInLangs: [
       "social-context",
       "note-ipfs"
     ],
-    false
-  )
+    mocks: false
+  })
   .then((ad4mCore) => {
     console.log(
       "\x1b[36m%s\x1b[0m",
