@@ -22,19 +22,11 @@ This project was the birthing place of all things Perspect3vism and thus the fir
 
 Since some of the AD4M Languages use Holochain and include a Holochain DNA, building those needs a [Holochain dev environment](https://developer.holochain.org/install/). The supported way of getting that is through `nix-shell`. (See https://developer.holochain.org/install/ for how to install Nix)
 
-### 1. Entering Holochain nix-shell
-On Linux and a freshly installed macOS, all you need to do (after installin Nix) is:
+### 1. Holochain binaries / dependencies through nix-shell
+All the Holochain dependencies are handled through Nix, as configured in [default.nix](default.nix). The following command will build everything needed (Holochain conductor etc.) and will take a while on first run - subsequent runs will be instantanious.
 ```
-nix-shell https://nightly.holochain.love
+nix-shell
 ```
-
-Until this PR gets merged, on macOS that got upgraded to Big Sur, you'll need this special Holonix build:
-
-```
-nix-shell https://github.com/holochain/holonix/archive/refs/heads/experiment/holochain-darwin-ldflags.tar.gz
-```
-(See [this discussion](https://github.com/holochain/holonix/issues/211))
-
 
 ### 2. Installing dependencies and actual building
 ```
@@ -43,8 +35,14 @@ npm run build
 ```
 
 This will build all AD4M Languages as well as the UI.
+Since some AD4M Languages use Holochain, `npm run build` needs to be run inside the nix-shell.
 
 ### 3. Run
+The AD4M executor expects Holochain binaries in the working directory. The following script will create sym-links pointing to the executables pulled in via nix-shell:
+```
+./create-hc-symlinks.sh
+```
+Now we are ready to run the app:
 ```
 npm start
 ```
