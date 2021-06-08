@@ -22,27 +22,27 @@ This project was the birthing place of all things Perspect3vism and thus the fir
 
 Since some of the AD4M Languages use Holochain and include a Holochain DNA, building those needs a [Holochain dev environment](https://developer.holochain.org/install/). The supported way of getting that is through `nix-shell`. (See https://developer.holochain.org/install/ for how to install Nix)
 
-### 1. Holochain binaries / dependencies through nix-shell
-All the Holochain dependencies are handled through Nix, as configured in [default.nix](default.nix). The following command will build everything needed (Holochain conductor etc.) and will take a while on first run - subsequent runs will be instantanious.
-```
-nix-shell
-```
+### 0. Holochain binaries / dependencies through nix-shell
+All the Holochain dependencies are handled through Nix, as configured in [default.nix](default.nix). 
+Several sub-commands run with `npm run build` use `nix-shell`.
+Entering the nix-shell will take a while on first run - subsequent runs will be instantanious.
 
-### 2. Installing dependencies and actual building
+### 1. Installing dependencies and actual building
 ```
 npm install
 npm run build
 ```
 
 This will build all AD4M Languages as well as the UI.
-Since some AD4M Languages use Holochain, `npm run build` needs to be run inside the nix-shell.
+It will also create symbolic links from the repositories root directory to the Holochain binaries in the Nix store.
 
-### 3. Run
-The AD4M executor expects Holochain binaries in the working directory. The following script will create sym-links pointing to the executables pulled in via nix-shell:
-```
-./create-hc-symlinks.sh
-```
-Now we are ready to run the app:
+`npm run build` runs these sub-commands in order:
+* `build-ui` (running TSC and Rollup over UI code)
+* `get-languages` (download some pre-built AD4M Languages)
+* `build-languages` (build AD4M Languages in this repo - runs `nix-shell`)
+* `create-symlinks` (create symbolic links for Holochain binaries - runs `nix-shell`)
+
+### 2. Run
 ```
 npm start
 ```
