@@ -78,8 +78,8 @@
   "dependencies": {
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@holochain/conductor-api": "0.0.1-dev.15",
-    "@perspect3vism/ad4m": "0.0.5",
-    "@perspect3vism/ad4m-executor": "0.0.12",
+    "@perspect3vism/ad4m": "file:../ad4m",
+    "@perspect3vism/ad4m-executor": "file:../ad4m-executor",
     "@smui/dialog": "^1.0.0",
     "@transmute/did-key-ed25519": "^0.2.1-unstable.29",
     "@transmute/did-key-secp256k1": "^0.2.1-unstable.29",
