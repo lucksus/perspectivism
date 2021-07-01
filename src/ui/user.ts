@@ -1,13 +1,13 @@
 import type { ApolloClient } from '@apollo/client';
 import { AGENT, PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED } from './graphql_queries'
-import type Perspective from '@perspect3vism/ad4m/Perspective'
+import type { PerspectiveHandle }  from '@perspect3vism/ad4m'
 import { logError } from './logUtils'
 import type World from './world';
 
 const PRIVATE_PERSPECTIVE_NAME = '__MY_PRIVATE'
 const PUBLIC_PERSPECTIVE_NAME = '__MY_PUBLIC'
 
-async function getPerspective(uuid: string, gqlClient: ApolloClient<any>): Promise<Perspective> {
+async function getPerspective(uuid: string, gqlClient: ApolloClient<any>): Promise<PerspectiveHandle> {
     const perspectiveResult = logError(await gqlClient.query({
         query: PERSPECTIVE,
         variables: { uuid }
@@ -63,7 +63,7 @@ export default class User {
         this.#publicPUUID = (await this.ensurePerspective(PUBLIC_PERSPECTIVE_NAME, perspectives)).uuid
     }
 
-    async ensurePerspective(name: string, allPerspectives: Perspective[]) {
+    async ensurePerspective(name: string, allPerspectives: PerspectiveHandle[]) {
         let found = allPerspectives.find( e => e.name === name)
     
         if(!found) {
