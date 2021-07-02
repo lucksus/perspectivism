@@ -6,7 +6,7 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import { mutation, getClient } from "svelte-apollo";
-    import { AGENT_SERVICE_STATUS, INITIALIZE_AGENT, LOCK_AGENT, QUIT, UNLOCK_AGENT } from './graphql_queries';
+    import { AGENT_STATUS, INITIALIZE_AGENT, LOCK_AGENT, QUIT, UNLOCK_AGENT } from './graphql_queries';
     import LinkExtern from './LinkExtern.svelte'
 
     const QGL_CLIENT = getClient()
@@ -16,14 +16,14 @@
     const GQL_QUIT = mutation(QUIT)
 
     function check() {
-        QGL_CLIENT.query({ query: AGENT_SERVICE_STATUS }).then( result => {
+        QGL_CLIENT.query({ query: AGENT_STATUS }).then( result => {
             console.log("check:", result)
-            if(!result.data.agent.isInitialized) {
+            if(!result.data.agentStatus.isInitialized) {
                 initDialog.open()
             } else {
                 initDialog.close()
-                if(!result.data.agent.isUnlocked) {
-                    did = result.data.agent.did
+                if(!result.data.agentStatus.isUnlocked) {
+                    did = result.data.agentStatus.did
                     unlockDialog.open()
                 } else {
                     unlockDialog.close()
@@ -79,9 +79,9 @@
 	function unlockKeystore() {
 		GQL_UNLOCK_AGENT({ variables: { passphrase }}).then((result) => {
             console.log("unlock response:", result)
-            unlockError = result.data.unlockAgent.error
+            unlockError = result.data.agentUnlock.error
             passphrase = ""
-            if(result.data.unlockAgent.isUnlocked) {
+            if(result.data.agentUnlock.isUnlocked) {
                 unlockDialog.close()
             } else {
                 unlockDialog.open()
@@ -104,7 +104,7 @@
         }).then(result => {
             console.log(result)
             // @ts-ignore
-            did = result.data?.initializeAgent?.did
+            did = result.data?.agentInitialize?.did
             initDialog.close()
             didKeyDialog.open()
         })

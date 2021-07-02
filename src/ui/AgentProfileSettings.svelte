@@ -1,7 +1,7 @@
 <script lang="ts">
     import DataTable, {Body, Row, Cell} from '@smui/data-table';
     import { mutation, getClient } from "svelte-apollo";
-    import { AGENT, UPDATE_AGENT_PROFILE } from './graphql_queries';
+    import { AGENT, UPDATE_AGENT_PERSPECTIVE } from './graphql_queries';
     import Textfield from '@smui/textfield'
     import Button, {Label} from '@smui/button';
     import { gql } from '@apollo/client';
@@ -10,7 +10,7 @@
     import md5 from 'md5'
 
     const QGL_CLIENT = getClient()
-    const M_UPDATE_AGENT_PROFILE = mutation(UPDATE_AGENT_PROFILE)
+    const M_UPDATE_AGENT_PROFILE = mutation(UPDATE_AGENT_PERSPECTIVE)
 
     let did = "loading..."
     let name = "loading..."
@@ -21,8 +21,9 @@
             if(result.error) {
                 console.error(result)
             } else {
-                const agent = result.data.agent.agent
+                const agent = result.data.agent
                 did = agent.did
+                // TODO: get name/email out of perspective
                 name = agent.name ? agent.name : ""
                 email = agent.email ? agent.email : ""
             }
@@ -34,8 +35,7 @@
               subscription {
                   agentUpdated {
                     did
-                    name
-                    email
+                    perspective
                   }
               }   
           `}).subscribe({
