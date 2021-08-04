@@ -144,7 +144,7 @@
 					<Text>{perspective.name}</Text>
 					{#if !hovered[perspective.uuid]}
 					<Meta>
-						<div on:click|stopPropagation="">
+						<div on:click|stopPropagation={true}>
 							<Group variant="unelevated">
 								<Button variant="unelevated" color="secondary" on:click={()=>deletePerspective(perspective)}>
 									<Label>Delete</Label>
