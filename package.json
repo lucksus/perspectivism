@@ -79,6 +79,7 @@
   "dependencies": {
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@holochain/conductor-api": "0.0.1-dev.15",
+    "@peculiar/webcrypto": "^1.1.7",
     "@perspect3vism/ad4m": "0.1.7",
     "@perspect3vism/ad4m-executor": "0.1.7",
     "@smui/dialog": "^1.0.0",
