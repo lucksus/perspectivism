@@ -8,7 +8,7 @@
     "build-ui": "tsc && rollup -c",
     "build-languages": "nix-shell --run ./build_languages.sh",
     "create-symlinks": "nix-shell --run ./create-hc-symlinks.sh",
-    "get-languages": "node get-languages.js",
+    "get-languages": "node scripts/get-languages.js",
     "dev": "tsc && rollup -c -w",
     "serve": "sirv public",
     "validate": "svelte-check",
@@ -73,13 +73,14 @@
     "ts-jest": "^26.4.4",
     "tslib": "^2.0.0",
     "tslint-eslint-rules": "^5.4.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "unzipper": "^0.10.11"
   },
   "dependencies": {
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@holochain/conductor-api": "0.0.1-dev.15",
     "@perspect3vism/ad4m": "0.1.7",
-    "@perspect3vism/ad4m-executor": "0.1.3",
+    "@perspect3vism/ad4m-executor": "0.1.7",
     "@smui/dialog": "^1.0.0",
     "@transmute/did-key-ed25519": "^0.2.1-unstable.29",
     "@transmute/did-key-secp256k1": "^0.2.1-unstable.29",

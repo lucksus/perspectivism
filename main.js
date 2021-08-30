@@ -22,9 +22,9 @@ app.whenReady().then(() => {
     resourcePath: __dirname,
     appDefaultLangPath: "./src/languages",
     ad4mBootstrapLanguages: {
-      agents: "agent-profiles",
+      agents: "agent-expression-store",
       languages: "languages",
-      perspectives: "shared-perspectives"
+      neighbourhoods: "neighbourhoods"
     },
     ad4mBootstrapFixtures: {
       languages: [{
