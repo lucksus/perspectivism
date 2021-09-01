@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { setContext } from "svelte"
 	import { ApolloClient, InMemoryCache } from "@apollo/client";
 	import { WebSocketLink } from '@apollo/client/link/ws';
-	import { setClient } from "svelte-apollo";
 	import InitDialog from "./InitDialog.svelte"
+	import { Ad4mClient } from "@perspect3vism/ad4m"
 
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:4000/graphql`,
@@ -22,7 +23,7 @@
 			},
 		},
   	});
-  	setClient(client);
+	setContext('ad4mClient', new Ad4mClient(client))
 </script>
 
 <svelte:head>

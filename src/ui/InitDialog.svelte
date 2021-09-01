@@ -1,35 +1,29 @@
 <script lang="ts">
+    import { getContext } from "svelte";
     import Dialog, {Title, Content, Actions} from '@smui/dialog';
 	import Button, {Label} from '@smui/button';
 	import Textfield, {Input} from '@smui/textfield';
 	import HelperText from '@smui/textfield/helper-text/index';
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
-    import { mutation, getClient } from "svelte-apollo";
-    import { AGENT_STATUS, INITIALIZE_AGENT, LOCK_AGENT, QUIT, UNLOCK_AGENT } from './graphql_queries';
     import LinkExtern from './LinkExtern.svelte'
 
-    const QGL_CLIENT = getClient()
-    const GQL_INITIALIZE_AGENT = mutation(INITIALIZE_AGENT)
-    const GQL_LOCK_AGENT = mutation(LOCK_AGENT)
-    const GQL_UNLOCK_AGENT = mutation(UNLOCK_AGENT)
-    const GQL_QUIT = mutation(QUIT)
+    const ad4m = getContext('ad4mClient')
 
-    function check() {
-        QGL_CLIENT.query({ query: AGENT_STATUS }).then( result => {
-            console.log("check:", result)
-            if(!result.data.agentStatus.isInitialized) {
-                initDialog.open()
+    async function check() {
+        const status = await ad4m.agent.status()
+        console.log("agent status check:", status)
+        if(!status.isInitialized) {
+            initDialog.open()
+        } else {
+            initDialog.close()
+            if(!status.isUnlocked) {
+                did = status.did
+                unlockDialog.open()
             } else {
-                initDialog.close()
-                if(!result.data.agentStatus.isUnlocked) {
-                    did = result.data.agentStatus.did
-                    unlockDialog.open()
-                } else {
-                    unlockDialog.close()
-                }
+                unlockDialog.close()
             }
-        })
+        }
     }
 
     let initDialog;
@@ -46,6 +40,8 @@
     let unlockError
 
 	function submitDID() {
+        console.error("Submitting DID documents not implemented!")
+        /*
 		GQL_INITIALIZE_AGENT({
             variables: {
                 did,
@@ -54,6 +50,7 @@
                 passphrase
             }
         }).then(() => check())
+        */
     }
     
     function submitKeyDID() {
@@ -63,9 +60,8 @@
             return
         }
 
-        GQL_LOCK_AGENT({
-            variables: { passphrase }
-        })
+        
+        ad4m.agent.generate(passphrase)
     }
 
 	function resolveDID() {
@@ -76,21 +72,20 @@
   			.then(data => didDocument = data);
 	}
 
-	function unlockKeystore() {
-		GQL_UNLOCK_AGENT({ variables: { passphrase }}).then((result) => {
-            console.log("unlock response:", result)
-            unlockError = result.data.agentUnlock.error
-            passphrase = ""
-            if(result.data.agentUnlock.isUnlocked) {
-                unlockDialog.close()
-            } else {
-                unlockDialog.open()
-            }
-        })
+	async function unlockKeystore() {
+        const status = await ad4m.agent.unlock(passphrase)
+        console.log("unlock response:", status)
+        unlockError = status.error
+        passphrase = ""
+        if(status.isUnlocked) {
+            unlockDialog.close()
+        } else {
+            unlockDialog.open()
+        }
     }
 
     function quit() {
-        GQL_QUIT({})
+        ad4m.runtime.quit()
     }
 
     function importKeystore() {
@@ -99,15 +94,8 @@
     }
 
     async function createKeys() {
-        GQL_INITIALIZE_AGENT({
-            variables: {}
-        }).then(result => {
-            console.log(result)
-            // @ts-ignore
-            did = result.data?.agentInitialize?.did
-            initDialog.close()
-            didKeyDialog.open()
-        })
+        initDialog.close()
+        didKeyDialog.open()
     }
     
     check()
@@ -122,9 +110,9 @@
 >
     <Title id="dialog-title">Setup Agent Identity</Title>
     <Content id="dialog-content">
-        <h1>Welcome to Perspectivism</h1>
+        <h1>Welcome to Perspect3ve</h1>
         <div>
-            Perspectivism is agent-centric and built around <LinkExtern url="https://w3c.github.io/did-core/">DIDs (Decentralized Identifier)</LinkExtern> 
+            Perspect3ve is a general purpose AD4M interface and as such uses <LinkExtern url="https://w3c.github.io/did-core/">DIDs (Decentralized Identifier)</LinkExtern> 
             as the agent representation.
             This means it does not add its own siloed user handling / login, but in principle can work with any decentralized/sovereign
             identitiy platform that implements DID (like <LinkExtern url="https://www.uport.me/">uPort</LinkExtern>, <LinkExtern url="https://sovrin.org/">sovrin</LinkExtern>, a DID document on your own webserver, etc.).
@@ -155,10 +143,6 @@
     <Title id="dialog-title">Create new keystore</Title>
     <Content>
         <h1>Create new Keystore</h1>
-        <div>
-            <div>Your freshly created DID is:</div>
-            <span class="did">{did}</span>
-        </div>
         <div>
             <div>
                 Please enter a new passphrase to lock your keystore with:
