@@ -26,7 +26,7 @@ app.whenReady().then(() => {
     ad4mBootstrapLanguages: {
       agents: "agent-expression-store",
       languages: "languages",
-      neighbourhoods: "neighbourhoods"
+      neighbourhoods: "neighbourhood-store"
     },
     ad4mBootstrapFixtures: {
       languages: [{
