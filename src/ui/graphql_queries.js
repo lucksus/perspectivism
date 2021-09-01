@@ -133,7 +133,7 @@ export const PERSPECTIVES = gql`
         perspectives {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
@@ -143,7 +143,7 @@ export const PERSPECTIVE = gql`
         perspective(uuid: $uuid) {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
@@ -153,7 +153,7 @@ export const ADD_PERSPECTIVE = gql`
         perspectiveAdd(name: $name) {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
@@ -163,7 +163,7 @@ export const UPDATE_PERSPECTIVE = gql`
         perspectiveUpdate(uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage) {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
@@ -193,7 +193,7 @@ export const INSTALL_SHARED_PERSPECTIVE = gql`
         neighbourhoodJoinFromUrl(url: $url) {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
@@ -209,7 +209,7 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
-            sharedURL
+            sharedUrl
 		}
 	}  
 `
@@ -219,7 +219,7 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
-            sharedURL
+            sharedUrl
 		}
 	}  
 `
