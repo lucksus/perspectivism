@@ -18,7 +18,8 @@
     "lint:fix": "tslint --fix -c tslint.json \"src/core/**/*.ts\"",
     "test": "tsc && jest",
     "rebuild": "electron-rebuild -f -w serialport",
-    "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png"
+    "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png",
+    "postinstall": "ln -sf node_modules/@perspect3vism/ad4m-executor/default.nix default.nix && npm run create-symlinks"
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
