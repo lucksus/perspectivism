@@ -1,8 +1,7 @@
 <script lang="ts">
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import Button from '@smui/button'
-    import type LanguageRef from "../ad4m/LanguageRef";
-    import type { LanguageController } from "../core/LanguageController";
+    import type { LanguageRef } from "@perspect3vism/ad4m";
     import iconComponentFromString from "./iconComponentFromString";
     import { LANGUAGES_WITH_SETTINGS, SET_LANGUAGE_SETTINGS } from "./graphql_queries"
     import { getClient, mutation } from "svelte-apollo"

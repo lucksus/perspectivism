@@ -1,14 +1,12 @@
 <script lang="ts">
-    import type Perspective from '@perspect3vism/ad4m/Perspective'
+    import type { Perspective } from '@perspect3vism/ad4m'
 
     export let perspective: Perspective
 
     import IconButton from '@smui/icon-button';
     import Fab, {Icon, Label} from '@smui/fab';
-    import Links from '@perspect3vism/ad4m/Links';
+    import { exprRef2String, hashLinkExpression, linkEqual, Links } from '@perspect3vism/ad4m';
     const Link = Links.default
-    import { hashLinkExpression, linkEqual } from '@perspect3vism/ad4m/Links';
-    import { exprRef2String } from '@perspect3vism/ad4m/ExpressionRef';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';

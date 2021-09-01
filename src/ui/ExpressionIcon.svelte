@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type Expression from "@perspect3vism/ad4m/Expression"
+    import type { Expression } from "@perspect3vism/ad4m"
     import iconComponentFromString from "./iconComponentFromString";
     import { createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
