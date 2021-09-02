@@ -21,8 +21,12 @@
 		cache: new InMemoryCache(),
 		defaultOptions: {
 			watchQuery: {
-				fetchPolicy: 'network-only',
+				fetchPolicy: 'no-cache',
 				nextFetchPolicy: 'network-only'
+			},
+			query: {
+				fetchPolicy: 'no-cache',
+				errorPolicy: 'all',
 			},
 		},
 	  });
