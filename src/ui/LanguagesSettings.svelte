@@ -1,22 +1,23 @@
 <script lang="ts">
+    import { getContext } from "svelte";
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import Button from '@smui/button'
     import type { LanguageRef } from "@perspect3vism/ad4m";
     import iconComponentFromString from "./iconComponentFromString";
-    import { LANGUAGES_WITH_SETTINGS, SET_LANGUAGE_SETTINGS } from "./graphql_queries"
-    import { getClient, mutation } from "svelte-apollo"
+
+    const ad4m = getContext('ad4mClient')
 
     let languages: LanguageRef[] = []
     let settingsIconConstructors = new Map()
     let settingsIcons = {}
 
-    const M_SET_LANGUAGE_SETTINGS = mutation(SET_LANGUAGE_SETTINGS)
-
-    getClient().query({query: LANGUAGES_WITH_SETTINGS}).then(async result => {
-        languages = result.data.languages
+    async function init() {
+        languages = await ad4m.languages.all()
         await checkLanguagesForSettingsIcon()
         createCustomSettingsIcons()
-    })
+    }
+
+    init()
 
     async function asyncForEach(array, callback) {
       for (let index = 0; index < array.length; index++) {
@@ -64,10 +65,7 @@
     }
 
     function updateSettings(lang) {
-      M_SET_LANGUAGE_SETTINGS({variables: {
-        languageAddress: lang.address,
-        settings: JSON.stringify(settingsIcons[lang.address].settings)
-      }})
+      ad4m.languages.writeSettings(lang.address, JSON.stringify(settingsIcons[lang.address].settings))
     }
 </script>
 
