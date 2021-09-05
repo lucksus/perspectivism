@@ -9,52 +9,43 @@
     import LineRipple from '@smui/line-ripple';
     import Button, {Label} from '@smui/button';
     import Select, {Option} from '@smui/select';
-    import { createEventDispatcher } from 'svelte';
+    import { getContext, createEventDispatcher } from 'svelte';
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
-    import { LANGUAGES, PERSPECTIVE, PERSPECTIVE_UPDATED, PUBLISH_PERSPECTIVE, UPDATE_PERSPECTIVE } from './graphql_queries'
-    import { getClient, mutation, query } from 'svelte-apollo'
+    import { v4 as uuid } from 'uuid'
+    import { Circle3 } from 'svelte-loading-spinners'
+    import path from 'path'
+
+    const ad4m = getContext('ad4mClient')
 
     let showPublishPanel = false
-    let publishType = ''
+    let publishLinkLanguage = ''
     let publishName = ''
     let publishDescription = ''
+    let publishUUID = uuid()
     let isPublishing = false
+    let linkLanguages = []
+    let publishingStatus = ''
 
     const dispatch = createEventDispatcher();
-    const gqlClient = getClient()
-    const M_UPDATE_PERSPECTIVE = mutation(UPDATE_PERSPECTIVE)
-    const M_PUBLISH_PERSPECTIVE = mutation(PUBLISH_PERSPECTIVE)
 
-    function update() {
+    async function init() {
+        linkLanguages = await ad4m.languages.byFilter('linksAdapter')
+        console.log("LinkLanguages:", linkLanguages)
+    }
+
+    init()
+
+    async function update() {
         const uuid = perspective ? perspective.uuid : perspectiveId
-        gqlClient.query({
-            query: PERSPECTIVE,
-            variables: { uuid }
-        }).then(result => {
-            const p = result.data.perspective
-            perspective = {
-                name: p.name,
-                uuid: p.uuid,
-                sharedPerspective: p.sharedPerspective,
-                sharedURL: p.sharedURL,
-            }
-            isPublishing = false
-        })
+        perspective = await ad4m.perspective.byUUID(uuid)
     }
 
     update()
 
-    getClient().subscribe({
-		query: PERSPECTIVE_UPDATED
-	}).subscribe({
-		next: () => update(),
-		error: (e) => console.error(e)
-	})
+    ad4m.perspective.addPerspectiveUpdatedListener(update)
 
-    function save() {
-        M_UPDATE_PERSPECTIVE({
-            variables: perspective
-        })
+    async function save() {
+        await ad4m.perspective.update(perspective.uuid, perspective.name)
         dispatch('submit', perspective.uuid)
     }
 
@@ -62,16 +53,35 @@
         dispatch('cancel')
     }
 
-    function publish() {
-        M_PUBLISH_PERSPECTIVE({
-            variables: {
-                uuid: perspective.uuid,
-                name: publishName,
-                description: publishDescription,
-                type: publishType
-            }
-        })
+    async function publish() {
         isPublishing = true
+
+        publishingStatus = "Cloning LinkLanguage..."
+
+        const uniqueLinkLanguage = await ad4m.languages.cloneHolochainTemplate(
+            path.join(__dirname, `../languages/${linkLanguage.name}`), 
+            linkLanguage.name, 
+            publishUUID
+        );
+
+        publishingStatus = `LinkLanguage cloned with address: ${uniqueLinkLanguage}!\nPublishing Neighbourhood...`
+
+        // TODO: add name, type (or linkLanguage name) and description to meta perspective
+        const meta = new Perspective()
+        const neighbourhoodUrl = await ad4m.neighbourhood.publishFromPerspective(
+            perspectiveHandle.uuid,
+            uniqueLinkLanguage.address,
+            meta
+        )
+
+        publishingStatus = 'Done!'
+
+        isPublishing = false
+        showPublishPanel = false
+    }
+
+    function randomizeUuid() {
+        publishUUID = uuid()
     }
 
     if(!perspective)
@@ -98,6 +108,7 @@
                             <span>URL: </span>
                             <span>{perspective.sharedURL}</span>
                         </div>
+                        <!--
                         <div>
                             <span>Name: </span>
                             <span>{perspective.sharedPerspective.name}</span>
@@ -110,11 +121,13 @@
                             <span>Type: </span>
                             <span>{perspective.sharedPerspective.type}</span>
                         </div>
+                        -->
                     </Cell>
                 {:else}
                     <Cell>
                         {#if showPublishPanel}
                             <h3>Publish as</h3>
+                            <!--
                             <Textfield fullwidth lineRipple={false} label="Name">
                                 <Input bind:value={publishName} id="input-name" aria-controls="name-helper-text" aria-describedby="name-helper-text" />
                                 <FloatingLabel for="input-name">Name</FloatingLabel>
@@ -124,20 +137,36 @@
                             
                             <Textfield fullwidth lineRipple={false} label="Description">
                                 <Input bind:value={publishDescription} id="input-desc" aria-controls="desc-helper-text" aria-describedby="desc-helper-text" />
-                                <FloatingLabel for="desc-did">Description</FloatingLabel>
+                                <FloatingLabel for="input-desc">Description</FloatingLabel>
                                 <LineRipple />
                             </Textfield>
                             <HelperText id="desc-helper-text">Text describing the shared Perspective</HelperText>
-                            
-                            <Select bind:value={publishType} label="Sharing Type">
-                                <Option value={'broadcast'} selected={false}>Broadcast</Option>
-                                <Option value={'permissionless'} selected={true}>Permissionless</Option>
-                                <Option value={'permissioned'} selected={false} deactivated={true}>Permissioned</Option>
+                            -->
+                            <Select bind:value={publishLinkLanguage} label="Link Language">
+                                {#each linkLanguages as linkLanguage}
+                                    <Option value={linkLanguage} selected={false}>{linkLanguage.name}</Option>
+                                {/each}
                             </Select>
 
-                            <p></p>
+                            <Textfield fullwidth lineRipple={false} label="UUID for LinkLanguage clone">
+                                <Input bind:value={publishUUID} id="input-uuid" aria-controls="uuid-helper-text" aria-describedby="uuid-helper-text" />
+                                <FloatingLabel for="input-uuid">UUID for LinkLanguage clone</FloatingLabel>
+                                <LineRipple />
+                            </Textfield>
+                            <HelperText id="uuid-helper-text">An arbitrary string that makes this LinkLanguage clone unique</HelperText>
+                            <Button variant="raised" on:click={randomizeUuid}>
+                                Randomize
+                            </Button>
 
-                            <Button variant="raised" on:click={publish} disabled={publishType==='permissioned' || isPublishing}>
+
+
+                            <p>
+                                {#if isPublishing}
+                                    {publishingStatus} <Circle3></Circle3>
+                                {/if}
+                            </p>
+
+                            <Button variant="raised" on:click={publish}>
                                 Publish!
                             </Button>
                             <Button variant="outlined" on:click={() => showPublishPanel=false}>
