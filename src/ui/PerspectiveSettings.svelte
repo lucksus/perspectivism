@@ -2,7 +2,6 @@
     export let perspective
     export let perspectiveId
 
-    import FormField from '@smui/form-field';
     import Textfield, {Input} from '@smui/textfield';
 	import HelperText from '@smui/textfield/helper-text/index';
 	import FloatingLabel from '@smui/floating-label';
@@ -13,8 +12,10 @@
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import { v4 as uuid } from 'uuid'
     import { Circle3 } from 'svelte-loading-spinners'
+    import type { Ad4mClient } from '@perspect3vism/ad4m';
+    import { Perspective } from '@perspect3vism/ad4m';
 
-    const ad4m = getContext('ad4mClient')
+    const ad4m: Ad4mClient = getContext('ad4mClient')
 
     let showPublishPanel = false
     let publishLinkLanguage = ''
@@ -28,7 +29,14 @@
     const dispatch = createEventDispatcher();
 
     async function init() {
-        linkLanguages = await ad4m.languages.byFilter('linksAdapter')
+        const addresses = await ad4m.runtime.knownLinkLanguageTemplates()
+
+        linkLanguages = []
+        for(const adr of addresses) {
+            const meta = await ad4m.languages.meta(adr)
+            linkLanguages.push(meta)
+        }
+
         console.log("LinkLanguages:", linkLanguages)
     }
 
@@ -63,12 +71,12 @@
             JSON.stringify({ uuid: publishUUID, name: `Social-Context LinkLanguage for NH: ${publishName}` })
         );
 
-        publishingStatus = `LinkLanguage cloned with address: ${uniqueLinkLanguage}!\nPublishing Neighbourhood...`
+        publishingStatus = `LinkLanguage cloned with address: ${uniqueLinkLanguage.address}!\nPublishing Neighbourhood...`
 
         // TODO: add name, type (or linkLanguage name) and description to meta perspective
         const meta = new Perspective()
         const neighbourhoodUrl = await ad4m.neighbourhood.publishFromPerspective(
-            perspectiveHandle.uuid,
+            perspective.uuid,
             uniqueLinkLanguage.address,
             meta
         )
@@ -100,12 +108,12 @@
             </Row>
             <Row>
                 <Cell>Sharing:</Cell>
-                {#if perspective.sharedPerspective}
+                {#if perspective.sharedUrl}
                     <Cell>
                         <h3>This Perspective is shared</h3>
                         <div>
                             <span>URL: </span>
-                            <span>{perspective.sharedURL}</span>
+                            <span>{perspective.sharedUrl}</span>
                         </div>
                         <!--
                         <div>
