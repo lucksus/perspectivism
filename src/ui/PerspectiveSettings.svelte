@@ -13,7 +13,6 @@
     import DataTable, {Head, Body, Row, Cell} from '@smui/data-table';
     import { v4 as uuid } from 'uuid'
     import { Circle3 } from 'svelte-loading-spinners'
-    import path from 'path'
 
     const ad4m = getContext('ad4mClient')
 
@@ -57,11 +56,11 @@
         isPublishing = true
 
         publishingStatus = "Cloning LinkLanguage..."
+        console.log("publishLinkLanguage:", publishLinkLanguage)
 
-        const uniqueLinkLanguage = await ad4m.languages.cloneHolochainTemplate(
-            path.join(__dirname, `../languages/${linkLanguage.name}`), 
-            linkLanguage.name, 
-            publishUUID
+        const uniqueLinkLanguage = await ad4m.languages.applyTemplateAndPublish(
+            publishLinkLanguage, 
+            JSON.stringify({ uuid: publishUUID, name: `Social-Context LinkLanguage for NH: ${publishName}` })
         );
 
         publishingStatus = `LinkLanguage cloned with address: ${uniqueLinkLanguage}!\nPublishing Neighbourhood...`
@@ -144,7 +143,7 @@
                             -->
                             <Select bind:value={publishLinkLanguage} label="Link Language">
                                 {#each linkLanguages as linkLanguage}
-                                    <Option value={linkLanguage} selected={false}>{linkLanguage.name}</Option>
+                                    <Option value={linkLanguage.address} selected={false}>{linkLanguage.name}</Option>
                                 {/each}
                             </Select>
 
