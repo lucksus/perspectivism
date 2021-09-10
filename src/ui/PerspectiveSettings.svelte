@@ -25,6 +25,7 @@
     let isPublishing = false
     let linkLanguages = []
     let publishingStatus = ''
+    let publishedLinkLanguage
 
     const dispatch = createEventDispatcher();
 
@@ -45,6 +46,14 @@
     async function update() {
         const uuid = perspective ? perspective.uuid : perspectiveId
         perspective = await ad4m.perspective.byUUID(uuid)
+        if(perspective.sharedUrl) {
+            let nh = await ad4m.expression.get(perspective.sharedUrl)
+            nh = JSON.parse(nh.data)
+            console.log('NH:', nh)
+            const linkLanguageMeta = await ad4m.languages.meta(nh.linkLanguage)
+            console.log(linkLanguageMeta)
+            publishedLinkLanguage = linkLanguageMeta
+        }
     }
 
     update()
@@ -112,9 +121,41 @@
                     <Cell>
                         <h3>This Perspective is shared</h3>
                         <div>
-                            <span>URL: </span>
                             <span>{perspective.sharedUrl}</span>
                         </div>
+                        {#if publishedLinkLanguage}
+                        <div>
+                            <h4>Link Language</h4>
+                            <div>
+                                <span>Name:</span>
+                                <span>{publishedLinkLanguage.name}</span>
+                            </div>
+                            <div>
+                                <span>Description:</span>
+                                <span>{publishedLinkLanguage.description}</span>
+                            </div>
+                            <div>
+                                <span>Address:</span>
+                                <span>{publishedLinkLanguage.address}</span>
+                            </div>
+                            {#if publishedLinkLanguage.templated}
+                            <div>
+                                <span>Template source:</span>
+                                <span>{publishedLinkLanguage.templateSourceLanguageAddress}</span>
+                            </div>
+                            <div>
+                                <span>Template parameters:</span>
+                                <span>{publishedLinkLanguage.templateAppliedParams}</span>
+                            </div>
+                            {/if}
+                            {#if publishedLinkLanguage.sourceCodeLink}
+                            <div>
+                                <span>Source code link:</span>
+                                <span>{publishedLinkLanguage.sourceCodeLink}</span>
+                            </div>
+                            {/if}
+                        </div>
+                        {/if}
                         <!--
                         <div>
                             <span>Name: </span>
