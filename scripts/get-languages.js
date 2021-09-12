@@ -12,8 +12,8 @@ const languages = {
   },
   languages: {
       targetDnaName: "languages",
-      dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.5/languages.dna",
-      bundle: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.5/bundle.js",
+      dna: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.6/languages.dna",
+      bundle: "https://github.com/perspect3vism/language-persistence/releases/download/0.0.6/bundle.js",
   },
   "neighbourhood-store": {
     targetDnaName: "neighbourhood-store",
@@ -24,7 +24,7 @@ const languages = {
     zipped: true,
     targetDnaName: "social-context",
     resource:
-      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.12/full_index.zip",
+      "https://github.com/juntofoundation/Social-Context/releases/download/0.0.13/full_index.zip",
   },
   "note-ipfs": {
     bundle: "https://github.com/perspect3vism/lang-note-ipfs/releases/download/0.0.1/bundle.js",

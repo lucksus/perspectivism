@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { ApolloClient, InMemoryCache } from "@apollo/client";
+	import { ApolloClient, ApolloLink, InMemoryCache } from "@apollo/client";
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import { getContext, setContext } from "svelte"
 	import { Ad4mClient } from "@perspect3vism/ad4m"
 	import MainView from "./MainView.svelte";
 	import { setClient } from "svelte-apollo"
+	import { removeTypenameFromMutationLink } from 'apollo-remove-typename-mutation-link';
 	import World from "./world";
 	//import User from "./user";
 
@@ -17,7 +18,7 @@
 
 	const client = new ApolloClient({
 		//uri: 'http://localhost:4000',
-		link: wsLink,
+		link: ApolloLink.from([removeTypenameFromMutationLink, wsLink]) ,
 		cache: new InMemoryCache(),
 		defaultOptions: {
 			watchQuery: {

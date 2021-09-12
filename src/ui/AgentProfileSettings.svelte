@@ -1,62 +1,60 @@
 <script lang="ts">
+    import { getContext } from 'svelte';
+    import { Ad4mClient, Literal } from '@perspect3vism/ad4m'
     import DataTable, {Body, Row, Cell} from '@smui/data-table';
-    import { mutation, getClient } from "svelte-apollo";
-    import { AGENT, UPDATE_AGENT_PERSPECTIVE } from './graphql_queries';
     import Textfield from '@smui/textfield'
     import Button, {Label} from '@smui/button';
-    import { gql } from '@apollo/client';
     import Card, {Content, PrimaryAction, Media, MediaContent, Actions, ActionButtons, ActionIcons} from '@smui/card';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
 
-    const QGL_CLIENT = getClient()
-    const M_UPDATE_AGENT_PROFILE = mutation(UPDATE_AGENT_PERSPECTIVE)
+    const ad4m: Ad4mClient = getContext('ad4mClient')
+
+    const AGENT_PERSPECTIVE_NAME = '__agent_public_perspective'
 
     let did = "loading..."
-    let name = "loading..."
+    let firstName = "loading..."
+    let lastName = "loading..."
     let email = "loading..."
 
-    function update() {
-        QGL_CLIENT.query({query: AGENT}).then(result => {
-            if(result.error) {
-                console.error(result)
-            } else {
-                const agent = result.data.agent
-                did = agent.did
-                // TODO: get name/email out of perspective
-                name = agent.name ? agent.name : ""
-                email = agent.email ? agent.email : ""
-            }
-        })
+    let agentPerspective
+
+    async function populateUiFromPerspective() {
+      firstName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
+      lastName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
+      email = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
     }
 
-    QGL_CLIENT.subscribe({
-          query: gql`
-              subscription {
-                  agentUpdated {
-                    did
-                    perspective
-                  }
-              }   
-          `}).subscribe({
-              next: result => {
-                console.debug(result)
-                const agent = result.data.agentUpdated
-                did = agent.did
-                name = agent.name ? agent.name : ""
-                email = agent.email ? agent.email : ""
-              },
-              error: (e) => console.error(e)
-          })
+    async function init() {
+      const me = await ad4m.agent.me()
+      did = me.did
+      const allPerspectives = await ad4m.perspective.all()
+      console.log("ALL Perspectives:", allPerspectives)
+      agentPerspective = allPerspectives.find(p => p.name === AGENT_PERSPECTIVE_NAME)
+      if(!agentPerspective) {
+        agentPerspective = await ad4m.perspective.add(AGENT_PERSPECTIVE_NAME)
+        agentPerspective.loadSnapshot(me.perspective)
+      }
 
+      await populateUiFromPerspective()
 
-    function save() {
-        M_UPDATE_AGENT_PROFILE({
-            variables: { name, email }
-        })
+      //await ad4m.agent.addUpdatedListener(populateUiFromPerspective)
+
     }
 
-    update()
+    async function save() {
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://givenName', target: Literal.from(firstName).toUrl()})
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://familyName', target: Literal.from(lastName).toUrl()})
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://mbox', target: Literal.from(email).toUrl()})
+    }
+
+    async function publish() {
+      const snapshot = await agentPerspective.snapshot()
+      console.log("Publishing perspective: ", snapshot)
+      await ad4m.agent.updatePublicPerspective(snapshot)
+    }
+
+    init()
 </script>
 
 <Card style="width: 360px;">
@@ -79,9 +77,13 @@
         <DataTable>
             <Body>
                 <Row>
-                    <Cell>Name:</Cell>
-                    <Cell><Textfield bind:value={name} label="Name" /></Cell>
+                    <Cell>First name:</Cell>
+                    <Cell><Textfield bind:value={firstName} label="First name" /></Cell>
                 </Row>
+                <Row>
+                  <Cell>Last name:</Cell>
+                  <Cell><Textfield bind:value={lastName} label="Last name" /></Cell>
+              </Row>
                 <Row>
                     <Cell>Email:</Cell>
                     <Cell><Textfield bind:value={email} label="Email" /></Cell>
@@ -95,7 +97,12 @@
         <Button on:click={save}>
             <Label>Save</Label>
         </Button>
+        <Button on:click={publish}>
+          <Label>Publish</Label>
+      </Button>
       </ActionButtons>
     </Actions>
   </Card>
 
+
+  
