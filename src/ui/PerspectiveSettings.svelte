@@ -34,8 +34,11 @@
 
         linkLanguages = []
         for(const adr of addresses) {
-            const meta = await ad4m.languages.meta(adr)
-            linkLanguages.push(meta)
+            try{
+                linkLanguages.push(await ad4m.languages.meta(adr))
+            } catch(e) {
+                console.warn(e)
+            }
         }
 
         console.log("LinkLanguages:", linkLanguages)
@@ -45,6 +48,7 @@
 
     async function update() {
         const uuid = perspective ? perspective.uuid : perspectiveId
+        if(!uuid) return
         perspective = await ad4m.perspective.byUUID(uuid)
         if(perspective.sharedUrl) {
             let nh = await ad4m.expression.get(perspective.sharedUrl)
@@ -55,6 +59,9 @@
             publishedLinkLanguage = linkLanguageMeta
         }
     }
+
+    $: if(perspective || perspectiveId)
+        update()
 
     update()
 
