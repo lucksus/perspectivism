@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Expression } from "@perspect3vism/ad4m"
-    import { parseExprUrl } from "@perspect3vism/ad4m"
+    import { Literal, parseExprUrl, Perspective } from "@perspect3vism/ad4m"
     import iconComponentFromString from "./iconComponentFromString";
     import { getContext, createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
@@ -26,6 +26,8 @@
     let iconReady = false
     let childLinks = null
     let loading = true
+    let authorName = null
+    let authorEmail = null
 
     
     $: if(expressionURL && loading) ad4m.expression.get(expressionURL).then(result => {
@@ -44,6 +46,37 @@
         .then(result => {
             childLinks = result
         })
+
+    $: if(expression) ad4m.expression.get(expression.author).then(result => {
+        let author = JSON.parse(result.data)
+        console.log("Expression author:", author)
+
+        let did = author.did
+        let firstName, lastName, email
+        let perspective = new Perspective(author.perspective.links)
+
+        console.log("single target: ", perspective.getSingleTarget({source: did, predicate: 'foaf://givenName'}))
+        try {
+            firstName = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
+        }catch(e) {
+            firstName = "<not set>"
+        }
+
+        try {
+            lastName = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
+        }catch(e) {
+            lastName = "<not set>"
+        }
+
+        try {
+            email = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
+        }catch(e) {
+            email = "<not set>"
+        }
+        
+        authorName = `${firstName} ${lastName}`
+        authorEmail = email
+    })
     
 
     //let expression: void | Expression = null
@@ -140,14 +173,14 @@
         <div class="backside-content">
             <div>
                 <h2 class="header">Author</h2>
-                {#if emailValidator.validate(expression?.author?.email) }
-                    <img class="avatar" src="http://www.gravatar.com/avatar/{md5(expression?.author?.email)}?s=75" alt="gravatar">
+                {#if emailValidator.validate(authorEmail) }
+                    <img class="avatar" src="http://www.gravatar.com/avatar/{md5(authorEmail)}?s=75" alt="gravatar">
                 {/if}
-                <span class="property">Name:</span><span class="value">{expression?.author?.name}</span>
+                <span class="property">Name:</span><span class="value">{authorName}</span>
                 <br>
-                <span class="property">Email:</span><span class="value">{expression?.author?.email}</span>
+                <span class="property">Email:</span><span class="value">{authorEmail}</span>
                 <br>
-                <span class="property">DID:</span> <span class="value">{expression?.author?.did}</span>
+                <span class="property">DID:</span> <span class="value">{expression?.author}</span>
             </div>
             <div>
                 <h2 class="header">Timestamp</h2> 
