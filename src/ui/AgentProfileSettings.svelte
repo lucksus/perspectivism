@@ -20,9 +20,23 @@
     let agentPerspective
 
     async function populateUiFromPerspective() {
-      firstName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
-      lastName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
-      email = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
+      try {
+        firstName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
+      }catch(e) {
+        firstName = "<not set>"
+      }
+
+      try {
+        lastName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
+      }catch(e) {
+        lastName = "<not set>"
+      }
+
+      try {
+        email = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
+      }catch(e) {
+        email = "<not set>"
+      }
     }
 
     async function init() {
