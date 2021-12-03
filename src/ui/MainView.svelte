@@ -233,7 +233,7 @@
 			</div>
 		{/if}
 	{:else if selectedMainView.edit }
-		<PerspectiveSettings perspective={JSON.parse(JSON.stringify(selectedMainView.edit))} 
+		<PerspectiveSettings perspective={selectedMainView.edit} 
 			on:submit={editPerspectiveSubmit}
 			on:cancel={() => selectedMainView.edit = null}
 		></PerspectiveSettings>

@@ -27,6 +27,8 @@
     let publishingStatus = ''
     let publishedLinkLanguage
 
+    let perspectiveTemp = {name: '<loading>'}
+
     const dispatch = createEventDispatcher();
 
     async function init() {
@@ -50,6 +52,9 @@
         const uuid = perspective ? perspective.uuid : perspectiveId
         if(!uuid) return
         perspective = await ad4m.perspective.byUUID(uuid)
+        perspectiveTemp = JSON.parse(JSON.stringify(perspective))
+        perspectiveTemp.name = perspective.name
+
         if(perspective.sharedUrl) {
             let nh = await ad4m.expression.get(perspective.sharedUrl)
             nh = JSON.parse(nh.data)
@@ -60,15 +65,12 @@
         }
     }
 
-    $: if(perspective || perspectiveId)
-        update()
-
     update()
 
     ad4m.perspective.addPerspectiveUpdatedListener(update)
 
     async function save() {
-        await ad4m.perspective.update(perspective.uuid, perspective.name)
+        await ad4m.perspective.update(perspective.uuid, perspectiveTemp.name)
         dispatch('submit', perspective.uuid)
     }
 
@@ -107,11 +109,6 @@
         publishUUID = uuid()
     }
 
-    if(!perspective)
-        perspective = {}
-    if(!perspective.name)
-        perspective.name = '<loading>'
-
 </script>
 
 <div class="perspective-settings-container">
@@ -120,7 +117,7 @@
         <Body>
             <Row>
                 <Cell>Name:</Cell>
-                <Cell><Textfield bind:value={perspective.name} label="Name" /></Cell>
+                <Cell><Textfield bind:value={perspectiveTemp.name} label="Name" /></Cell>
             </Row>
             <Row>
                 <Cell>Sharing:</Cell>
