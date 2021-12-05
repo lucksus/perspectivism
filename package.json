@@ -4,11 +4,11 @@
   "license": "CAL-1.0",
   "main": "main.js",
   "scripts": {
-    "build": "npm run build-ui && npm run get-languages && npm run build-languages && npm run create-symlinks",
+    "build": "npm run build-ui && npm run get-languages",
     "build-ui": "tsc && rollup -c",
     "build-languages": "nix-shell --run ./build_languages.sh",
     "create-symlinks": "nix-shell --run ./create-hc-symlinks.sh",
-    "get-languages": "node get-languages.js",
+    "get-languages": "node scripts/get-languages.js",
     "dev": "tsc && rollup -c -w",
     "serve": "sirv public",
     "validate": "svelte-check",
@@ -18,7 +18,8 @@
     "lint:fix": "tslint --fix -c tslint.json \"src/core/**/*.ts\"",
     "test": "tsc && jest",
     "rebuild": "electron-rebuild -f -w serialport",
-    "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png"
+    "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png",
+    "postinstall": "ln -sf node_modules/@perspect3vism/ad4m-executor/default.nix default.nix && npm run create-symlinks"
   },
   "devDependencies": {
     "@apollo/client": "^3.2.5",
@@ -73,21 +74,23 @@
     "ts-jest": "^26.4.4",
     "tslib": "^2.0.0",
     "tslint-eslint-rules": "^5.4.0",
-    "typescript": "^3.9.3"
+    "typescript": "^3.9.3",
+    "unzipper": "^0.10.11"
   },
   "dependencies": {
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
     "@holochain/conductor-api": "0.0.1-dev.15",
-    "@perspect3vism/ad4m": "0.0.5",
-    "@perspect3vism/ad4m-executor": "0.0.12",
+    "@peculiar/webcrypto": "^1.1.7",
+    "@perspect3vism/ad4m": "0.1.22",
+    "@perspect3vism/ad4m-executor": "0.1.27",
     "@smui/dialog": "^1.0.0",
     "@transmute/did-key-ed25519": "^0.2.1-unstable.29",
     "@transmute/did-key-secp256k1": "^0.2.1-unstable.29",
     "@transmute/did-key.js": "^0.2.1-unstable.29",
     "@transmute/did-wallet": "lucksus/did-wallet",
+    "apollo-remove-typename-mutation-link": "^3.3.9",
     "apollo-server": "^2.18.2",
     "base-x": "^3.0.8",
-    "electron-graphql": "^0.2.1",
     "electron-root-path": "^1.0.16",
     "esm": "^3.2.25",
     "express": "^4.17.1",

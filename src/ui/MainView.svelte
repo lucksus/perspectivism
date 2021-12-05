@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getContext } from "svelte";
 	import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -8,24 +9,42 @@
 	import Perspective from './Perspective.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
-	import { getClient, mutation, query } from "svelte-apollo";
-	import { ADD_PERSPECTIVE, PERSPECTIVES, PERSPECTIVE_ADDED, PERSPECTIVE_REMOVED, PERSPECTIVE_UPDATED, REMOVE_PERSPECTIVE } from './graphql_queries';
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
 	import PeersView from './PeersView.svelte'
+	import { Ad4mClient } from '@perspect3vism/ad4m'
+	import { readable } from 'svelte/store'
 
+	const ad4m: Ad4mClient = getContext('ad4mClient')
 
-	let perspectives = query(PERSPECTIVES)
-	const M_ADD_PERSPECTIVE = mutation(ADD_PERSPECTIVE)
-	const M_REMOVE_PERSPECTIVE = mutation(REMOVE_PERSPECTIVE)
+	let perspectives = readable([], async set => {
+		let ps = await ad4m.perspective.all()
+		console.log("Perspectives:", ps)
+		set(ps)
+
+		ad4m.perspective.addPerspectiveAddedListener(newP => {
+			ps = [...ps, newP]
+			set(ps)
+		})
+
+		ad4m.perspective.addPerspectiveUpdatedListener(updatedP => {
+			ps = ps.map(p => p.uuid == updatedP.uuid ? updatedP : p)
+			set(ps)
+		})
+
+		ad4m.perspective.addPerspectiveRemovedListener(removedP => {
+			ps = ps.filter(p => p.uuid != removedP.uuid)
+			set(ps)
+		})
+	})
 
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
 	let drawer
 	let hovered
-	$: if(!$perspectives.loading && $perspectives.data) {
+	$: if($perspectives) {
 		hovered = {}
-		$perspectives.data.perspectives.forEach(p => {
+		$perspectives.forEach(p => {
 			hovered[p.uuid] = true
 		})
 	}
@@ -35,46 +54,22 @@
 	//	linkRepoController.syncWithSharingAdapter($perspectiveStore[pID])
 	//}
 
-	getClient().subscribe({
-		query: PERSPECTIVE_ADDED
-	}).subscribe({
-		next: () => perspectives.fetchMore({}),
-		error: (e) => console.error(e)
-	})
-
-	getClient().subscribe({
-		query: PERSPECTIVE_UPDATED
-	}).subscribe({
-		next: () => perspectives.refetch({}),
-		error: (e) => console.error(e)
-	})
-
-	getClient().subscribe({
-		query: PERSPECTIVE_REMOVED
-	}).subscribe({
-		next: () => perspectives.refetch({}),
-		error: (e) => console.error(e)
-	})
-
 	let selectedMainView = {
 		perspective: null,
 		settings: null,
 		edit: null,
 	}
 
-	function createNewPerspective() {
+	async function createNewPerspective() {
 		let number = 1
 		let prefix = "New Perspective "
-		while($perspectives.data.perspectives.includes(prefix+number)) {
+		while($perspectives.includes(prefix+number)) {
 			number++
 		}
 
 		const name = prefix+number
-		M_ADD_PERSPECTIVE({
-			variables: {
-				name
-			}
-		})
+		const result = await ad4m.perspective.add(name)
+		console.log("Perspective added:", result)
 	}
 
 	function deletePerspective(perspective) {
@@ -82,11 +77,7 @@
 			selectedMainView.perspective = null
 		}
 
-		M_REMOVE_PERSPECTIVE({
-			variables: {
-				uuid: perspective.uuid
-			}
-		})
+		ad4m.perspective.remove(perspective.uuid)
 	}
 
 	function editPerspective(perspective) {
@@ -110,7 +101,7 @@
 
 	function openPerspectiveByURL(perspectiveURL) {
 		console.log("openPerspectiveByURL:", perspectiveURL)
-		const found = $perspectives.data.perspectives.find(p => p.sharedURL == perspectiveURL)
+		const found = $perspectives.find(p => p.sharedURL == perspectiveURL)
 		if(found) {
 			console.log("Found perspective! Opening...")
 			selectedMainView = { perspective: found, settings: null }
@@ -134,7 +125,7 @@
 			{#if $perspectives.loading}
 				<Chip><ChipText>Loading...</ChipText></Chip>
 			{:else}
-			{#each $perspectives.data.perspectives as perspective}
+			{#each $perspectives as perspective}
 				<Item href="javascript:void(0)"
 					on:mouseenter="{e => hovered[perspective.uuid] = false}"
 					on:mouseleave="{e => hovered[perspective.uuid] = true}"
@@ -144,7 +135,7 @@
 					<Text>{perspective.name}</Text>
 					{#if !hovered[perspective.uuid]}
 					<Meta>
-						<div on:click|stopPropagation="">
+						<div on:click|stopPropagation={true}>
 							<Group variant="unelevated">
 								<Button variant="unelevated" color="secondary" on:click={()=>deletePerspective(perspective)}>
 									<Label>Delete</Label>
@@ -242,7 +233,7 @@
 			</div>
 		{/if}
 	{:else if selectedMainView.edit }
-		<PerspectiveSettings perspective={JSON.parse(JSON.stringify(selectedMainView.edit))} 
+		<PerspectiveSettings perspective={selectedMainView.edit} 
 			on:submit={editPerspectiveSubmit}
 			on:cancel={() => selectedMainView.edit = null}
 		></PerspectiveSettings>

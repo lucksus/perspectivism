@@ -12,6 +12,10 @@
 /src/languages/**/hc-dna/tests/node_modules
 /src/languages/**/hc-dna/*.dna
 /src/languages/social-context/*
+/src/languages/agent-expression-store/*
+/src/languages/neighbourhood-store/*
+/src/languages/note-ipfs/*
+/src/languages/languages/*
 /src/ui/world.js
 /src/ui/user.js
 /src/ui/logUtils.js
@@ -25,3 +29,4 @@ hc
 Perspectivism-linux-x64
 .cargo
 src/languages/agent-profiles/agent-profiles.dna
+default.nix

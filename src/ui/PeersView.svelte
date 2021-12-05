@@ -3,7 +3,7 @@
     import { query, mutation, getClient } from "svelte-apollo";
     import { EXPRESSION, PERSPECTIVES, PERSPECTIVE, ADD_PERSPECTIVE, PUBLISH_PERSPECTIVE, ADD_LINK, LINKS_DATED } from './graphql_queries'
     import subMinutes from 'date-fns/subMinutes'
-    import type Agent from '@perspect3vism/ad4m/Agent';
+    import type { Agent } from '@perspect3vism/ad4m';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
     import { logError } from './logUtils'

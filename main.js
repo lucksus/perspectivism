@@ -1,5 +1,7 @@
 require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
+const { Crypto } = require("@peculiar/webcrypto");
+global.crypto = new Crypto();
 const { app, BrowserWindow, ipcMain } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
@@ -22,9 +24,9 @@ app.whenReady().then(() => {
     resourcePath: __dirname,
     appDefaultLangPath: "./src/languages",
     ad4mBootstrapLanguages: {
-      agents: "agent-profiles",
+      agents: "agent-expression-store",
       languages: "languages",
-      perspectives: "shared-perspectives"
+      neighbourhoods: "neighbourhood-store"
     },
     ad4mBootstrapFixtures: {
       languages: [{

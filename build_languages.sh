@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for lang in "languages" "agent-profiles" "shared-perspectives" "ipfs-links" "note-ipfs"
+for lang in "agent-profiles" "ipfs-links" "note-ipfs"
 do
 echo "============================"
 echo "BUILDING LANGUAGE" $lang

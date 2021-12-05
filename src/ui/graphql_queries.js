@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client'
 
 export const EXPRESSION = gql`
-    query expression($url: String) {
+    query expression($url: String!) {
         expression(url: $url) {
-            author { did, name, email }
+            author
             timestamp
             data
             language {
@@ -18,26 +18,26 @@ export const EXPRESSION = gql`
 `
 
 export const EXPRESSION_RAW = gql`
-    query expressionRaw($url: String) {
+    query expressionRaw($url: String!) {
         expressionRaw(url: $url)
     }
 `
 
 export const OPEN_LINK = gql `
-    mutation openLinkExtern($url: String) {
-        openLinkExtern(url: $url)
+    mutation runtimeOpenLink($url: String!) {
+        runtimeOpenLink(url: $url)
     }
 `
 
 export const QUIT = gql `
-    mutation quit {
+    mutation runtimeQuit {
         quit
     }
 `
 
-export const AGENT_SERVICE_STATUS = gql `
-    query agent {
-        agent {
+export const AGENT_STATUS = gql `
+    query agentStatus {
+        agentStatus {
             isInitialized
             isUnlocked
             did
@@ -51,16 +51,16 @@ export const AGENT = gql `
         agent {
             agent {
                 did
-                name
-                email
+                directMessageLanguage
+                perspective
             }
         }
     }
 `
 
 export const INITIALIZE_AGENT = gql `
-    mutation initializeAgent($did: String, $didDocument: String, $keystore: String, $passphrase: String) {
-        initializeAgent(input: { did: $did, didDocument: $didDocument, keystore: $keystore, passphrase: $passphrase }) {
+    mutation agentInitialize($did: String, $didDocument: String, $keystore: String, $passphrase: String) {
+        agentInitialize(did: $did, didDocument: $didDocument, keystore: $keystore, passphrase: $passphrase) {
             isInitialized
             isUnlocked
             did
@@ -70,8 +70,8 @@ export const INITIALIZE_AGENT = gql `
 `
 
 export const LOCK_AGENT = gql `
-    mutation lockAgent($passphrase: String) {
-        lockAgent(passphrase: $passphrase) {
+    mutation agentLock($passphrase: String!) {
+        agentLock(passphrase: $passphrase) {
             isInitialized
             isUnlocked
             did
@@ -80,8 +80,8 @@ export const LOCK_AGENT = gql `
 `
 
 export const UNLOCK_AGENT = gql `
-    mutation unlockAgent($passphrase: String) {
-        unlockAgent(passphrase: $passphrase) {
+    mutation agentUnlock($passphrase: String!) {
+        agentUnlock(passphrase: $passphrase) {
             isInitialized
             isUnlocked
             did
@@ -90,18 +90,12 @@ export const UNLOCK_AGENT = gql `
     }
 `
 
-export const UPDATE_AGENT_PROFILE = gql `
-    mutation updateAgentProfile($name: String, $email: String) {
-        updateAgentProfile(input: {name: $name, email: $email}) {
-            agent {
-                did
-                name
-                email
-            }
-            isInitialized
-            isUnlocked
+export const UPDATE_AGENT_PERSPECTIVE = gql `
+    mutation agentUpdatePublicPerspective($perspective: String!) {
+        agentUpdatePublicPerspective(perspective: $perspective) {
             did
-            error
+            directMessageLanguage
+            perspective
         }
     }
 `
@@ -129,8 +123,8 @@ export const LANGUAGES_WITH_SETTINGS = gql `
 `
 
 export const SET_LANGUAGE_SETTINGS = gql`
-    mutation setLanguageSettings($languageAddress: String, $settings: String) {
-        setLanguageSettings(input: { languageAddress: $languageAddress, settings: $settings})
+    mutation languageWriteSettings($languageAddress: String!, $settings: String!) {
+        languageWriteSettings(languageAddress: $languageAddress, settings: $settings)
     }
 `
 
@@ -139,112 +133,74 @@ export const PERSPECTIVES = gql`
         perspectives {
             uuid
             name
-            sharedURL
+            sharedUrl
         }
     }
 `
 
 export const PERSPECTIVE = gql`
-    query perspective($uuid: String) {
+    query perspective($uuid: String!) {
         perspective(uuid: $uuid) {
             uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type 
-            }
+            sharedUrl
         }
     }
 `
 
 export const ADD_PERSPECTIVE = gql`
-    mutation updatePerspective($name: String) {
-        addPerspective(input: {name: $name}) {
+    mutation perspectiveAdd($name: String!) {
+        perspectiveAdd(name: $name) {
             uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type 
-            }
+            sharedUrl
         }
     }
 `
 
 export const UPDATE_PERSPECTIVE = gql`
-    mutation updatePerspective($uuid: String, $name: String, $linksSharingLanguage: String) {
-        updatePerspective(input: {uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage}) {
+    mutation perspectiveUpdate($uuid: String!, $name: String!, $linksSharingLanguage: String!) {
+        perspectiveUpdate(uuid: $uuid, name: $name, linksSharingLanguage: $linksSharingLanguage) {
             uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type
-            }
+            sharedUrl
         }
     }
 `
 
 export const PUBLISH_PERSPECTIVE = gql`
-    mutation publishPerspective(
-        $uuid: String
-        $name: String
-        $description: String
-        $type: String
-        $uid: String
-        $requiredExpressionLanguages: [String]
-        $allowedExpressionLanguages: [String]
+    mutation neighbourhoodPublishFromPerspective(
+        $linkLanguage: String!,
+        $meta: String!,
+        $perspectiveUUID: String!
     ) {
-        publishPerspective(
-            input: {
-            uuid: $uuid
-            name: $name
-            description: $description
-            type: $type
-            uid: $uid
-            requiredExpressionLanguages: $requiredExpressionLanguages
-            allowedExpressionLanguages: $allowedExpressionLanguages
-            }
+        neighbourhoodPublishFromPerspective(
+            linkLanguage: $linkLanguage,
+            meta: $meta,
+            perspectiveUUID: $perspectiveUUID
         ) {
-            name
-            description
-            type
-            linkLanguages {
-                address
+            expression
+            language {
                 name
+                address
             }
-            allowedExpressionLanguages
-            requiredExpressionLanguages
         }
     }
 `
 
 export const INSTALL_SHARED_PERSPECTIVE = gql`
-    mutation installSharedPerspective($url: String) {
-        installSharedPerspective(url: $url) {
+    mutation neighbourhoodJoinFromUrl($url: String!) {
+        neighbourhoodJoinFromUrl(url: $url) {
             uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type
-                linkLanguages { address }
-                allowedExpressionLanguages
-                requiredExpressionLanguages
-                sharedExpressionLanguages
-            }
+            sharedUrl
         }
     }
 `
 
 export const REMOVE_PERSPECTIVE = gql`
-    mutation removePerspective($uuid: String) {
-        removePerspective(uuid: $uuid)
+    mutation perspectiveRemove($uuid: String!) {
+        perspectiveRemove(uuid: $uuid)
     }
 `
 
@@ -253,12 +209,7 @@ export const PERSPECTIVE_ADDED = gql`
 		perspectiveAdded {
 			uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type 
-            }
+            sharedUrl
 		}
 	}  
 `
@@ -268,12 +219,7 @@ export const PERSPECTIVE_UPDATED = gql`
 		perspectiveUpdated {
 			uuid
             name
-            sharedURL
-            sharedPerspective {
-                name
-                description
-                type                
-            }
+            sharedUrl
 		}
 	}  
 `
@@ -285,9 +231,9 @@ export const PERSPECTIVE_REMOVED = gql`
 `
 
 export const ALL_LINKS_QUERY = gql`
-    query links($perspectiveUUID: String) {
-        links(perspectiveUUID: $perspectiveUUID, query: { }) {
-            author { did }
+    query perspectiveQueryLinks($perspectiveUUID: String!) {
+        perspectiveQueryLinks(query: { }, uuid: $perspectiveUUID) {
+            author
             timestamp
             data {
                 source
@@ -299,9 +245,9 @@ export const ALL_LINKS_QUERY = gql`
 `
 
 export const LINKS_SOURCE_PREDICATE_QUERY = gql`
-    query links($perspectiveUUID: String, $source: String, $predicate: String) {
-        links(perspectiveUUID: $perspectiveUUID, query: { source: $source, predicate: $predicate }) {
-            author { did }
+    query perspectiveQueryLinks($perspectiveUUID: String!, $source: String!, $predicate: String!) {
+        perspectiveQueryLinks(query: { source: $source, predicate: $predicate }, uuid: $perspectiveUUID) {
+            author
             timestamp
             data {
                 source
@@ -313,9 +259,9 @@ export const LINKS_SOURCE_PREDICATE_QUERY = gql`
 `
 
 export const CHILD_LINKS_QUERY = gql`
-    query links($perspectiveUUID: String, $source: String) {
-        links(perspectiveUUID: $perspectiveUUID, query: { source: $source }) {
-            author { did }
+    query links($perspectiveUUID: String!, $source: String!) {
+        perspectiveQueryLinks(query: { source: $source }, uuid: $perspectiveUUI) {
+            author
             timestamp
             data {
                 source
@@ -327,9 +273,9 @@ export const CHILD_LINKS_QUERY = gql`
 `
 
 export const LINKS_DATED = gql`
-    query links($perspectiveUUID: String, $fromDate: Date, $untilDate: Date) {
-        links(perspectiveUUID: $perspectiveUUID, query: { fromDate: $fromDate, untilDate: $untilDate }) {
-            author { did }
+    query links($perspectiveUUID: String!, $fromDate: Date!, $untilDate: Date!) {
+        perspectiveQueryLinks(query: { fromDate: $fromDate, untilDate: $untilDate }, uuid: $perspectiveUUID) {
+            author
             timestamp
             data {
                 source
@@ -341,15 +287,15 @@ export const LINKS_DATED = gql`
 `
 
 export const ADD_LINK = gql`
-        mutation AddLink($perspectiveUUID: String, $link: String){
-            addLink(input: { perspectiveUUID: $perspectiveUUID, link: $link }) {
-                author { did }
-                timestamp
-                data {
-                    source
-                    predicate
-                    target
-                }
+    mutation perspectiveAddLink($perspectiveUUID: String!, $link: String!){
+        perspectiveAddLink(link: $link, uuid: $perspectiveUUID) {
+            author
+            timestamp
+            data {
+                source
+                predicate
+                target
             }
         }
+    }
 `

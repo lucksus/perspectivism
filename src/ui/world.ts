@@ -14,7 +14,7 @@ export default class World {
     constructor(gqlClient: ApolloClient<any>) {
         this.#gqlClient = gqlClient
         this.#initialized = new Promise(resolve => {
-            this.ensureGlobalAppPerspective().then(() => resolve())
+            //this.ensureGlobalAppPerspective().then(() => resolve())
         })
     }
 
