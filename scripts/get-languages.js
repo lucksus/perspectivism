@@ -27,7 +27,7 @@ const languages = {
       "https://github.com/juntofoundation/Social-Context/releases/download/0.0.18/full_index.zip",
   },
   "note-ipfs": {
-    bundle: "https://github.com/perspect3vism/lang-note-ipfs/releases/download/0.0.1/bundle.js",
+    bundle: "https://github.com/perspect3vism/lang-note-ipfs/releases/download/0.0.3/bundle.js",
   } 
 };
 
