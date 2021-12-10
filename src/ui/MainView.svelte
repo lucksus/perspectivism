@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from "svelte";
+	import { getContext, onMount } from "svelte";
 	import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -13,6 +13,8 @@
 	import PeersView from './PeersView.svelte'
 	import { Ad4mClient } from '@perspect3vism/ad4m'
 	import { readable } from 'svelte/store'
+	import Zumly from 'zumly'
+	import ZoomRoot from './ZoomRoot.svelte'
 
 	const ad4m: Ad4mClient = getContext('ad4mClient')
 
@@ -109,6 +111,22 @@
 			console.log("TODO: install perspective")
 		}
 	}
+
+
+	onMount(()=> {
+		// Zumly instance
+		const zumly = new Zumly({
+			mount: '#zoom-container',
+			initialView: 'ZoomRoot',
+			views: {
+				ZoomRoot,
+				Perspective
+			}
+		})
+
+		zumly.init()
+	})
+	
 
 </script>
 
@@ -240,6 +258,7 @@
 	{:else}
 		<h1>Welcome to Perspect3ve!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>
+		<div id="zoom-container"></div>
     {/if}
     
     <style>
