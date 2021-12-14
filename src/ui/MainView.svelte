@@ -92,6 +92,7 @@
 		}
 	}
 
+	let stringView = `<div class="z-view"><h1 style="width: 300px; height: 150px; background-color: red;">String View</h1></div>`
 
 	onMount(()=> {
 		// Zumly instance
@@ -100,8 +101,22 @@
 			initialView: 'ZoomRoot',
 			views: {
 				ZoomRoot,
-				Perspective
-			}
+				Perspective,
+				stringView
+			},
+				// Customize transitions. Object. Optional
+				transitions: {
+					// Effects for background views. Array. ['blur', 'sepia', 'saturate']
+					effects: ['blur'],
+					// How new injected view is adapted. String. Default 'width'
+					cover: 'height',
+					// Transition duration. String. Default '1s'
+					duration: '1300ms' ,
+					// Transition ease. String. Default 'ease-in-out'
+					ease: 'cubic-bezier(0.25,0.1,0.25,1)'
+				},
+				// Activate debug notifications. Boolean. Default false
+				debug: true
 		})
 
 		zumly.init()
@@ -211,6 +226,9 @@
 		</Row>
 	</TopAppBar>
 
+	<div id="zoom-container"></div>
+	
+
 	<PeersView on:request-open-perspective={(event)=>{
 		console.log("on:request-open-perspective:", event)
 		openPerspectiveByURL(event.detail.perspectiveURL)
@@ -236,9 +254,10 @@
 			on:cancel={() => selectedMainView.edit = null}
 		></PerspectiveSettings>
 	{:else}
+	<!--
 		<h1>Welcome to Perspect3ve!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>
-		<div id="zoom-container"></div>
+	-->	
     {/if}
     
     <style>
@@ -249,6 +268,14 @@
             max-width: 240px;
             margin: 0 auto;
         }
+
+		#zoom-container {
+			position: absolute;
+			left: 0;
+			top: 48px;
+			right: 0;
+			bottom: 0;
+		}
     
         h1 {
             color: #00c3ff;
