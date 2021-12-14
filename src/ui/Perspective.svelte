@@ -17,9 +17,17 @@
     import { readable } from 'svelte/store'
 
     export let perspective: Perspective
+    export let uuid: String
 
     const dispatch = createEventDispatcher();
     const ad4m: Ad4mClient = getContext('ad4mClient')
+
+    if(!perspective && uuid) {
+        (async () => {
+            perspective = await ad4m.perspective.byUUID(uuid)
+        })()
+    }
+
 
     let linksStore
     let constructionMenu
@@ -329,6 +337,10 @@
 
 </script>
 
+{#if !perspective || !perspective.uuid}
+    <h1>Loading...</h1>
+{:else}
+
 <h1>${perspective.uuid}</h1>
 
 <div class="perspective-container" 
@@ -430,7 +442,7 @@
     on:link={onLinkExpression}
 ></ExpressionContextMenu>
 
-
+{/if}
 
 <style>
     .perspective-container {

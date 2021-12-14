@@ -12,8 +12,8 @@
         <h1>Perspectives</h1>
         <ul>
             {#each $perspectives as perspective}
-            <li class="perspective-icon zoom-me" data-to="Perspective">
-                <span class="perspective-name">
+            <li class="perspective-icon">
+                <span class="perspective-name zoom-me" data-to="Perspective" data-uuid={perspective.uuid}>
                     {perspective.name}
                 </span>
             </li>
