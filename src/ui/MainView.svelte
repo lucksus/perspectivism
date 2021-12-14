@@ -11,34 +11,14 @@
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
 	import PeersView from './PeersView.svelte'
-	import { Ad4mClient } from '@perspect3vism/ad4m'
-	import { readable } from 'svelte/store'
+	import type { Ad4mClient } from '@perspect3vism/ad4m'
 	import Zumly from 'zumly'
 	import ZoomRoot from './ZoomRoot.svelte'
+	import { perspectivesStore } from "./PerspectivesStore";
 
 	const ad4m: Ad4mClient = getContext('ad4mClient')
 
-	let perspectives = readable([], async set => {
-		let ps = await ad4m.perspective.all()
-		console.log("Perspectives:", ps)
-		set(ps)
-
-		ad4m.perspective.addPerspectiveAddedListener(newP => {
-			ps = [...ps, newP]
-			set(ps)
-		})
-
-		ad4m.perspective.addPerspectiveUpdatedListener(updatedP => {
-			ps = ps.map(p => p.uuid == updatedP.uuid ? updatedP : p)
-			set(ps)
-		})
-
-		ad4m.perspective.addPerspectiveRemovedListener(removedP => {
-			ps = ps.filter(p => p.uuid != removedP.uuid)
-			set(ps)
-		})
-	})
-
+	let perspectives = perspectivesStore(ad4m)
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
