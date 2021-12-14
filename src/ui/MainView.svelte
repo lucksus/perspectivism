@@ -106,19 +106,19 @@
 				stringView
 			},
 			componentContext: allContexts,
-				// Customize transitions. Object. Optional
-				transitions: {
-					// Effects for background views. Array. ['blur', 'sepia', 'saturate']
-					effects: ['blur'],
-					// How new injected view is adapted. String. Default 'width'
-					cover: 'height',
-					// Transition duration. String. Default '1s'
-					duration: '1300ms' ,
-					// Transition ease. String. Default 'ease-in-out'
-					ease: 'cubic-bezier(0.25,0.1,0.25,1)'
-				},
-				// Activate debug notifications. Boolean. Default false
-				debug: true
+			// Customize transitions. Object. Optional
+			transitions: {
+				// Effects for background views. Array. ['blur', 'sepia', 'saturate']
+				effects: ['blur'],
+				// How new injected view is adapted. String. Default 'width'
+				cover: 'height',
+				// Transition duration. String. Default '1s'
+				duration: '1300ms' ,
+				// Transition ease. String. Default 'ease-in-out'
+				ease: 'cubic-bezier(0.25,0.1,0.25,1)'
+			},
+			// Activate debug notifications. Boolean. Default false
+			debug: true
 		})
 
 		zumly.init()
