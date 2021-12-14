@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext, onMount } from "svelte";
+	import { getAllContexts, getContext, onMount } from "svelte";
 	import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -17,6 +17,7 @@
 	import { perspectivesStore } from "./PerspectivesStore";
 
 	const ad4m: Ad4mClient = getContext('ad4mClient')
+	const allContexts = getAllContexts()
 
 	let perspectives = perspectivesStore(ad4m)
 	let collapsed = false;
@@ -104,6 +105,7 @@
 				Perspective,
 				stringView
 			},
+			componentContext: allContexts,
 				// Customize transitions. Object. Optional
 				transitions: {
 					// Effects for background views. Array. ['blur', 'sepia', 'saturate']
