@@ -298,4 +298,13 @@
                 max-width: none;
             }
         }
+		
+		.z-view {
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			bottom: 50px;
+			right: 50px;
+			border: red 3px solid;
+		}
     </style>
