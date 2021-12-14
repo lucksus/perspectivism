@@ -7,19 +7,17 @@
     let perspectives = perspectivesStore(ad4m)
 </script>
 
-<div class="z-view">
-    <div id="perspectives">
-        <h1>Perspectives</h1>
-        <ul>
-            {#each $perspectives as perspective}
-            <li class="perspective-icon">
-                <span class="perspective-name zoom-me" data-to="Perspective" data-uuid={perspective.uuid}>
-                    {perspective.name}
-                </span>
-            </li>
-            {/each}
-        </ul>
-    </div>
-    
-    <div class="zoom-me" data-to="stringView">zoom me</div>
+<div id="perspectives">
+    <h1>Perspectives</h1>
+    <ul>
+        {#each $perspectives as perspective}
+        <li class="perspective-icon">
+            <span class="perspective-name zoom-me" data-to="Perspective" data-uuid={perspective.uuid}>
+                {perspective.name}
+            </span>
+        </li>
+        {/each}
+    </ul>
 </div>
+
+<div class="zoom-me" data-to="stringView">zoom me</div>
