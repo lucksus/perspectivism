@@ -231,11 +231,13 @@
 	<div id="zoom-container"></div>
 	
 
+	<!--
 	<PeersView on:request-open-perspective={(event)=>{
 		console.log("on:request-open-perspective:", event)
 		openPerspectiveByURL(event.detail.perspectiveURL)
 	}}>
 	</PeersView>
+	-->
 	
 	{#if selectedMainView.perspective}
 		<Perspective perspective={selectedMainView.perspective} 
@@ -298,13 +300,4 @@
                 max-width: none;
             }
         }
-		
-		.z-view {
-			position: absolute;
-			left: 0px;
-			top: 0px;
-			bottom: 50px;
-			right: 50px;
-			border: red 3px solid;
-		}
     </style>
