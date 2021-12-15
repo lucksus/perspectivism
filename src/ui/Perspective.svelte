@@ -335,7 +335,15 @@
         linkingSource = link
     }
 
+    function noop(){}
+
 </script>
+
+<div 
+    on:mousewheel|stopPropagation={noop} 
+    on:touchstart|stopPropagation={noop}
+    on:mouseup|stopPropagation={noop}
+>
 
 {#if !perspective || !perspective.uuid}
     <h1>Loading...</h1>
@@ -429,8 +437,6 @@
     </div>
 </div>
 
-
-
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
     languageIcons={languageIcons}
@@ -444,6 +450,7 @@
 
 {/if}
 
+</div>
 <style>
     .perspective-container {
         position: absolute;
