@@ -5,10 +5,8 @@
     import Fab, {Icon, Label} from '@smui/fab';
     import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
-    import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
-    import PerspectiveSettings from './PerspectiveSettings.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from '@apollo/client';
@@ -53,9 +51,6 @@
     let linkingCursor = {}
     let dropMove = false
     let dropMoveTarget
-
-    let showSettings = false
-    let showExpressionBrwoser = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -400,43 +395,6 @@
     </div>
 </div>
 
-<div id="side-bar-container">
-    <div class="side-bar-panel panel-1" style={`transform: rotateY(${showExpressionBrwoser? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showExpressionBrwoser = !showExpressionBrwoser}>
-            <span class="float-right"><Icon class="material-icons">web</Icon></span>
-            <Label>Expression Browser</Label>
-        </div>
-        <div class="side-panel-content expression-browser-panel" style={`opacity: ${showExpressionBrwoser? '1' : '0'}`}>
-            <ExpressionBrowser
-                on:close={()=> showExpressionBrwoser = false}
-                on:link-expresson={event => ADD_LINK({variables: {
-                    link: JSON.stringify({
-                        source: 'root',
-                        target: event.detail
-                    })
-                }})}
-            ></ExpressionBrowser>
-        </div>
-    </div>
-
-    <div class="side-bar-panel panel-2" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showSettings = !showSettings}>
-            <span class="float-right"><Icon class="material-icons">settings</Icon></span>
-            <Label>Perspective Settings</Label>
-        </div>
-        <div class="side-panel-content settings-panel" style={`opacity: ${showSettings? '1' : '0'}`}>
-            <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
-                on:submit={()=> {
-                    showSettings = false
-                }}
-                on:cancel={()=> {
-                    showSettings = false
-                }}>
-            </PerspectiveSettings>
-        </div>
-    </div>
-</div>
-
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
     languageIcons={languageIcons}
@@ -460,65 +418,6 @@
         height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
-    }
-
-    #side-bar-container {
-        position: absolute;
-        right: 0;
-        top: 0;
-        perspective: 100px;
-        perspective-origin: rightpo;
-    }
-
-    .side-bar-panel {
-        position: absolute;
-        right: 0;
-        transform-style: preserve-3d;
-        transition: transform 0.5s;
-    }
-
-    .panel-1 {
-        top: 115px;
-    }
-
-    .panel-2 {
-        top: 425px;
-    }
-    
-    .expression-browser-panel {
-        height: 545px;
-        width: 380px;
-    }
-
-    .settings-panel {
-        width: 204px;
-    }
-
-    .side-bar-button {
-        position: absolute;
-        width: 175px;
-        height: 45px;
-        padding: 10px 50px 0 25px;
-        transform-origin: right bottom;
-        transform: rotate(-90deg) translateX(115px);
-        right: 0;
-        background-color: white;
-        border: 1px solid rgb(127, 129, 255);
-        color:   rgb(127, 129, 255);
-        cursor: pointer;
-    }
-
-    .float-right {
-        float: right;
-    }
-
-    .side-panel-content {
-        position: absolute;
-        transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
-        transition: opacity 0.5s;
-        padding: 40px;
-        border: 1px solid rgb(127, 129, 255);
-        background-color: white;
     }
 
     .debug {
