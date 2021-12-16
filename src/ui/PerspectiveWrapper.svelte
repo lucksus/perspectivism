@@ -6,7 +6,6 @@
     import Perspective from './Perspective.svelte'
     import ExpressionBrowser from './ExpressionBrowser.svelte';
     import PerspectiveSettings from './PerspectiveSettings.svelte';
-import isFirstDayOfMonth from "date-fns/isFirstDayOfMonth/index.js";
 
     export let uuid: string
 
