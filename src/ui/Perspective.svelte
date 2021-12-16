@@ -17,9 +17,17 @@
     import { readable } from 'svelte/store'
 
     export let perspective: Perspective
+    export let uuid: String
 
     const dispatch = createEventDispatcher();
     const ad4m: Ad4mClient = getContext('ad4mClient')
+
+    if(!perspective && uuid) {
+        (async () => {
+            perspective = await ad4m.perspective.byUUID(uuid)
+        })()
+    }
+
 
     let linksStore
     let constructionMenu
@@ -327,7 +335,19 @@
         linkingSource = link
     }
 
+    function noop(){}
+
 </script>
+
+<div 
+    on:mousewheel|stopPropagation={noop} 
+    on:touchstart|stopPropagation={noop}
+    on:mouseup|stopPropagation={noop}
+>
+
+{#if !perspective || !perspective.uuid}
+    <h1>Loading...</h1>
+{:else}
 
 <h1>${perspective.uuid}</h1>
 
@@ -417,8 +437,6 @@
     </div>
 </div>
 
-
-
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
     languageIcons={languageIcons}
@@ -430,8 +448,9 @@
     on:link={onLinkExpression}
 ></ExpressionContextMenu>
 
+{/if}
 
-
+</div>
 <style>
     .perspective-container {
         position: absolute;

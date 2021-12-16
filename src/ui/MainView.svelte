@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getContext } from "svelte";
+	import { getAllContexts, getContext, onMount } from "svelte";
 	import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -11,32 +11,15 @@
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
 	import PeersView from './PeersView.svelte'
-	import { Ad4mClient } from '@perspect3vism/ad4m'
-	import { readable } from 'svelte/store'
+	import type { Ad4mClient } from '@perspect3vism/ad4m'
+	import Zumly from 'zumly'
+	import ZoomRoot from './ZoomRoot.svelte'
+	import { perspectivesStore } from "./PerspectivesStore";
 
 	const ad4m: Ad4mClient = getContext('ad4mClient')
+	const allContexts = getAllContexts()
 
-	let perspectives = readable([], async set => {
-		let ps = await ad4m.perspective.all()
-		console.log("Perspectives:", ps)
-		set(ps)
-
-		ad4m.perspective.addPerspectiveAddedListener(newP => {
-			ps = [...ps, newP]
-			set(ps)
-		})
-
-		ad4m.perspective.addPerspectiveUpdatedListener(updatedP => {
-			ps = ps.map(p => p.uuid == updatedP.uuid ? updatedP : p)
-			set(ps)
-		})
-
-		ad4m.perspective.addPerspectiveRemovedListener(removedP => {
-			ps = ps.filter(p => p.uuid != removedP.uuid)
-			set(ps)
-		})
-	})
-
+	let perspectives = perspectivesStore(ad4m)
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
@@ -109,6 +92,38 @@
 			console.log("TODO: install perspective")
 		}
 	}
+
+	let stringView = `<div class="z-view"><h1 style="width: 300px; height: 150px; background-color: red;">String View</h1></div>`
+
+	onMount(()=> {
+		// Zumly instance
+		const zumly = new Zumly({
+			mount: '#zoom-container',
+			initialView: 'ZoomRoot',
+			views: {
+				ZoomRoot,
+				Perspective,
+				stringView
+			},
+			componentContext: allContexts,
+			// Customize transitions. Object. Optional
+			transitions: {
+				// Effects for background views. Array. ['blur', 'sepia', 'saturate']
+				effects: ['blur'],
+				// How new injected view is adapted. String. Default 'width'
+				cover: 'height',
+				// Transition duration. String. Default '1s'
+				duration: '1300ms' ,
+				// Transition ease. String. Default 'ease-in-out'
+				ease: 'cubic-bezier(0.25,0.1,0.25,1)'
+			},
+			// Activate debug notifications. Boolean. Default false
+			debug: true
+		})
+
+		zumly.init()
+	})
+	
 
 </script>
 
@@ -213,11 +228,16 @@
 		</Row>
 	</TopAppBar>
 
+	<div id="zoom-container"></div>
+	
+
+	<!--
 	<PeersView on:request-open-perspective={(event)=>{
 		console.log("on:request-open-perspective:", event)
 		openPerspectiveByURL(event.detail.perspectiveURL)
 	}}>
 	</PeersView>
+	-->
 	
 	{#if selectedMainView.perspective}
 		<Perspective perspective={selectedMainView.perspective} 
@@ -238,8 +258,10 @@
 			on:cancel={() => selectedMainView.edit = null}
 		></PerspectiveSettings>
 	{:else}
+	<!--
 		<h1>Welcome to Perspect3ve!</h1>
 		<h2>Please open the drawer and create or select a perspective to start...</h2>
+	-->	
     {/if}
     
     <style>
@@ -250,6 +272,14 @@
             max-width: 240px;
             margin: 0 auto;
         }
+
+		#zoom-container {
+			position: absolute;
+			left: 0;
+			top: 48px;
+			right: 0;
+			bottom: 0;
+		}
     
         h1 {
             color: #00c3ff;
