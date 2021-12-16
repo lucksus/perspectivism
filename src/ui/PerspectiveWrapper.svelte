@@ -44,7 +44,7 @@ import isFirstDayOfMonth from "date-fns/isFirstDayOfMonth/index.js";
     {/if}
 
     <div class="footer-panel">
-        <TabBar {tabs} let:tab key={(tab) => tab.k} bind:active>
+        <TabBar {tabs} let:tab key={(tab) => tab.k} bind:active style="height: 42px; background-color: #44aaee6b;">
             <Tab
                 {tab}
                 stacked={true}
@@ -79,6 +79,7 @@ import isFirstDayOfMonth from "date-fns/isFirstDayOfMonth/index.js";
         bottom: 0;
         left: 0;
         background-color: aliceblue;
+        padding: 20px;
     }
 
     .footer-panel {
@@ -87,6 +88,7 @@ import isFirstDayOfMonth from "date-fns/isFirstDayOfMonth/index.js";
         right: 0;
         bottom: 0;
         left: 0;
+        text-align: center;
     }
 
     .footer-content {

@@ -69,5 +69,7 @@ button:focus {
 	top: 0px;
 	bottom: 50px;
 	right: 50px;
-	border: red 3px solid;
+	border: #44aaee6b 3px solid;
+	border-radius: 50px;
+	overflow: hidden;
 }
