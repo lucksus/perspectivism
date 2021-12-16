@@ -76,7 +76,7 @@
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.9.3",
     "unzipper": "^0.10.11",
-    "zumly": "file:../zumly"
+    "zumly": "0.9.11"
   },
   "dependencies": {
     "@holochain-open-dev/holochain-run-dna": "^0.2.6",
