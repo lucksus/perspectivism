@@ -26,6 +26,14 @@
         })()
     }
 
+    ad4m.perspective.addPerspectiveUpdatedListener(async p => {
+        //@ts-ignore
+        if(p.uuid == perspective.uuid || p.uuid == uuid) {
+            //@ts-ignore
+            perspective = await ad4m.perspective.byUUID(perspective.uuid)
+        }
+    })
+
 
     let linksStore
     let constructionMenu

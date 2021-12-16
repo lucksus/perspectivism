@@ -61,8 +61,8 @@ import isFirstDayOfMonth from "date-fns/isFirstDayOfMonth/index.js";
             {:else if active.k === 2 }
                 <ExpressionBrowser></ExpressionBrowser>
             {:else if active.k === 3 }
-                {#if perspective}
-                    <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))}>
+                {#if uuid}
+                    <PerspectiveSettings perspectiveId={uuid}>
                     </PerspectiveSettings>
                 {/if}
             {/if}

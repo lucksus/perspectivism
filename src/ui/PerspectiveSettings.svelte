@@ -49,6 +49,7 @@
     init()
 
     async function update() {
+        console.log("update:", perspective, perspectiveId)
         const uuid = perspective ? perspective.uuid : perspectiveId
         if(!uuid) return
         perspective = await ad4m.perspective.byUUID(uuid)
@@ -112,8 +113,7 @@
 </script>
 
 <div class="perspective-settings-container">
-    <h1>Perspective Settings</h1>
-    <DataTable>
+    <DataTable> 
         <Body>
             <Row>
                 <Cell>Name:</Cell>
@@ -121,11 +121,11 @@
             </Row>
             <Row>
                 <Cell>Sharing:</Cell>
-                {#if perspective.sharedUrl}
+                {#if perspectiveTemp.sharedUrl}
                     <Cell>
                         <h3>This Perspective is shared</h3>
                         <div>
-                            <span>{perspective.sharedUrl}</span>
+                            <span>{perspectiveTemp.sharedUrl}</span>
                         </div>
                         {#if publishedLinkLanguage}
                         <div>
@@ -237,14 +237,17 @@
         </Body>
     </DataTable>
 </div>
-<p></p>
-<Button variant="raised" on:click={save}>
-    <Label>Ok</Label>
+
+<Button variant="raised" on:click={save} style="margin: 40px; padding: 25px;">
+    <Label>Save</Label>
 </Button>
+<!--
 <Button variant="outlined" on:click={cancel}>
     <Label>Cancel</Label>
 </Button>
-
+-->
 <style>
-
+    .perspective-settings-container {
+        float: left;
+    }
 </style>
