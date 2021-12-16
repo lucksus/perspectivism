@@ -62,21 +62,10 @@
       await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://mbox', target: Literal.from(email).toUrl()})
     }
 
-    async function publish() {
-      const snapshot = await agentPerspective.snapshot()
-      console.log("Publishing perspective: ", snapshot)
-      await ad4m.agent.updatePublicPerspective(snapshot)
-    }
-
     init()
 </script>
 
 <Card style="width: 360px;">
-    <div style="padding: 20px">
-        <h2 class="mdc-typography--headline6" style="margin: 0;">Your Agent Profile</h2>
-        <div class="mdc-typography--subtitle2" style="margin: 0; overflow-wrap: anywhere;">{did}</div>
-    </div>
-    <hr>
     <PrimaryAction>
       <Media aspectRatio="square" >
         <MediaContent>
@@ -111,9 +100,6 @@
         <Button on:click={save}>
             <Label>Save</Label>
         </Button>
-        <Button on:click={publish}>
-          <Label>Publish</Label>
-      </Button>
       </ActionButtons>
     </Actions>
   </Card>

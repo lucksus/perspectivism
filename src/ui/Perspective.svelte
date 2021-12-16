@@ -352,11 +352,6 @@
     <h1>Loading...</h1>
 {:else}
 
-<div class="header">
-    <h1>{perspective.name}</h1>
-</div>
-
-
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
     on:mousemove={handleMouseMove}
@@ -421,19 +416,6 @@
 
 </div>
 <style>
-    h1 {
-        margin: 5px 20px;
-    }
-
-    .header {
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        height: 45px;
-        background-color: #44aaee6b;
-    }
-
     .perspective-container {
         position: absolute;
         top: 30px;

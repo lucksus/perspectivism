@@ -10,6 +10,7 @@
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
+	import AgentPerspectiveWrapper from './AgentPerspectiveWrapper.svelte';
 	import PeersView from './PeersView.svelte'
 	import type { Ad4mClient } from '@perspect3vism/ad4m'
 	import Zumly from 'zumly'
@@ -103,7 +104,7 @@
 			views: {
 				ZoomRoot,
 				PerspectiveWrapper,
-				stringView
+				AgentPerspectiveWrapper,
 			},
 			componentContext: allContexts,
 			// Customize transitions. Object. Optional

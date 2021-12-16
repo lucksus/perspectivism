@@ -3,9 +3,7 @@
     import type { Ad4mClient } from '@perspect3vism/ad4m'
     import { perspectivesStore } from "./PerspectivesStore";
     const ad4m: Ad4mClient = getContext('ad4mClient')
-    console.log("ad4m in zoomroot:", ad4m)
     let perspectives = perspectivesStore(ad4m)
-    console.log($perspectives)
     let agentPerspective 
     $: agentPerspective = $perspectives.find(e => e.name == '__agent_public_perspective')
 
@@ -26,7 +24,11 @@
     <div class="public">
         <h2>Public Perspectives</h2>
         {#if agentPerspective}
-            <div class="perspective-box agent-perspective zoom-me" data-to="PerspectiveWrapper" data-uuid={agentPerspective.uuid}>
+            <div class="perspective-box agent-perspective zoom-me" data-to="PerspectiveWrapper" 
+                data-uuid={agentPerspective.uuid}
+                data-settings={false}
+                data-agentprofile={true}
+            >
                 Public Agent Perspective
             </div>
         {/if}
@@ -36,7 +38,10 @@
             {#each $perspectives as perspective}
                 {#if perspective !== agentPerspective && perspective.sharedUrl}
                     <li class="perspective-icon">
-                        <div class="perspective-box zoom-me" data-to="PerspectiveWrapper" data-uuid={perspective.uuid}>
+                        <div class="perspective-box zoom-me" data-to="PerspectiveWrapper" 
+                            data-uuid={perspective.uuid}
+                            data-settings=true
+                        >
                             {perspective.name}
                         </div>
                     </li>
@@ -51,7 +56,10 @@
             {#each $perspectives as perspective}
                 {#if perspective !== agentPerspective && !perspective.sharedUrl}
                     <li class="perspective-icon">
-                        <div class="perspective-box zoom-me" data-to="PerspectiveWrapper" data-uuid={perspective.uuid}>
+                        <div class="perspective-box zoom-me" data-to="PerspectiveWrapper" 
+                            data-uuid={perspective.uuid}
+                            data-settings=true
+                        >
                             {perspective.name}
                         </div>
                     </li>
