@@ -12,7 +12,7 @@
     <ul>
         {#each $perspectives as perspective}
         <li class="perspective-icon">
-            <span class="perspective-name zoom-me" data-to="Perspective" data-uuid={perspective.uuid}>
+            <span class="perspective-name zoom-me" data-to="PerspectiveWrapper" data-uuid={perspective.uuid}>
                 {perspective.name}
             </span>
         </li>

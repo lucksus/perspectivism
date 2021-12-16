@@ -6,7 +6,7 @@
 	import List, {Item, Text, Graphic, Separator, Meta} from '@smui/list';
 	import Chip, {Text as ChipText} from '@smui/chips';
 	import Button, {Group, Label} from '@smui/button';
-	import Perspective from './Perspective.svelte';
+	import PerspectiveWrapper from './PerspectiveWrapper.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
 	import PerspectiveSettings from './PerspectiveSettings.svelte'
 	import AgentProfileSettings from './AgentProfileSettings.svelte';
@@ -102,7 +102,7 @@
 			initialView: 'ZoomRoot',
 			views: {
 				ZoomRoot,
-				Perspective,
+				PerspectiveWrapper,
 				stringView
 			},
 			componentContext: allContexts,
