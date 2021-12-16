@@ -113,9 +113,10 @@
 				// How new injected view is adapted. String. Default 'width'
 				cover: 'height',
 				// Transition duration. String. Default '1s'
-				duration: '1300ms' ,
+				duration: '400ms' ,
 				// Transition ease. String. Default 'ease-in-out'
-				ease: 'cubic-bezier(0.25,0.1,0.25,1)'
+				//ease: 'cubic-bezier(0.25,0.1,0.25,1)'
+				ease: 'ease-out'
 			},
 			// Activate debug notifications. Boolean. Default false
 			debug: true
