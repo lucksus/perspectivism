@@ -23,6 +23,8 @@ export default class VisGraph {
     }
 
     async load() {
+        this.nodes = []
+        this.edges = []
         await this.getPerspectiveNodesAndMetaEdges();
     }
 

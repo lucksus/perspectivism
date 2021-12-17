@@ -22,6 +22,10 @@
         })()
     }
 
+    if(!uuid && perspective) {
+        uuid = perspective.uuid
+    }
+
     //@ts-ignore
     ad4m.perspective.addPerspectiveUpdatedListener(async p => {
         //@ts-ignore
@@ -29,6 +33,22 @@
             //@ts-ignore
             perspective = await ad4m.perspective.byUUID(perspective.uuid)
         }
+    })
+
+    async function update() {
+        await graph.load()
+        network.setData({nodes: graph.nodes, edges: graph.edges})
+        getNodePositions()
+    }
+
+    ad4m.perspective.addPerspectiveLinkAddedListener(uuid, () => {
+        update()
+        return null
+    })
+
+    ad4m.perspective.addPerspectiveLinkRemovedListener(uuid, () => {
+        update()
+        return null
     })
 
     let network
