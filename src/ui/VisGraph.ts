@@ -1,15 +1,15 @@
-import { Ad4mClient, LinkQuery } from '@perspect3vism/ad4m'
+import { Ad4mClient, LinkQuery, PerspectiveProxy } from '@perspect3vism/ad4m'
 import { v4 as uuidv4 } from 'uuid'
 import type { Edge, Node } from 'vis-network/esnext'
 
 export default class VisGraph {
-    #ad4mClient: Ad4mClient
+    #perspective: PerspectiveProxy
     nodes: Node[]
     edges: Edge[]
     connectLinkElements: boolean
 
-    constructor(ad4mClient: Ad4mClient) {
-        this.#ad4mClient = ad4mClient
+    constructor(perspective: PerspectiveProxy) {
+        this.#perspective = perspective
         this.connectLinkElements = true
         this.nodes = []
         this.edges = []
@@ -174,7 +174,7 @@ export default class VisGraph {
 
     async loadConnectedLinks(perspective, isNeighbourhood) {
         const linkLanguageLinksNode = this.loadLinkLanguageNode(perspective, isNeighbourhood);
-        const links = await this.#ad4mClient.perspective.queryLinks(perspective.uuid, new LinkQuery({}));
+        const links = await perspective.get(new LinkQuery({}));
         
         let from;
         if (isNeighbourhood) {
@@ -230,7 +230,7 @@ export default class VisGraph {
 
     async loadLinks(perspective, isNeighbourhood) {
         const linkLanguageLinksNode = this.loadLinkLanguageNode(perspective, isNeighbourhood);
-        const links = await this.#ad4mClient.perspective.queryLinks(perspective.uuid, new LinkQuery({}));
+        const links = await perspective.get(new LinkQuery({}));
         
         let from;
         if (isNeighbourhood) {
@@ -282,31 +282,27 @@ export default class VisGraph {
     }
 
     async getPerspectiveNodesAndMetaEdges() {
-        console.log("getPerspectiveNodesAndMetaEdges()");
-        const perspectives = await this.#ad4mClient.perspective.all();
-        console.log("Got perspectives: ", perspectives);
-        for (const perspective of perspectives) {
-          if (perspective.neighbourhood) {
+        
+        if (this.#perspective.neighbourhood) {
             //Load the neighbourhood data
-            this.loadNeighbourhoodNode(perspective);
-  
+            //this.loadNeighbourhoodNode(this.#perspective);
+
             if (this.connectLinkElements) {
-              //Load the meta data
-              this.loadConnectedMetaLinks(perspective);
-              await this.loadConnectedLinks(perspective, true);
+                //Load the meta data
+                this.loadConnectedMetaLinks(this.#perspective);
+                await this.loadConnectedLinks(this.#perspective, true);
             } else {
-              //Load the meta data
-              this.loadMetaLinks(perspective);
-              await this.loadLinks(perspective, true)
+                //Load the meta data
+                this.loadMetaLinks(this.#perspective);
+                await this.loadLinks(this.#perspective, true)
             }
-          } else {
-            this.loadPerspectiveNode(perspective);
+        } else {
+            //this.loadPerspectiveNode(this.#perspective);
             if (this.connectLinkElements) {
-              await this.loadConnectedLinks(perspective, false);
+                await this.loadConnectedLinks(this.#perspective, false);
             } else {
-              await this.loadLinks(perspective, false)
+                await this.loadLinks(this.#perspective, false)
             }
-          }
         }
         this.edges = this.edges.sort(() => Math.random() - 0.5);
         this.nodes = this.nodes.sort(() => Math.random() - 0.5);
@@ -332,9 +328,10 @@ export default class VisGraph {
             if (parent) {
                 //@ts-ignore
                 node.key = "" + this.nodes.indexOf(parent).pad(padsize) + node.key;
+                edge = this.edges.find(e => e.to == parent.id);
+            } else {
+                edge = undefined
             }
-  
-            edge = this.edges.find(e => e.to == parent.id);
           }
         });  
   

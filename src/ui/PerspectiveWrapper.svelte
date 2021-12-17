@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import type { Ad4mClient } from "@perspect3vism/ad4m"
+    import type { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m"
     import Tab, { Icon, Label } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Perspective from './Perspective.svelte'
@@ -18,7 +18,7 @@
         settings = JSON.parse(settings)
 
     const ad4m: Ad4mClient = getContext('ad4mClient')
-    let perspective
+    let perspective: PerspectiveProxy|null
 
     $: if(uuid) {
         (async () => {

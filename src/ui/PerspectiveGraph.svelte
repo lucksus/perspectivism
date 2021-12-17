@@ -14,7 +14,7 @@
     export let uuid: string
 
     const ad4m: Ad4mClient = getContext('ad4mClient')
-    const graph = new VisGraph(ad4m)
+    
 
     if(!perspective && uuid) {
         (async () => {
@@ -35,6 +35,7 @@
     let networkDiv
     
     async function createNetwork(container) {
+        const graph = new VisGraph(perspective)
         await graph.load()
         network = new Network(container, {nodes: graph.nodes, edges: graph.edges}, {
             groups: {
@@ -71,7 +72,7 @@
         })
     }
 
-    $: if(networkDiv) createNetwork(networkDiv)
+    $: if(networkDiv && perspective) createNetwork(networkDiv)
 
     let linksStore
     let constructionMenu
