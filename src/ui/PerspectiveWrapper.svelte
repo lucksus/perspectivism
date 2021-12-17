@@ -4,6 +4,7 @@
     import Tab, { Icon, Label } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Perspective from './Perspective.svelte'
+    import PerspectiveGraph from "./PerspectiveGraph.svelte";
     import ExpressionBrowser from './ExpressionBrowser.svelte';
     import PerspectiveSettings from './PerspectiveSettings.svelte';
     import AgentProfileSettings from './AgentProfileSettings.svelte';
@@ -71,7 +72,7 @@
     </div>
 
     {#if perspective}
-        <Perspective perspective={perspective}></Perspective>
+        <PerspectiveGraph perspective={perspective}></PerspectiveGraph>
     {:else}
         <h2>Loading...</h2>
     {/if}

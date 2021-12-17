@@ -76,6 +76,7 @@
     "tslint-eslint-rules": "^5.4.0",
     "typescript": "^3.9.3",
     "unzipper": "^0.10.11",
+    "vis-network": "^9.1.0",
     "zumly": "0.9.11"
   },
   "dependencies": {
