@@ -106,9 +106,11 @@
             }
         })
 
-        network.on('dragging', () => {
-            getNodePositions()
-        })
+        for(let event of ['dragging', 'stabilizationProgress', 'stabilized', 'resize', 'afterDrawing']) {
+            network.on(event, () => {
+                getNodePositions()
+            })
+        }
 
         network.on('zoom', (params) => {
             scale = params.scale
