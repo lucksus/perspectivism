@@ -33,10 +33,25 @@
 
     let network
     let networkDiv
-    
-    async function createNetwork(container) {
-        const graph = new VisGraph(perspective)
+    let nodePositions
+    let graph
+    let scale = 1
+
+    $: if(perspective && networkDiv) {
+        init()
+    }
+
+    async function init() {
+        await graphFromPerspective(perspective)
+        await createNetwork(networkDiv)
+    }
+
+    async function graphFromPerspective(p) {
+        graph = new VisGraph(p)
         await graph.load()
+    }
+
+    async function createNetwork(container) {
         network = new Network(container, {nodes: graph.nodes, edges: graph.edges}, {
             groups: {
                 linkLanguageLink: {color:{background:'#FF3366'}},
@@ -70,9 +85,31 @@
                 }
             }
         })
+
+        network.on('dragging', () => {
+            getNodePositions()
+        })
+
+        network.on('zoom', (params) => {
+            scale = params.scale
+            getNodePositions()
+        })
+
+        getNodePositions()
     }
 
-    $: if(networkDiv && perspective) createNetwork(networkDiv)
+    function getNodePositions() {
+        nodePositions = []
+        for(let node of graph.nodes) {
+            console.log(node)
+            nodePositions.push( {
+                url: node.label,
+                pos: network.canvasToDOM(network.getPosition(node.id)),
+            })
+        }
+    }
+
+    
 
     let linksStore
     let constructionMenu
@@ -196,7 +233,22 @@
     <h1>Loading...</h1>
 {:else}
 
-<div class="network" bind:this={networkDiv}></div>
+<div class="network-wrapper">
+    {#if nodePositions}
+        {#each nodePositions as node}
+            <div class="expression-icon-wrapper" style={
+                `top: ${node.pos.y}px; 
+                 left: ${node.pos.x}px;
+                 transform: scale(${scale*0.8});
+                 `}>
+                <ExpressionIcon expressionURL={node.url} perspectiveUUID={perspective.uuid}/>
+            </div>
+        {/each}
+    {/if}
+    <div class="network" bind:this={networkDiv}>
+    </div>
+</div>
+
 
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
@@ -213,12 +265,24 @@
 
 </div>
 <style>
-    .network {
+    .network-wrapper {
         position: absolute;
         top: 30px;
         left: 0;
         right: 0;
         height: 100%;
+    }
+
+    .network {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+    }
+
+    .expression-icon-wrapper {
+        position: absolute;
     }
 
     .debug {
