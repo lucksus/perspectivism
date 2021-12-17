@@ -1,16 +1,11 @@
 <script lang="ts">
     import { getContext, createEventDispatcher } from "svelte";
     import type { Perspective } from '@perspect3vism/ad4m'
-    import IconButton from '@smui/icon-button';
-    import Fab, {Icon, Label} from '@smui/fab';
     import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
-    import { query, mutation, getClient } from "svelte-apollo";
-    import { gql } from '@apollo/client';
-    import { LANGUAGES } from './graphql_queries'
     import { linkTo2D, coordToPredicate } from './uiUtils';
     import { linksStoreForPerspective } from "./LinksStore";
 
