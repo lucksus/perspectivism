@@ -20,6 +20,7 @@
 /src/ui/user.js
 /src/ui/logUtils.js
 /src/ui/PerspectivesStore.js
+src/ui/LinksStore.js
 
 holochain
 lair-keystore

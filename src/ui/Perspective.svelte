@@ -12,7 +12,7 @@
     import { gql } from '@apollo/client';
     import { LANGUAGES } from './graphql_queries'
     import { linkTo2D, coordToPredicate } from './uiUtils';
-    import { readable } from 'svelte/store'
+    import { linksStoreForPerspective } from "./LinksStore";
 
     export let perspective: Perspective
     export let uuid: String
@@ -269,36 +269,7 @@
     }
 
     $: if(perspective) {
-        linksStore = readable([], set => {
-            console.log("linksStore 1")
-
-            let allLinks = []
-            set(allLinks)
-
-            ad4m.perspective.addPerspectiveLinkAddedListener(perspective.uuid, newLink => {
-                allLinks = [...allLinks, newLink]
-                set(allLinks)
-            })
-
-            console.log("linksStore 2")
-
-            ad4m.perspective.addPerspectiveLinkRemovedListener(perspective.uuid, removedLink => {
-                allLinks = allLinks.filter(l => !linkEqual(l, removedLink))
-                set(allLinks)
-            })
-
-            console.log("linksStore 3")
-
-            async function init() {
-                let links
-                links = await ad4m.perspective.queryLinks(perspective.uuid, {})
-                allLinks = links
-                console.log("Init Perspective's links:", allLinks)
-                set(allLinks)
-            }
-
-            init()
-        })
+        linksStore = linksStoreForPerspective(ad4m, perspective)
     }
 
 
