@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import type { Ad4mClient, PerspectiveProxy } from '@perspect3vism/ad4m'
+    import { Ad4mClient, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
     import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
     import iconComponentFromString from './iconComponentFromString';
@@ -241,6 +241,20 @@
         linkingSource = link
     }
 
+    function shouldRenderExpressionIcon(url: string) {
+        const isLiteral = url.startsWith('literal://')
+
+        let isValidUrl
+        try {
+            const ref = parseExprUrl(url)
+            isValidUrl = true
+        } catch(e) {
+            isValidUrl = false
+        }
+
+        return isValidUrl && !isLiteral
+    }
+
     function noop(){}
 
 </script>
@@ -258,13 +272,15 @@
 <div class="network-wrapper">
     {#if nodePositions}
         {#each nodePositions as node}
-            <div class="expression-icon-wrapper" style={
-                `top: ${node.pos.y}px; 
-                 left: ${node.pos.x}px;
-                 transform: scale(${scale*0.8});
-                 `}>
-                <ExpressionIcon expressionURL={node.url} perspectiveUUID={perspective.uuid}/>
-            </div>
+            {#if shouldRenderExpressionIcon(node.url)}
+                <div class="expression-icon-wrapper" style={
+                    `top: ${node.pos.y}px; 
+                    left: ${node.pos.x}px;
+                    transform: scale(${scale*0.8});
+                    `}>
+                    <ExpressionIcon expressionURL={node.url} perspectiveUUID={perspective.uuid}/>
+                </div>
+            {/if}
         {/each}
     {/if}
     <div class="network" bind:this={networkDiv}>
