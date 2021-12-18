@@ -10,6 +10,7 @@
     import AgentProfileSettings from './AgentProfileSettings.svelte';
     import Button, {Label as ButtonLabel} from '@smui/button';
     import IconButton from '@smui/icon-button';
+    import PerspectiveShell from "./PerspectiveShell.svelte";
 
     export let uuid: string
     export let settings: string
@@ -142,7 +143,9 @@
         </div>
         
         <div class="footer-content">
-            Prolog REPL
+            {#if perspective}
+                <PerspectiveShell perspective={perspective}></PerspectiveShell>
+            {/if}
         </div>
     </div>
 
