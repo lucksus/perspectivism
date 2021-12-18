@@ -73,3 +73,7 @@ button:focus {
 	border-radius: 50px;
 	overflow: hidden;
 }
+
+.vis-network {
+	outline: none;
+}
