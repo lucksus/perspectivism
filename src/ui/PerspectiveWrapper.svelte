@@ -9,10 +9,14 @@
     import PerspectiveSettings from './PerspectiveSettings.svelte';
     import AgentProfileSettings from './AgentProfileSettings.svelte';
     import Button, {Label as ButtonLabel} from '@smui/button';
+    import IconButton from '@smui/icon-button';
 
     export let uuid: string
     export let settings: string
     export let agentprofile: string
+
+    let showFooterPanel = false
+    let showSidePanel = false
 
     if(typeof settings === 'string')
         settings = JSON.parse(settings)
@@ -27,14 +31,19 @@
     }
 
     let tabs = [
-        { k: 1, label: 'Prolog REPL', icon: 'alarm_on' },
-        { k: 2, label: 'Expression Browser', icon: 'web' },
+        { k: 1, label: 'Expression Browser', icon: 'web' },
     ]
 
-    console.log('settings:', settings)
+    let active = tabs[0]
+
     if(settings) {
-        console.log('adding settings')
-        tabs.push({ k: 3, label: 'Perspective Settings', icon: 'settings' })
+        tabs.push({ k: 2, label: 'Perspective Settings', icon: 'settings' })
+    }
+
+    if(agentprofile) {
+        tabs.push({ k: 3, label: 'Agent Wizard', icon: 'account_circle' })
+        active = tabs[tabs.length-1]
+        showSidePanel = true
     }
 
     async function publishAsAgentPerspective() {
@@ -44,7 +53,7 @@
     }
 
     function noop(){}
-    let active = tabs[0]
+    
     let me
     async function init() {
         me = await ad4m.agent.me()
@@ -77,14 +86,15 @@
         <h2>Loading...</h2>
     {/if}
 
-    {#if agentprofile}
-        <div class="agentprofile">
-            <AgentProfileSettings></AgentProfileSettings>
-        </div>
-    {/if}
+    
 
-    <div class="footer-panel">
-        <div class="footer-header">
+    <div class="side-panel" style={`width: ${showSidePanel ? '400px' : '0'};`}>
+        <div class="side-panel-handle">
+            <IconButton class="material-icons" on:click={() => showSidePanel = !showSidePanel}>
+                {showSidePanel ? 'chevron_right' : 'chevron_left'}
+            </IconButton>
+        </div>
+        <div class="side-header">
             <TabBar {tabs} let:tab key={(tab) => tab.k} bind:active style="display: inline;">
                 <Tab
                     {tab}
@@ -96,6 +106,34 @@
                     <Label>{tab.label}</Label>
                 </Tab>
             </TabBar>
+        </div>
+
+        <div class="side-content">
+            {#if active.k === 1 }
+                <ExpressionBrowser></ExpressionBrowser>
+            {:else if active.k === 2 }
+                {#if uuid}
+                    <PerspectiveSettings perspectiveId={uuid}>
+                    </PerspectiveSettings>
+                {/if}
+            {:else if active.k === 3 }
+                {#if showSidePanel}
+                    <AgentProfileSettings></AgentProfileSettings>
+                {/if}
+            {/if}
+        </div>
+    </div>
+
+    <div class="footer-panel" style={`height: ${showFooterPanel ? '200px' : '50px'};`}>
+        <div class="footer-header">
+            <span class="toolbar">
+                <IconButton class="material-icons" on:click={() => showFooterPanel = !showFooterPanel}>
+                    {showFooterPanel ? 'expand_more' : 'expand_less'}
+                </IconButton>
+            </span>
+            <span class="footer-title">
+                REPL
+            </span>
             {#if agentprofile}
                 <Button variant="raised" on:click={publishAsAgentPerspective} style="position: absolute; right: 0; top: 2px;">
                     <ButtonLabel>Publish Profile</ButtonLabel>
@@ -103,18 +141,9 @@
             {/if}
         </div>
         
-          <div class="footer-content">
-            {#if active.k === 1 }
-                Prolog REPL
-            {:else if active.k === 2 }
-                <ExpressionBrowser></ExpressionBrowser>
-            {:else if active.k === 3 }
-                {#if uuid}
-                    <PerspectiveSettings perspectiveId={uuid}>
-                    </PerspectiveSettings>
-                {/if}
-            {/if}
-          </div>
+        <div class="footer-content">
+            Prolog REPL
+        </div>
     </div>
 
 </div>
@@ -130,7 +159,7 @@
         left: 0;
         top: 0;
         right: 0;
-        height: 45px;
+        height: 50px;
         background-color: #44aaee6b;
     }
 
@@ -140,7 +169,7 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background-color: aliceblue;
+        background-color: #e1f6f7db;
         padding: 20px;
     }
 
@@ -150,7 +179,7 @@
         right: 0;
         bottom: 0;
         left: 0;
-        text-align: center;
+        transition: height 0.5s;
     }
 
     .footer-header { 
@@ -158,13 +187,53 @@
         background-color: #44aaee6b;
     }
 
+    .footer-title {
+        margin-left: 50px;
+        line-height: 50px;
+    }
+
+    .toolbar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 50px;
+    }
+
     .footer-content {
-        height: 150px;
+        background-color: black;
+        height: 160px;
         overflow-x: scroll;
     }
 
-    .agentprofile {
-        float: right;
-        margin-top: 40px
+    .side-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 400px;
+        padding-left: 50px;
+        transition: width 0.5s;
+        background-color: white;
+        overflow-x: hidden;
+    }
+
+    .side-panel-handle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 50px;
+        background-color: darkslateblue;
+        line-height: 95vh;
+        color: white;
+        font-weight: bold;
+    }
+
+    .side-header {
+        position: relative;
+    }
+
+    .side-content {
+        position: relative;
     }
 </style>
