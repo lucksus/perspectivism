@@ -1,4 +1,4 @@
-import { Ad4mClient, LinkQuery, PerspectiveProxy } from '@perspect3vism/ad4m'
+import { Ad4mClient, LinkQuery, Literal, PerspectiveProxy } from '@perspect3vism/ad4m'
 import { v4 as uuidv4 } from 'uuid'
 import type { Edge, Node } from 'vis-network/esnext'
 
@@ -154,6 +154,7 @@ export default class VisGraph {
             id: link.target+perspective.sharedUrl,
             label: link.target,
             widthConstraint: 150,
+            shape: link.target.startsWith("literal://") ? 'text' : 'ellipse',
             group: "metaLinks"
           };
   
@@ -188,13 +189,26 @@ export default class VisGraph {
         for (const link of links) {
           const linkData = link.data;
           const inferredConnections = links.filter(linkF => linkF.data.target == linkData.source);
-          const sourceNode = {
-            id: linkData.source+perspective.uuid,
-            label: linkData.source,
-            widthConstraint: 150,
-            group: "linkLanguageLink",
-            isSource: true
+          let sourceNode
+          try {
+            sourceNode = {
+                id: linkData.source+perspective.uuid,
+                label: Literal.fromUrl(linkData.source).get(),
+                widthConstraint: 150,
+                group: "linkLanguageLink",
+                shape: 'text',
+                isSource: true
+            }
+          } catch(e) {
+            sourceNode = {
+                id: linkData.source+perspective.uuid,
+                label: linkData.source,
+                widthConstraint: 150,
+                group: "linkLanguageLink",
+                isSource: true
+            }
           }
+          
           let targetNode;
           if (linkData.target.includes("neighbourhood://")) {
             targetNode = {
@@ -206,11 +220,22 @@ export default class VisGraph {
               color: '#FF0013'
             }
           } else {
-            targetNode = {
-              id: linkData.target+perspective.uuid,
-              label: linkData.target,
-              widthConstraint: 150,
-              group: "linkLanguageLink"
+            try {
+                targetNode = {
+                    id: linkData.target+perspective.uuid,
+                    label: Literal.fromUrl(linkData.target).get(),
+                    widthConstraint: 150,
+                    group: "linkLanguageLink",
+                    shape: 'text',
+                    font: '20px arial blue'
+                }
+            } catch(e) {
+                targetNode = {
+                    id: linkData.target+perspective.uuid,
+                    label: linkData.target,
+                    widthConstraint: 150,
+                    group: "linkLanguageLink",
+                }
             }
           }
           if (this.nodes.filter(node => node.id == sourceNode.id).length == 0) this.nodes.push(sourceNode)
