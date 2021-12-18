@@ -78,32 +78,25 @@
                 metaLinks: {color:{background:'#33A1FF'}}
             },
             nodes: {
-                borderWidth: 1
+                borderWidth: 1,
+                shape: 'box',
+                color: 'teal'
             },
             edges: {
-                color: 'black'
+                color: 'black',
+                arrows: {
+                    to: {
+                        enabled: true,
+                    }
+                },
+                arrowStrikethrough: false,
             },
             physics: {
-                hierarchicalRepulsion: {
-                    nodeDistance: 300,
-                    centralGravity: 0.0,
-                    springLength: 200,
-                    damping: 0.09,
-                    avoidOverlap: 1,
-                    springConstant: 0.001,
-                },
-                solver: 'hierarchicalRepulsion'
-            },
-            layout: {
-                hierarchical: {
-                    enabled: true,
-                    levelSeparation: 350,
-                    nodeSpacing: 350,
-                    treeSpacing: 350,
-                    direction: 'UD',        // UD, DU, LR, RL
-                    sortMethod: 'directed'   // hubsize, directed
+                barnesHut: {
+                    springLength: 400,
+                    gravitationalConstant: -10000,
                 }
-            }
+            },
         })
 
         for(let event of ['dragging', 'stabilizationProgress', 'stabilized', 'resize', 'afterDrawing']) {
@@ -274,7 +267,7 @@
         {#each nodePositions as node}
             {#if shouldRenderExpressionIcon(node.url)}
                 <div class="expression-icon-wrapper" style={
-                    `top: ${node.pos.y}px; 
+                    `top: ${node.pos.y+(30*scale)}px; 
                     left: ${node.pos.x}px;
                     transform: scale(${scale*0.8});
                     `}>
