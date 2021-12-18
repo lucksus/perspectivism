@@ -192,7 +192,7 @@ export default class VisGraph {
           let sourceNode
           try {
             sourceNode = {
-                id: linkData.source+perspective.uuid,
+                id: linkData.source,
                 label: Literal.fromUrl(linkData.source).get(),
                 widthConstraint: 150,
                 group: "linkLanguageLink",
@@ -201,7 +201,7 @@ export default class VisGraph {
             }
           } catch(e) {
             sourceNode = {
-                id: linkData.source+perspective.uuid,
+                id: linkData.source,
                 label: linkData.source,
                 widthConstraint: 150,
                 group: "linkLanguageLink",
@@ -222,7 +222,7 @@ export default class VisGraph {
           } else {
             try {
                 targetNode = {
-                    id: linkData.target+perspective.uuid,
+                    id: linkData.target,
                     label: Literal.fromUrl(linkData.target).get(),
                     widthConstraint: 150,
                     group: "linkLanguageLink",
@@ -231,7 +231,7 @@ export default class VisGraph {
                 }
             } catch(e) {
                 targetNode = {
-                    id: linkData.target+perspective.uuid,
+                    id: linkData.target,
                     label: linkData.target,
                     widthConstraint: 150,
                     group: "linkLanguageLink",

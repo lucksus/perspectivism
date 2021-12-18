@@ -110,6 +110,14 @@
             getNodePositions()
         })
 
+        network.on('oncontext', params => {
+            if(params.nodes.length > 0) {
+                let url = params.nodes[0]
+                let pos = params.pointer.DOM
+                expressionContextMenu.open(pos.x, pos.y, url)
+            }
+        })
+
         getNodePositions()
     }
 
@@ -264,17 +272,24 @@
 
 <div class="network-wrapper">
     {#if nodePositions}
-        {#each nodePositions as node}
-            {#if shouldRenderExpressionIcon(node.url)}
-                <div class="expression-icon-wrapper" style={
-                    `top: ${node.pos.y+(30*scale)}px; 
-                    left: ${node.pos.x}px;
-                    transform: scale(${scale*0.8});
-                    `}>
-                    <ExpressionIcon expressionURL={node.url} perspectiveUUID={perspective.uuid}/>
-                </div>
-            {/if}
-        {/each}
+        <div class="expression-icons">
+            {#each nodePositions as node}
+                {#if shouldRenderExpressionIcon(node.url)}
+                    <div class="expression-icon-wrapper" style={
+                        `top: ${node.pos.y+(30*scale)}px; 
+                        left: ${node.pos.x}px;
+                        transform: scale(${scale*0.8});
+                        `}>
+                        <ExpressionIcon 
+                            expressionURL={node.url} 
+                            perspectiveUUID={perspective.uuid}
+                            on:context-menu={onExpressionContextMenu} 
+                            rotated={iconStates[node.url] === 'rotated'}
+                        />
+                    </div>
+                {/if}
+            {/each}
+        </div>
     {/if}
     <div class="network" bind:this={networkDiv}>
     </div>
@@ -310,6 +325,11 @@
         left: 0;
         right: 0;
         height: 100%;
+    }
+
+    .expression-icons {
+        perspective: 1000px;
+        transform-style: preserve-3d;
     }
 
     .expression-icon-wrapper {
