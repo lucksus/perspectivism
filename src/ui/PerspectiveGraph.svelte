@@ -229,7 +229,7 @@
     function onDeleteExpression(event) {
         const expression = event.detail
         $linksStore.forEach(l => {
-            if(l.data.target === expression) {
+            if(l.data.target === expression || l.data.source === expression) {
                 console.log("deleting expression:", l)
                 ad4m.perspective.removeLink(perspective.uuid, l)
             }
