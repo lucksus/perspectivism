@@ -9,6 +9,7 @@
     import { linksStoreForPerspective } from "./LinksStore";
     import { Network } from 'vis-network/esnext'
     import VisGraph from "./VisGraph";
+    import LinkContextMenu from "./LinkContextMenu.svelte";
 
     export let perspective: PerspectiveProxy
     export let uuid: string
@@ -116,6 +117,14 @@
                 let url = params.nodes[0]
                 let pos = params.pointer.DOM
                 expressionContextMenu.open(pos.x, pos.y, url)
+            } else if(params.edges.length > 0) {
+                let edgeId = params.edges[0]
+                //@ts-ignore
+                let { from, to, label, link } = graph.edges.find(e=> e.id===edgeId)
+                console.log('oncontext link:', link)
+                let pos = params.pointer.DOM
+                if(link)
+                    linkContextMenu.open(pos.x, pos.y, link)
             }
         })
 
@@ -143,6 +152,8 @@
 
     let linksStore
     let constructionMenu
+    let expressionContextMenu
+    let linkContextMenu
     let languages = []
     let languageIcons = {
         'note-ipfs': 'note',
@@ -213,8 +224,6 @@
     }
 
 
-    let expressionContextMenu
-
     function onExpressionContextMenu(event) {
         const { expressionURL, mouseEvent, parentLink } = event.detail
         expressionContextMenu.open(mouseEvent.clientX, mouseEvent.clientY, expressionURL, parentLink)
@@ -241,6 +250,11 @@
                 ad4m.perspective.removeLink(perspective.uuid, l)
             }
         })
+    }
+
+    function onDeleteLink(event) {
+        const link = event.detail
+        perspective.remove(link)
     }
 
     function shouldRenderExpressionIcon(url: string) {
@@ -307,6 +321,10 @@
     on:delete={onDeleteExpression}
     on:link={(e)=>{dispatch('link-from-expression', e.detail)}}
 ></ExpressionContextMenu>
+<LinkContextMenu bind:this={linkContextMenu}
+    on:delete={onDeleteLink}
+>
+</LinkContextMenu>
 
 {/if}
 

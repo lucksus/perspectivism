@@ -132,7 +132,9 @@ export default class VisGraph {
           this.edges.push({
             from: sourceId,
             to: targetId,
-            label: link.predicate
+            label: link.predicate,
+            //@ts-ignore
+            link
           })
         }
     }
@@ -170,7 +172,9 @@ export default class VisGraph {
           this.edges.push({
             from: sourceNode.id,
             to: targetNode.id,
-            label: link.predicate
+            label: link.predicate,
+            //@ts-ignore
+            link
           })
         }
     }
@@ -251,6 +255,8 @@ export default class VisGraph {
             from: sourceNode.id,
             to: targetNode.id,
             label: linkData.predicate,
+            //@ts-ignore
+            link
           })
         }
     }
@@ -304,6 +310,8 @@ export default class VisGraph {
             from: sourceNode.id,
             to: targetNode.id,
             label: linkData.predicate,
+            //@ts-ignore
+            link
           })
         }
     }
