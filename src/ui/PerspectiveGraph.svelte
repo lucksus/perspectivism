@@ -243,12 +243,6 @@
         })
     }
 
-    function onLinkExpression(event) {
-        const link = event.detail
-        isLinking = true
-        linkingSource = link
-    }
-
     function shouldRenderExpressionIcon(url: string) {
         const isLiteral = url.startsWith('literal://')
 
@@ -311,7 +305,7 @@
 <ExpressionContextMenu bind:this={expressionContextMenu}
     on:switch-header-content={onExpressionSwitchHeaderContent}
     on:delete={onDeleteExpression}
-    on:link={onLinkExpression}
+    on:link={(e)=>{dispatch('link-from-expression', e.detail)}}
 ></ExpressionContextMenu>
 
 {/if}

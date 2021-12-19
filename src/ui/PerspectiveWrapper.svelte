@@ -30,7 +30,6 @@
     let pickTarget = ''
 
     function pickExpression(event) {
-        console.log("pick expression")
         pickMode = true
         pickTarget = event.detail
     }
@@ -121,6 +120,12 @@
             <PerspectiveGraph 
                 perspective={perspective}
                 on:expressionClicked={expressionClicked}
+                on:link-from-expression={(e)=>{
+                    newLinkSource = e.detail
+                    showLinkWizard = true
+                    pickMode = true
+                    pickTarget = 'target'
+                }}
             ></PerspectiveGraph>
         </div>
     {:else}
@@ -172,8 +177,8 @@
                 bind:source={newLinkSource}
                 bind:predicate={newLinkPredicate}
                 bind:target={newLinkTarget}
-                on:cancel={()=>{showLinkWizard=false}}
-                on:ok={()=>{showLinkWizard=false}}
+                on:cancel={()=>{showLinkWizard=false; pickMode=false;}}
+                on:ok={()=>{showLinkWizard=false; pickMode=false;}}
                 on:pick={pickExpression}
                 perspective={perspective}
             >
