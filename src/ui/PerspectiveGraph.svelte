@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getContext } from "svelte";
+    import { getContext, createEventDispatcher } from "svelte";
     import { Ad4mClient, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
     import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
@@ -14,6 +14,7 @@
     export let uuid: string
 
     const ad4m: Ad4mClient = getContext('ad4mClient')
+    const dispatch = createEventDispatcher()
     
 
     if(!perspective && uuid) {
@@ -118,13 +119,19 @@
             }
         })
 
+        network.on('click', params => {
+            if(params.nodes.length > 0) {
+                let url = params.nodes[0]
+                dispatch('expressionClicked', url)
+            }
+        })
+
         getNodePositions()
     }
 
     function getNodePositions() {
         nodePositions = []
         for(let node of graph.nodes) {
-            console.log(node)
             nodePositions.push( {
                 url: node.label,
                 pos: network.canvasToDOM(network.getPosition(node.id)),

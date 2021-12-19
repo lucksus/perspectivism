@@ -8,9 +8,10 @@
     import ExpressionBrowser from './ExpressionBrowser.svelte';
     import PerspectiveSettings from './PerspectiveSettings.svelte';
     import AgentProfileSettings from './AgentProfileSettings.svelte';
-    import Button, {Label as ButtonLabel} from '@smui/button';
+    import Button, {Label as ButtonLabel, Icon as ButtonIcon} from '@smui/button';
     import IconButton from '@smui/icon-button';
     import PerspectiveShell from "./PerspectiveShell.svelte";
+    import LinkWizard from "./LinkWizard.svelte";
 
     export let uuid: string
     export let settings: string
@@ -18,6 +19,40 @@
 
     let showFooterPanel = false
     let showSidePanel = false
+    let showLinkWizard = false
+
+    let linkWizard
+    let newLinkSource
+    let newLinkPredicate
+    let newLinkTarget
+
+    let pickMode = false
+    let pickTarget = ''
+
+    function pickExpression(event) {
+        console.log("pick expression")
+        pickMode = true
+        pickTarget = event.detail
+    }
+
+    function expressionClicked(event){
+        if(pickMode) {
+            let url = event.detail
+            pickMode = false
+            switch(pickTarget) {
+                case 'source':
+                    linkWizard.source = url;
+                    break;
+                case 'predicate':
+                    linkWizard.predicate = url;
+                    break;
+                case 'target':
+                    linkWizard.target = url;
+                    break;
+            }
+        }
+    }
+    
 
     if(typeof settings === 'string')
         settings = JSON.parse(settings)
@@ -82,7 +117,12 @@
     </div>
 
     {#if perspective}
-        <PerspectiveGraph perspective={perspective}></PerspectiveGraph>
+        <div class:picker={pickMode}>
+            <PerspectiveGraph 
+                perspective={perspective}
+                on:expressionClicked={expressionClicked}
+            ></PerspectiveGraph>
+        </div>
     {:else}
         <h2>Loading...</h2>
     {/if}
@@ -126,6 +166,19 @@
     </div>
 
     <div class="footer-panel" style={`height: ${showFooterPanel ? '200px' : '50px'};`}>
+        {#if showLinkWizard && perspective}
+            <LinkWizard 
+                bind:this={linkWizard}
+                bind:source={newLinkSource}
+                bind:predicate={newLinkPredicate}
+                bind:target={newLinkTarget}
+                on:cancel={()=>{showLinkWizard=false}}
+                on:ok={()=>{showLinkWizard=false}}
+                on:pick={pickExpression}
+                perspective={perspective}
+            >
+            </LinkWizard>
+        {/if}
         <div class="footer-header">
             <span class="toolbar">
                 <IconButton class="material-icons" on:click={() => showFooterPanel = !showFooterPanel}>
@@ -135,11 +188,17 @@
             <span class="footer-title">
                 REPL
             </span>
-            {#if agentprofile}
-                <Button variant="raised" on:click={publishAsAgentPerspective} style="position: absolute; right: 0; top: 2px;">
-                    <ButtonLabel>Publish Profile</ButtonLabel>
+            <span class="tool-buttons">
+                <Button variant="raised" on:click={()=>showLinkWizard=true}>
+                    <ButtonIcon class="material-icons">add</ButtonIcon>
+                    <ButtonLabel>Add Link/Expression</ButtonLabel>
                 </Button>
-            {/if}
+                {#if agentprofile}
+                    <Button variant="raised" on:click={publishAsAgentPerspective}>
+                        <ButtonLabel>Publish Profile</ButtonLabel>
+                    </Button>
+                {/if}
+            </span>
         </div>
         
         <div class="footer-content">
@@ -195,6 +254,12 @@
         line-height: 50px;
     }
 
+    .tool-buttons {
+        position: absolute; 
+        right: 0; 
+        top: 2px;
+    }
+
     .toolbar {
         position: absolute;
         left: 0;
@@ -238,5 +303,9 @@
 
     .side-content {
         position: relative;
+    }
+
+    .picker {
+        cursor: crosshair;
     }
 </style>
