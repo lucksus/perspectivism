@@ -52,6 +52,7 @@
 <Dialog bind:this={expressionWizardDialog}>
     <Title>Create Expression</Title>
     <Content>
+        <i>For {targetForExpressionWizard}</i>
         <ExpressionConstructorWizard
             bind:this={expressionWizard}
             on:expression-created={expressionCreated}>
