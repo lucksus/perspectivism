@@ -20,6 +20,13 @@
     }
     getLanguages()
 
+    /*
+    let languageIcons = {
+        'note-ipfs': 'note',
+        'url-iframe': 'link',
+        'agent-expression-store': 'account_circle'
+    }*/
+
     let tabs = [
         { k: 1, label: 'Literal', icon: 'text_snippet' },
         { k: 2, label: 'Dynamic', icon: 'waves' }
@@ -97,7 +104,7 @@
             constructorIconComponents[lang.name] = ConstructorIcon
             customElements.define(lang.name+"-constructor", ConstructorIcon);
         }
-        
+
         const container = constructorContainer
         container.innerHTML = ''
         const constructorIcon = new constructorIconComponents[lang.name]()
