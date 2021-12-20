@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte';
+    import { getContext, createEventDispatcher } from 'svelte';
     import Tab, { Icon, Label } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Textfield, { Textarea } from '@smui/textfield';
@@ -7,22 +7,25 @@
     import { Literal } from '@perspect3vism/ad4m';
     import Radio from '@smui/radio';
     import FormField from '@smui/form-field';
+    import type { Ad4mClient } from '@perspect3vism/ad4m'
+    import Autocomplete from '@smui-extra/autocomplete';
+    import iconComponentFromString from './iconComponentFromString';
 
     const dispatch = createEventDispatcher()
+    const ad4m: Ad4mClient = getContext('ad4mClient')
+    let languages
 
-    let tabs1 = [
+    async function getLanguages() {
+        languages = await ad4m.languages.byFilter('expressionUI')
+    }
+    getLanguages()
+
+    let tabs = [
         { k: 1, label: 'Literal', icon: 'text_snippet' },
-        { k: 2, label: 'Dynamic', icon: 'waves' },
+        { k: 2, label: 'Dynamic', icon: 'waves' }
     ]
 
-    let tabs2 = [
-        { k: 1, label: 'String', icon: 'text_format' },
-        { k: 2, label: 'Number', icon: 'pin' },
-        { k: 3, label: 'Object', icon: 'data_object' },
-    ]
-
-
-    let active1 = tabs1[0], active2 = tabs2[0]
+    let active = tabs[0]
     let literalType = 'string'
     let literalInput = ''
     let literalValue = ''
@@ -73,10 +76,51 @@
         console.log(literal.toUrl())
         dispatch('expression-created', literal.toUrl())
     }
+
+
+    let selectedLanguageName = ''
+    let constructorIconComponents = {}
+    let constructorContainer
+
+    $: if(selectedLanguageName) {
+        let language = languages.find(l=>l.name === selectedLanguageName)
+        if(language) 
+            createExpressionConstructorIcon(language)
+    }
+
+    async function createExpressionConstructorIcon(lang) {
+        console.log("Create expression:", lang, JSON.stringify(lang))
+        if(!constructorIconComponents[lang.name]) {
+            const language = await ad4m.languages.byAddress(lang.address)
+            const code = language.constructorIcon.code
+            const ConstructorIcon = iconComponentFromString(code, lang.name)
+            constructorIconComponents[lang.name] = ConstructorIcon
+            customElements.define(lang.name+"-constructor", ConstructorIcon);
+        }
+        
+        const container = constructorContainer
+        container.innerHTML = ''
+        const constructorIcon = new constructorIconComponents[lang.name]()
+        constructorIcon.commitExpression = async (content) => {
+            commitExpression(lang, content, container)
+        }
+        constructorIcon.discard = () => {
+            container.innerHTML = ''
+        }
+        
+        container.appendChild(constructorIcon)
+    }
+
+    async function commitExpression(lang, content, container) {
+        const exprURL = await ad4m.expression.create(JSON.stringify(content), lang.address)
+        console.log("Created new expression:", exprURL)
+        dispatch('expression-created', exprURL)
+        container.innerHTML = ''
+    }
 </script>
 
 <div class="header">
-    <TabBar tabs={tabs1} let:tab key={(tab) => tab.k} bind:active1>
+    <TabBar {tabs} let:tab key={(tab) => tab.k} bind:active>
         <Tab
             {tab}
             stacked={true}
@@ -90,7 +134,7 @@
 </div>
 
 <div class="content1">
-    {#if active1.label == 'Literal' }
+    {#if active.label == 'Literal' }
         <div class="header">
             <FormField>
                 <Radio bind:group={literalType} value='string'/>
@@ -133,7 +177,24 @@
             </Button>
         </div>
     {:else}
-        <div>s</div>
+        <div class="dynamic-content">
+            <span>Select Language:</span>
+            {#if languages}
+                <Autocomplete
+                    bind:value={selectedLanguageName}
+                    options={languages.map(l=>l.name)}
+                    label="Language name"
+                    textfield$variant="outlined"
+                ></Autocomplete>
+            {/if}
+            <div bind:this={constructorContainer} class="constructor-container"></div>
+        </div>
     {/if}
 </div>
 
+<style>
+    .dynamic-content {
+        width: 500px;
+        height: 600px;
+    }
+</style>
