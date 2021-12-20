@@ -28,6 +28,13 @@
     let literalValue = ''
     let literalError
 
+    export function reset() {
+        literalType = 'string'
+        literalInput = ''
+        literalValue = ''
+        literalError = undefined
+    }
+
     $: if(literalInput){
         literalValue = updateLiteralValue(literalInput)
     }

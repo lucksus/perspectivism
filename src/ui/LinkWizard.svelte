@@ -14,7 +14,12 @@
     export let target=""
     export let perspective: PerspectiveProxy
 
+    export function reset() {
+        source = predicate = target = ""
+    }
+
     let expressionWizard
+    let expressionWizardDialog
     let targetForExpressionWizard
 
     function addLink() {
@@ -28,7 +33,8 @@
 
     function createExpression(target: string) {
         targetForExpressionWizard = target
-        expressionWizard.open()
+        expressionWizard.reset()
+        expressionWizardDialog.open()
     }
 
     function expressionCreated(e) {
@@ -38,16 +44,21 @@
             case 'target': target = url; break;
             case 'predicate': predicate = url; break;
         }
-        expressionWizard.close()
+        expressionWizardDialog.close()
     }
     
 </script>
 
-<Dialog bind:this={expressionWizard}>
+<Dialog bind:this={expressionWizardDialog}>
     <Title>Create Expression</Title>
-    <Content><ExpressionConstructorWizard on:expression-created={expressionCreated}></ExpressionConstructorWizard></Content>
+    <Content>
+        <ExpressionConstructorWizard
+            bind:this={expressionWizard}
+            on:expression-created={expressionCreated}>
+        </ExpressionConstructorWizard>
+    </Content>
     <Actions>
-        <Button on:click={expressionWizard.close}>
+        <Button on:click={expressionWizardDialog.close}>
             <Label>Cancel</Label>
         </Button>
     </Actions>

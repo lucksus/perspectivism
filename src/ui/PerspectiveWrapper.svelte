@@ -26,6 +26,11 @@
     let newLinkPredicate
     let newLinkTarget
 
+    function openLinkWizard() {
+        linkWizard.reset()
+        showLinkWizard = true
+    }
+
     let pickMode = false
     let pickTarget = ''
 
@@ -171,18 +176,20 @@
     </div>
 
     <div class="footer-panel" style={`height: ${showFooterPanel ? '200px' : '50px'};`}>
-        {#if showLinkWizard && perspective}
-            <LinkWizard 
-                bind:this={linkWizard}
-                bind:source={newLinkSource}
-                bind:predicate={newLinkPredicate}
-                bind:target={newLinkTarget}
-                on:cancel={()=>{showLinkWizard=false; pickMode=false;}}
-                on:ok={()=>{showLinkWizard=false; pickMode=false;}}
-                on:pick={pickExpression}
-                perspective={perspective}
-            >
-            </LinkWizard>
+        {#if perspective}
+            <div class="invisible" class:visible={showLinkWizard}>
+                <LinkWizard 
+                    bind:this={linkWizard}
+                    bind:source={newLinkSource}
+                    bind:predicate={newLinkPredicate}
+                    bind:target={newLinkTarget}
+                    on:cancel={()=>{showLinkWizard=false; pickMode=false;}}
+                    on:ok={()=>{showLinkWizard=false; pickMode=false;}}
+                    on:pick={pickExpression}
+                    perspective={perspective}
+                >
+                </LinkWizard>
+            </div>
         {/if}
         <div class="footer-header">
             <span class="toolbar">
@@ -194,7 +201,7 @@
                 REPL
             </span>
             <span class="tool-buttons">
-                <Button variant="raised" on:click={()=>showLinkWizard=true}>
+                <Button variant="raised" on:click={openLinkWizard}>
                     <ButtonIcon class="material-icons">add</ButtonIcon>
                     <ButtonLabel>Add Link/Expression</ButtonLabel>
                 </Button>
@@ -312,5 +319,13 @@
 
     .picker {
         cursor: crosshair;
+    }
+
+    .invisible {
+        display: none;
+    }
+
+    .visible {
+        display: block;
     }
 </style>
