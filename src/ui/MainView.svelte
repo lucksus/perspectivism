@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAllContexts, getContext, onMount } from "svelte";
+	import { getAllContexts, getContext, onMount, setContext } from "svelte";
 	import TopAppBar, {Row, Section, Title} from '@smui/top-app-bar';
 	import IconButton from '@smui/icon-button';
 	import Drawer, {Content, Header, Title as DrawerTitle, Subtitle, Scrim} from '@smui/drawer';
@@ -93,9 +93,7 @@
 		}
 	}
 
-	let stringView = `<div class="z-view"><h1 style="width: 300px; height: 150px; background-color: red;">String View</h1></div>`
-
-	onMount(()=> {
+	onMount(async ()=> {
 		// Zumly instance
 		const zumly = new Zumly({
 			mount: '#zoom-container',
@@ -121,7 +119,8 @@
 			debug: true
 		})
 
-		zumly.init()
+		await zumly.init()
+		zumly.componentContext.set('zumly', zumly)
 	})
 	
 

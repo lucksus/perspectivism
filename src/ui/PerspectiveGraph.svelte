@@ -1,10 +1,7 @@
 <script lang="ts">
     import { getContext, createEventDispatcher } from "svelte";
     import { Ad4mClient, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
-    import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
-    import iconComponentFromString from './iconComponentFromString';
-    import ConstructionMenu from './ConstructionMenu.svelte'
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { linksStoreForPerspective } from "./LinksStore";
     import { Network } from 'vis-network/esnext'
@@ -15,6 +12,7 @@
     export let uuid: string
 
     const ad4m: Ad4mClient = getContext('ad4mClient')
+    const zumly = getContext('zumly')
     const dispatch = createEventDispatcher()
     
 
@@ -202,7 +200,25 @@
         return isValidUrl && !isLiteral
     }
 
+    let perspectives
+    async function getPerspectives() {
+        perspectives = await ad4m.perspective.all()
+    }
+    getPerspectives()
+
+    function uuidForNeighbourhood(url) {
+        let p = perspectives.find(p => p.sharedUrl == url)
+        if(p) return p.uuid
+        else return null
+    }
+
     function noop(){}
+
+    function triggerZumly(e) {
+
+        //@ts-ignore
+        zumly.onZoom(e)
+    }
 
 </script>
 
@@ -226,12 +242,22 @@
                         left: ${node.pos.x}px;
                         transform: scale(${scale*0.8});
                         `}>
-                        <ExpressionIcon 
-                            expressionURL={node.url} 
-                            perspectiveUUID={perspective.uuid}
-                            on:context-menu={onExpressionContextMenu} 
-                            rotated={iconStates[node.url] === 'rotated'}
-                        />
+                        {#if node.url.startsWith('neighbourhood://') && uuidForNeighbourhood(node.url)}
+                            <div class="zoom-me nh-zoom" 
+                                data-to="PerspectiveWrapper" 
+                                data-uuid={uuidForNeighbourhood(node.url)}
+                                on:mouseup={(e)=>triggerZumly(e)}
+                            >
+                                <h1>{node.url}</h1>
+                            </div>
+                        {:else}
+                            <ExpressionIcon 
+                                expressionURL={node.url} 
+                                perspectiveUUID={perspective.uuid}
+                                on:context-menu={onExpressionContextMenu} 
+                                rotated={iconStates[node.url] === 'rotated'}
+                            />
+                        {/if}
                     </div>
                 {/if}
             {/each}
@@ -270,36 +296,22 @@
         left: 0;
         right: 0;
         height: 100%;
+        z-index: 1;
     }
 
     .expression-icons {
-        perspective: 1000px;
-        transform-style: preserve-3d;
+        z-index: 2;
     }
 
     .expression-icon-wrapper {
         position: absolute;
+        z-index: 2;
     }
 
-    .debug {
-        position: fixed;
-        width: 100%;
-        z-index: -10;
-    }
-
-    .inline {
-        display: inline;
-        transform-style: preserve-3d;
-    }
-
-    .link-path {
-        position: absolute;
-        top: 0;
-        left: 0;
-        transform: translateX(-10000px) translateY(-10000px);
-    }
-
-    .drop-move-container {
-        transition: transform 0.5s;
+    .nh-zoom {
+        width: 300px;
+        height: 200px;
+        background-color: red;
+        z-index: 1;
     }
 </style>

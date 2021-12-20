@@ -259,6 +259,7 @@
         bottom: 0;
         left: 0;
         transition: height 0.5s;
+        z-index: 10;
     }
 
     .footer-header { 
@@ -300,6 +301,7 @@
         transition: width 0.5s;
         background-color: white;
         overflow-x: hidden;
+        z-index: 10;
     }
 
     .side-panel-handle {
