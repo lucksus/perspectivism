@@ -31,7 +31,7 @@
         dispatch('ok')
     }
 
-    function createExpression(target: string) {
+    export function createExpression(target: string) {
         targetForExpressionWizard = target
         expressionWizard.reset()
         expressionWizardDialog.open()

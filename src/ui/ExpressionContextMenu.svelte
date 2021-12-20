@@ -36,7 +36,7 @@
                 <Graphic class="material-icons">qr_code</Graphic>
                 <Text>Switch header/content</Text>
             </Item>
-            <Item on:SMUI:action={() => dispatch('add-child')}>
+            <Item on:SMUI:action={() => dispatch('add-child', expression)}>
                 <Graphic class="material-icons">add_circle_outline</Graphic>
                 <Text>Create new expression as child</Text>
             </Item>

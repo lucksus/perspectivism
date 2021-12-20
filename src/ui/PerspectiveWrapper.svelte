@@ -131,6 +131,11 @@
                     pickMode = true
                     pickTarget = 'target'
                 }}
+                on:create-target-for-expression={(e)=>{
+                    newLinkSource = e.detail
+                    showLinkWizard = true
+                    linkWizard.createExpression('target')
+                }}
             ></PerspectiveGraph>
         </div>
     {:else}
