@@ -148,76 +148,11 @@
         }
     }
 
-    
-
     let linksStore
-    let constructionMenu
     let expressionContextMenu
     let linkContextMenu
-    let languages = []
-    let languageIcons = {
-        'note-ipfs': 'note',
-        'url-iframe': 'link'
-    }
-    let constructorIconComponents = {}
     let iconStates = {}
 
-    let content
-    let container
-    let zoom = 0
-    let translateX = 0
-    let translateY = 0
-    let isPanning = false
-    let isMovingExpression = false
-    let movingLink
-    let movingLinkOriginal
-    let isLinking = false
-    let linkingSource
-    let linkingCursor = {}
-    let dropMove = false
-    let dropMoveTarget
-
-    function contextMenu(event) {
-        isPanning = false
-        isMovingExpression = false
-        constructionMenu.open(event.clientX, event.clientY)
-    }
-
-    ad4m.languages.byFilter("expressionUI").then( expressionUILanguages => {
-        languages = expressionUILanguages
-    })
-
-
-    async function commitExpression(lang, content, container) {
-        const exprURL = await ad4m.expression.create(JSON.stringify(content), lang.address)
-        console.log("Created new expression:", exprURL)
-        ad4m.perspective.addLink(perspective.uuid, new Link({source: 'root', target: exprURL}))
-        container.innerHTML = ''
-    }
-
-    async function createExpression(lang) {
-        console.log("Create expression:", lang, JSON.stringify(lang))
-        if(!constructorIconComponents[lang.name]) {
-            const language = await ad4m.languages.byAddress(lang.address)
-            const code = language.constructorIcon.code
-            const ConstructorIcon = iconComponentFromString(code, lang.name)
-            constructorIconComponents[lang.name] = ConstructorIcon
-            customElements.define(lang.name+"-constructor", ConstructorIcon);
-        }
-
-        const container = document.getElementById("constructor-container")
-
-        container.innerHTML = ''
-        const constructorIcon = new constructorIconComponents[lang.name]()
-        constructorIcon.commitExpression = async (content) => {
-            commitExpression(lang, content, container)
-        }
-        constructorIcon.discard = () => {
-            container.innerHTML = ''
-        }
-        
-        container.appendChild(constructorIcon)
-    }
 
     $: if(perspective) {
         linksStore = linksStoreForPerspective(ad4m, perspective)
@@ -227,8 +162,6 @@
     function onExpressionContextMenu(event) {
         const { expressionURL, mouseEvent, parentLink } = event.detail
         expressionContextMenu.open(mouseEvent.clientX, mouseEvent.clientY, expressionURL, parentLink)
-        isPanning = false
-        isMovingExpression = false
     }
 
     function onExpressionSwitchHeaderContent(event) {
@@ -238,8 +171,6 @@
         } else {
             iconStates[expression] = ''
         }
-        isPanning = false
-        isMovingExpression = false
     }
 
     function onDeleteExpression(event) {
@@ -310,12 +241,6 @@
     </div>
 </div>
 
-
-<ConstructionMenu bind:this={constructionMenu} 
-    languages={languages} 
-    languageIcons={languageIcons}
-    on:language-clicked={({detail: lang}) => createExpression(lang)}
-></ConstructionMenu>
 <ExpressionContextMenu bind:this={expressionContextMenu}
     on:switch-header-content={onExpressionSwitchHeaderContent}
     on:delete={onDeleteExpression}
