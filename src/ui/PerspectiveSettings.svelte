@@ -44,6 +44,7 @@
         }
 
         console.log("LinkLanguages:", linkLanguages)
+        update()
     }
 
     init()
@@ -66,7 +67,7 @@
         }
     }
 
-    update()
+    
 
     ad4m.perspective.addPerspectiveUpdatedListener(update)
 
@@ -112,20 +113,21 @@
 
 </script>
 
+{#if perspective}
 <div class="perspective-settings-container">
     <DataTable> 
         <Body>
             <Row>
                 <Cell>Name:</Cell>
-                <Cell><Textfield bind:value={perspectiveTemp.name} label="Name" /></Cell>
+                <Cell><Textfield bind:value={perspective.name} label="Name" /></Cell>
             </Row>
             <Row>
                 <Cell>Sharing:</Cell>
-                {#if perspectiveTemp.sharedUrl}
+                {#if perspective.sharedUrl}
                     <Cell>
                         <h3>This Perspective is shared</h3>
                         <div>
-                            <span>{perspectiveTemp.sharedUrl}</span>
+                            <span>{perspective.sharedUrl}</span>
                         </div>
                         {#if publishedLinkLanguage}
                         <div>
@@ -246,6 +248,8 @@
     <Label>Cancel</Label>
 </Button>
 -->
+
+{/if}
 <style>
     .perspective-settings-container {
         float: left;

@@ -29,11 +29,37 @@ app.whenReady().then(() => {
       neighbourhoods: "neighbourhood-store"
     },
     ad4mBootstrapFixtures: {
-      languages: [{
-        address: bootstrapFixtures.worldLinkLanguageHash,
-        meta: bootstrapFixtures.worldLinkLinguageMeta,
-        bundle: bootstrapFixtures.worldLinkLinguageBundle
-      }],
+      languages: [
+        {
+          address: bootstrapFixtures.worldLinkLanguageHash,
+          meta: bootstrapFixtures.worldLinkLinguageMeta,
+          bundle: bootstrapFixtures.worldLinkLinguageBundle
+        },
+        {
+          address: 'QmWxQXz8M62TG1Ba7L49uVXMgabzMx4AP4Y56gy3PRvGpW',
+          meta: {
+            author: 'did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n',
+            timestamp: '2021-10-07T21:39:36.607Z',
+            data: {
+              name: 'Social Context',
+              address: 'QmWxQXz8M62TG1Ba7L49uVXMgabzMx4AP4Y56gy3PRvGpW',
+              description: 'Holochain based LinkLanguage. First full implementation of a LinkLanguage, for collaborative Neighbourhoods where every agent can add links. No membrane. Basic template for all custom Neighbourhoods in this first iteration of the Perspect3vism test network.',
+              author: 'did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n',
+              templated: false,
+              templateSourceLanguageAddress: null,
+              templateAppliedParams: null,
+              possibleTemplateParams: [ 'uuid', 'name', 'description' ],
+              sourceCodeLink: "https://github.com/juntofoundation/Social-Context'"
+            },
+            proof: {
+              signature: "e933e34f88694816ea91361605c8c2553ceeb96e847f8c73b75477cc7d9bacaf11eae34e38c2e3f474897f59d20f5843d6f1d2c493b13552093bc16472b0ac33",
+              key: "#zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+              valid: true
+            }
+          },
+          bundle: fs.readFileSync(path.join('src', 'languages', 'social-context', 'build', 'bundle.js')).toString()
+        }
+      ],
       perspectives: [{
         address: '__world',
         expression: bootstrapFixtures.worldPerspective
