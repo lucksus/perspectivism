@@ -2,7 +2,9 @@
 <script lang="ts">
     import { Link, PerspectiveProxy } from '@perspect3vism/ad4m';
     import Button, { Label, Icon as ButtonIcon } from '@smui/button';
+    import Dialog, { Title, Content, Actions } from '@smui/dialog';
     import { createEventDispatcher } from 'svelte';
+    import ExpressionConstructorWizard from './ExpressionConstructorWizard.svelte';
     import LinkUrlPicker from './LinkUrlPicker.svelte';
 
     const dispatch = createEventDispatcher();
@@ -12,6 +14,9 @@
     export let target=""
     export let perspective: PerspectiveProxy
 
+    let expressionWizard
+    let targetForExpressionWizard
+
     function addLink() {
         perspective.add(new Link({
             source,
@@ -20,18 +25,42 @@
         }))
         dispatch('ok')
     }
+
+    function createExpression(target: string) {
+        targetForExpressionWizard = target
+        expressionWizard.open()
+    }
+
+    function expressionCreated(e) {
+        let url = e.detail
+        switch(targetForExpressionWizard) {
+            case 'source': source = url; break;
+            case 'target': target = url; break;
+            case 'predicate': predicate = url; break;
+        }
+        expressionWizard.close()
+    }
     
 </script>
 
+<Dialog bind:this={expressionWizard}>
+    <Title>Create Expression</Title>
+    <Content><ExpressionConstructorWizard on:expression-created={expressionCreated}></ExpressionConstructorWizard></Content>
+    <Actions>
+        <Button on:click={expressionWizard.close}>
+            <Label>Cancel</Label>
+        </Button>
+    </Actions>
+</Dialog>
+
 <div class="container">
-    
     <div class="flex">
         <span class="paper">
             <LinkUrlPicker 
                 label="Source" 
                 bind:value={source} 
                 on:pick={(e)=>dispatch('pick', e.detail)}
-                on:create={(e)=>dispatch('create', e.detail)}>
+                on:create={()=>createExpression('source')}>
             </LinkUrlPicker>
         </span>
         <span class="paper">
@@ -39,7 +68,7 @@
                 label="Predicate" 
                 bind:value={predicate}
                 on:pick={(e)=>dispatch('pick', e.detail)}
-                on:create={(e)=>dispatch('create', e.detail)}>
+                on:create={()=>createExpression('predicate')}>
             </LinkUrlPicker>
         </span>
         <span class="paper">
@@ -47,7 +76,7 @@
                 label="Target" 
                 bind:value={target}
                 on:pick={(e)=>dispatch('pick', e.detail)}
-                on:create={(e)=>dispatch('create', e.detail)}>
+                on:create={()=>createExpression('target')}>
             </LinkUrlPicker>
         </span>
     </div>
