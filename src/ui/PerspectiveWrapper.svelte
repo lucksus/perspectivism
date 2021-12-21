@@ -12,6 +12,7 @@
     import IconButton from '@smui/icon-button';
     import PerspectiveShell from "./PerspectiveShell.svelte";
     import LinkWizard from "./LinkWizard.svelte";
+    import PrologExpressionView from "./PrologExpressionView.svelte";
 
     export let uuid: string
     export let settings: string
@@ -72,6 +73,7 @@
 
     let tabs = [
         { k: 1, label: 'Expression Browser', icon: 'web' },
+        { k: 4, label: 'Social DNA', icon: 'engineering' }
     ]
 
     let active = tabs[0]
@@ -175,6 +177,11 @@
             {:else if active.k === 3 }
                 {#if showSidePanel}
                     <AgentProfileSettings></AgentProfileSettings>
+                {/if}
+            {:else if active.k === 4 }
+                {#if perspective}    
+                    <PrologExpressionView perspective={perspective}>
+                    </PrologExpressionView>
                 {/if}
             {/if}
         </div>
