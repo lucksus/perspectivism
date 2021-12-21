@@ -83,13 +83,19 @@
                 {/each}
             {:else}
                 <ul>
-                {#each line.results as result}
-                    <li>
-                    {#each result as [key, value]}
-                        <span class="variable">{key}</span>: <span class="match">{value}</span>
+                {#if line.results === false}
+                    <span class="false">false</span>
+                {:else if line.results === true}
+                    <span class="true">true</span>
+                {:else}
+                    {#each line.results as result}
+                        <li>
+                        {#each result as [key, value]}
+                            <span class="variable">{key}</span>: <span class="match">{value}</span>
+                        {/each}
+                        </li>
                     {/each}
-                    </li>
-                {/each}
+                {/if}
                 </ul>
             {/if}
         </div>
@@ -144,5 +150,13 @@
     .match {
         font-size: 12px;
         font-style: italic;
+    }
+
+    .false {
+        color: red;
+    }
+
+    .true {
+        color: green;
     }
 </style>
