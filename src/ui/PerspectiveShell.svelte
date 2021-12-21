@@ -5,60 +5,102 @@
     let prompt = `|${perspective.name}>`
     let lines = []
     let input = ''
+    let historyCounter = -1
+    let unfinishedLine = ''
+    let shellContent
 
-    //@ts-ignore
-    perspective.eval = code => {
-        return eval(code)
-    }
 
-    function keypress(event) {
-        if(event.key == "Enter") {
-            event.preventDefault()
-            console.log('evaluate:', input)
-            let result
-            let error
-            try {
-                //@ts-ignore
-                result = perspective.eval(input)
-            } catch(e) {
-                error = e
-            }
-            console.log('got', result)
-            lines = [...lines, {
-                input,
-                result,
-                error
-            }]
-            input = ""
+    async function keypress(event) {
+        console.log(event.key)
+        switch(event.key) {
+            case "Enter":
+                event.preventDefault()
+                await evalProlog()
+                input = ''
+                historyCounter = -1
+                shellContent.scrollTo(0, shellContent.scrollHeight)
+                break;
+            case "ArrowUp":
+                event.preventDefault()
+                console.log("up")
+                if(historyCounter < lines.length-1) {
+                    if(historyCounter === 0) {
+                        unfinishedLine = input
+                    }
+                    historyCounter++
+                    let historyLine = lines[lines.length -1 -historyCounter]                    
+                    input = historyLine.input
+                }
+                break;
+            case "ArrowDown":
+                event.preventDefault()
+                console.log("down")
+                if(historyCounter > 0) {
+                    let historyLine = lines[lines.length -1 -historyCounter]
+                    historyCounter--
+                    input = historyLine.input
+                } else {
+                    input = unfinishedLine
+                    historyCounter = -1
+                }
+                break;
         }
     }
 
-    function evalInput() {
+    async function evalProlog() {
+        let results
+        let errors
         try {
-            return eval(input)
+            //@ts-ignore
+            results = await perspective.infer(input)
         } catch(e) {
-            return e
+            errors = e
         }
+        if(results) results = results.map(r=>Object.entries(r))
+        lines = [...lines, {
+            input: JSON.parse(JSON.stringify(input)),
+            results,
+            errors
+        }]
+
     }
 </script>
 
-<div class="perspective-shell-content">
+<div class="perspective-shell-content" 
+    bind:this={shellContent}
+    on:keypress|stopPropagation
+    on:keydown|stopPropagation
+>
     {#each lines as line}
         <div class="line">
-            <div>
+            <div class="prompt-line">
                 <span class="prompt">{prompt}</span>
                 <span class="prompt-input">{line.input}</span>    
             </div>
-            {#if line.error}
-                <span class="error">{line.error}</span>
+            {#if line.errors}
+                {#each line.errors as error}
+                    <span class="error">{error.message}</span>
+                {/each}
             {:else}
-                {line.result}
+                <ul>
+                {#each line.results as result}
+                    <li>
+                    {#each result as [key, value]}
+                        <span class="variable">{key}</span>: <span class="match">{value}</span>
+                    {/each}
+                    </li>
+                {/each}
+                </ul>
             {/if}
         </div>
     {/each}
     <div class="new-line">
         <span class="prompt">{prompt}</span>
-        <input class="prompt-input" bind:value={input} on:keypress={keypress}>
+        <input class="prompt-input" bind:value={input} 
+            on:keypress|stopPropagation={keypress} 
+            on:keydown|stopPropagation={keypress}
+            on:keyup|stopPropagation
+        >
     </div>
 </div>
 
@@ -68,7 +110,23 @@
         background-color: black;
     }
 
+    .prompt-line {
+        display: flex;
+        width: 100%;
+    }
+
+    .new-line {
+        display: flex;
+        width: 100%;
+    }
+
+    .prompt {
+        float: left;
+    }
+
     .prompt-input {
+        flex-grow: 1;
+        padding: 0 5px;
         color: white;
         background-color: black;
         border: none;
@@ -77,5 +135,14 @@
 
     .error {
         color: red;
+    }
+
+    .variable {
+        color: rgb(113, 211, 241);
+    }
+
+    .match {
+        font-size: 12px;
+        font-style: italic;
     }
 </style>

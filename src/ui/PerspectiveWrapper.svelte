@@ -289,6 +289,7 @@
         background-color: black;
         height: 160px;
         overflow-x: scroll;
+        padding-left: 10px
     }
 
     .side-panel {
