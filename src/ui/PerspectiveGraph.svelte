@@ -93,8 +93,8 @@
             },
             physics: {
                 barnesHut: {
-                    springLength: 400,
-                    gravitationalConstant: -10000,
+                    springLength: 600,
+                    gravitationalConstant: -20000,
                 }
             },
         })
@@ -225,7 +225,6 @@
 <div 
     on:mousewheel|stopPropagation={noop} 
     on:touchstart|stopPropagation={noop}
-    on:mouseup|stopPropagation={noop}
 >
 
 {#if !perspective || !perspective.uuid}
