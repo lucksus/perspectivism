@@ -89,7 +89,7 @@
                     {#each line.results as result}
                         <li>
                         {#each result as [key, value]}
-                            <span class="variable">{key}</span>: <span class="match">{value}</span>
+                            <span class="variable">{key}</span>: <span class="match">{value}</span><br>
                         {/each}
                         </li>
                     {/each}
