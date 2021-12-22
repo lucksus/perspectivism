@@ -56,7 +56,7 @@
         } catch(e) {
             errors = e
         }
-        if(results) results = results.map(r=>Object.entries(r))
+        if(typeof results == 'object') results = results.map(r=>Object.entries(r))
         lines = [...lines, {
             input: JSON.parse(JSON.stringify(input)),
             results,
@@ -82,12 +82,10 @@
                     <span class="error">{error.message}</span>
                 {/each}
             {:else}
-                <ul>
                 {#if line.results === false}
                     <span class="false">false</span>
-                {:else if line.results === true}
-                    <span class="true">true</span>
-                {:else}
+                {:else if line.results.length}
+                    <ul>
                     {#each line.results as result}
                         <li>
                         {#each result as [key, value]}
@@ -95,8 +93,10 @@
                         {/each}
                         </li>
                     {/each}
+                    </ul>
+                {:else}
+                    <span class="true">true</span>
                 {/if}
-                </ul>
             {/if}
         </div>
     {/each}

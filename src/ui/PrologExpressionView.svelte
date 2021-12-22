@@ -25,11 +25,16 @@
             predicate: 'ad4m://has_zome'
         }))
 
-        existingZomes = links.map(link => Literal.fromUrl(link.data.target).get())
+        existingZomes = links.map(link => {
+            return {
+                link,
+                code: Literal.fromUrl(link.data.target).get()
+            }
+        })
     }
 
     function deleteZome(zome) {
-
+        perspective.remove(zome.link)
     }
 
     perspective.addListener(() => {
@@ -50,7 +55,7 @@
 <Card variant="outlined">
     <Content>
         <code class="zome-code">
-            {zome}
+            {zome.code}
         </code>
     </Content>
     <Actions>
