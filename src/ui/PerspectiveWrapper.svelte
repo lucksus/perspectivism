@@ -71,7 +71,6 @@
 
     async function updateCustomActions() {
         customActions = []
-        debugger
         const results = await perspective.infer(`customAction(X, '${selectedExpression}')`)
         if(results) {
             for(let result of results) {
