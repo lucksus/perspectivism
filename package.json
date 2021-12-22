@@ -106,6 +106,7 @@
     "graphql-tools": "^6.2.4",
     "gun": "^0.2020.520",
     "gun-file": "^1.0.123",
+    "highlight.js": "^11.3.1",
     "ipfs": "^0.50.2",
     "lowdb": "^1.0.0",
     "multihashing": "^0.3.3",

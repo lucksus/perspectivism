@@ -3,6 +3,7 @@
     import Button, { Label, Icon as ButtonIcon } from '@smui/button';
     import { Link, LinkQuery, Literal, PerspectiveProxy } from '@perspect3vism/ad4m';
     import Card, { Content, Actions, ActionButtons } from '@smui/card';
+    import hljs from 'highlight.js'
 
     export let perspective: PerspectiveProxy
     
@@ -54,9 +55,9 @@
 {#each existingZomes as zome}
 <Card variant="outlined">
     <Content>
-        <code class="zome-code">
-            {zome.code}
-        </code>
+        <div class="zome-code">
+            {@html hljs.highlight(zome.code, {language: 'prolog'}).value}
+        </div>
     </Content>
     <Actions>
         <ActionButtons>
@@ -81,3 +82,10 @@
 <Button on:click={add}>
     <Label>Add</Label>
 </Button>
+
+<style>
+    .zome-code {
+        overflow: scroll;
+        white-space: pre;
+    }
+</style>

@@ -77,3 +77,15 @@ button:focus {
 .vis-network {
 	outline: none;
 }
+
+.hljs-symbol {
+	color: cornflowerblue;
+}
+
+.hljs-number {
+	color: darkblue;
+}
+
+.hljs-string {
+	color: red;
+}
