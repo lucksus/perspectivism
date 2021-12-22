@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import type { Ad4mClient, PerspectiveProxy } from "@perspect3vism/ad4m"
+    import { Ad4mClient, LinkQuery, Literal, PerspectiveProxy } from "@perspect3vism/ad4m"
     import Tab, { Icon, Label } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Perspective from './Perspective.svelte'
@@ -27,6 +27,9 @@
     let newLinkPredicate
     let newLinkTarget
 
+    let selectedExpression
+    let customActions = []
+
     function openLinkWizard() {
         linkWizard.reset()
         showLinkWizard = true
@@ -41,8 +44,8 @@
     }
 
     function expressionClicked(event){
+        let url = event.detail
         if(pickMode) {
-            let url = event.detail
             pickMode = false
             switch(pickTarget) {
                 case 'source':
@@ -55,7 +58,39 @@
                     linkWizard.target = url;
                     break;
             }
+        } else {
+            selectedExpression = url
         }
+    }
+
+    function nonExpressionClicked(event) {
+        selectedExpression = ''
+    }
+
+    $: if(selectedExpression) updateCustomActions()
+
+    async function updateCustomActions() {
+        customActions = []
+        debugger
+        const results = await perspective.infer(`customAction(X, '${selectedExpression}')`)
+        if(results) {
+            for(let result of results) {
+                let actionUrl: string = result.X
+                
+                if(actionUrl.startsWith('ad4m://expression_action:')) {
+                    let name = actionUrl.substring(25)
+                    let [body] = await perspective.get(new LinkQuery({source: actionUrl, predicate: 'ad4m://has_body'}))
+                    if(body) {
+                        let code = Literal.fromUrl(body.data.target).get()
+                        customActions = [...customActions, {name, code}]
+                    }
+                }
+            }
+        }
+    }
+
+    function executeCustomAction(action) {
+        console.log("execute:", action.code)
     }
     
 
@@ -130,6 +165,7 @@
             <PerspectiveGraph 
                 perspective={perspective}
                 on:expressionClicked={expressionClicked}
+                on:non-expressionClicked={nonExpressionClicked}
                 on:link-from-expression={(e)=>{
                     newLinkSource = e.detail
                     showLinkWizard = true
@@ -216,6 +252,11 @@
                 REPL
             </span>
             <span class="tool-buttons">
+                {#each customActions as action}
+                    <Button variant="raised" on:click={()=>executeCustomAction(action)}>
+                        <ButtonLabel>{action.name}</ButtonLabel>
+                    </Button>    
+                {/each}
                 <Button variant="raised" on:click={openLinkWizard}>
                     <ButtonIcon class="material-icons">add</ButtonIcon>
                     <ButtonLabel>Add Link/Expression</ButtonLabel>

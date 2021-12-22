@@ -9,7 +9,7 @@
     import LinkContextMenu from "./LinkContextMenu.svelte";
 
     export let perspective: PerspectiveProxy
-    export let uuid: string
+    export let uuid: string 
 
     const ad4m: Ad4mClient = getContext('ad4mClient')
     const zumly = getContext('zumly')
@@ -130,6 +130,8 @@
             if(params.nodes.length > 0) {
                 let url = params.nodes[0]
                 dispatch('expressionClicked', url)
+            } else {
+                dispatch('non-expressionClicked')
             }
         })
 
