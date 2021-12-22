@@ -108,6 +108,9 @@
     on:mousewheel|stopPropagation={noop} 
     on:touchstart|stopPropagation={noop}
     on:mouseup|stopPropagation={noop}
+    on:keydown|stopPropagation
+    on:keyup|stopPropagation
+    on:keypress|stopPropagation
 >
     <div class="header">
         <h1>
