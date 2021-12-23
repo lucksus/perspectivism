@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext } from "svelte";
-    import { Ad4mClient, LinkQuery, Literal, PerspectiveProxy } from "@perspect3vism/ad4m"
+    import { Ad4mClient, Link, LinkQuery, Literal, PerspectiveProxy } from "@perspect3vism/ad4m"
     import Tab, { Icon, Label } from '@smui/tab';
     import TabBar from '@smui/tab-bar';
     import Perspective from './Perspective.svelte'
@@ -88,8 +88,30 @@
         }
     }
 
-    function executeCustomAction(action) {
+    async function executeCustomAction(action) {
         console.log("execute:", action.code)
+
+        const replaceThis = (input: string|undefined) => {
+            if(input)
+                return input.replace('this', selectedExpression)
+            else
+                return undefined
+        }
+
+        for(let command of action.code) {
+            switch(command.action) {
+                case 'addLink':
+                    await perspective.add(new Link({
+                        source: replaceThis(command.source),
+                        predicate: replaceThis(command.predicate),
+                        target: replaceThis(command.target)
+                    }))
+                    break;
+                case 'removeLink':
+                    await perspective.remove(command.linkExpression)
+                    break;
+            }
+        }
     }
     
 
