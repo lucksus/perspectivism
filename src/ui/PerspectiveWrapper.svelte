@@ -13,6 +13,7 @@
     import PerspectiveShell from "./PerspectiveShell.svelte";
     import LinkWizard from "./LinkWizard.svelte";
     import PrologExpressionView from "./PrologExpressionView.svelte";
+    import ActionsView from "./ActionsView.svelte";
 
     export let uuid: string
     export let settings: string
@@ -129,7 +130,8 @@
 
     let tabs = [
         { k: 1, label: 'Expression Browser', icon: 'web' },
-        { k: 4, label: 'Social DNA', icon: 'engineering' }
+        { k: 4, label: 'Social DNA', icon: 'engineering' },
+        { k: 5, label: 'Actions', icon: 'engineering' }
     ]
 
     let active = tabs[0]
@@ -242,6 +244,11 @@
                 {#if perspective}    
                     <PrologExpressionView perspective={perspective}>
                     </PrologExpressionView>
+                {/if}
+            {:else if active.k === 5 }
+                {#if perspective}    
+                    <ActionsView perspective={perspective}>
+                    </ActionsView>
                 {/if}
             {/if}
         </div>
