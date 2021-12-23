@@ -188,18 +188,19 @@
         perspective.remove(link)
     }
 
-    function shouldRenderExpressionIcon(url: string) {
-        const isLiteral = url.startsWith('literal://')
+    function shouldRenderExpressionIcon(label: string|object) {
+        if(typeof label != 'string' || label.startsWith('literal://'))
+            return false
 
         let isValidUrl
         try {
-            const ref = parseExprUrl(url)
+            const ref = parseExprUrl(label)
             isValidUrl = true
         } catch(e) {
             isValidUrl = false
         }
 
-        return isValidUrl && !isLiteral
+        return isValidUrl
     }
 
     let perspectives

@@ -195,9 +195,11 @@ export default class VisGraph {
           const inferredConnections = links.filter(linkF => linkF.data.target == linkData.source);
           let sourceNode
           try {
+            let label = Literal.fromUrl(linkData.source).get()
+            if(typeof label == 'object') label = JSON.stringify(label)
             sourceNode = {
                 id: linkData.source,
-                label: Literal.fromUrl(linkData.source).get(),
+                label,
                 widthConstraint: 150,
                 group: "linkLanguageLink",
                 shape: 'text',
@@ -225,9 +227,11 @@ export default class VisGraph {
             }
           } else {
             try {
+              let label = Literal.fromUrl(linkData.target).get()
+              if(typeof label == 'object') label = JSON.stringify(label)
                 targetNode = {
                     id: linkData.target,
-                    label: Literal.fromUrl(linkData.target).get(),
+                    label,
                     widthConstraint: 150,
                     group: "linkLanguageLink",
                     shape: 'text',
