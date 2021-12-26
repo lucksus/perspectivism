@@ -90,13 +90,22 @@
                     }
                 },
                 arrowStrikethrough: false,
+                smooth: false,
             },
             physics: {
-                barnesHut: {
-                    springLength: 600,
-                    gravitationalConstant: -20000,
-                }
+                hierarchicalRepulsion: {
+                    centralGravity: 0,
+                    springLength: 620,
+                    springConstant: 0.005,
+                    nodeDistance: 310,
+                    avoidOverlap: 0.15
+                },
+                minVelocity: 0.75,
+                solver: "hierarchicalRepulsion"
             },
+            layout: {
+                randomSeed: 2
+            }
         })
 
         for(let event of ['dragging', 'stabilizationProgress', 'stabilized', 'resize', 'afterDrawing']) {
