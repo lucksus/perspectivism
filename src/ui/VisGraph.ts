@@ -7,12 +7,14 @@ export default class VisGraph {
     nodes: Node[]
     edges: Edge[]
     connectLinkElements: boolean
+    hidden: string[]
 
     constructor(perspective: PerspectiveProxy) {
         this.#perspective = perspective
         this.connectLinkElements = true
         this.nodes = []
         this.edges = []
+        this.hidden = []
     }
 
     toggleLinkElementConnect() {
@@ -25,6 +27,9 @@ export default class VisGraph {
     async load() {
         this.nodes = []
         this.edges = []
+        let hidden = await this.#perspective.infer('hiddenExpression(X)')
+        if(hidden)
+          this.hidden = hidden.map(h=>h.X)
         await this.getPerspectiveNodesAndMetaEdges();
     }
 
@@ -246,8 +251,12 @@ export default class VisGraph {
                 }
             }
           }
-          if (this.nodes.filter(node => node.id == sourceNode.id).length == 0) this.nodes.push(sourceNode)
-          if (this.nodes.filter(node => node.id == targetNode.id).length == 0) this.nodes.push(targetNode)
+          const sourceNotInYet = this.nodes.filter(node => node.id == sourceNode.id).length == 0
+          const targetNotInYet = this.nodes.filter(node => node.id == targetNode.id).length == 0
+          const sourceHidden = this.hidden.find(node => node == sourceNode.label)
+          const targetHidden = this.hidden.find(node => node == targetNode.label)
+          if (sourceNotInYet && !sourceHidden ) this.nodes.push(sourceNode)
+          if (targetNotInYet && !targetHidden ) this.nodes.push(targetNode)
           if (inferredConnections.length == 0) {
             this.edges.push({
               from: from,
