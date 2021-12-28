@@ -27,6 +27,7 @@ export default class VisGraph {
     async load() {
         this.nodes = []
         this.edges = []
+        this.hidden = []
         let hidden = await this.#perspective.infer('hiddenExpression(X)')
         if(hidden)
           this.hidden = hidden.map(h=>h.X)

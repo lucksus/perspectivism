@@ -36,7 +36,7 @@
     })
 
     async function update() {
-        await graph.load()
+        await graphFromPerspective(perspective)
         network.setData({nodes: graph.nodes, edges: graph.edges})
         getNodePositions()
     }
