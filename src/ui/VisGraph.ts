@@ -30,7 +30,13 @@ export default class VisGraph {
         this.hidden = []
         let hidden = await this.#perspective.infer('hiddenExpression(X)')
         if(hidden)
-          this.hidden = hidden.map(h=>h.X)
+          this.hidden = hidden.map(h=>{
+            try{
+              return Literal.fromUrl(h.X).get()
+            } catch(e) {
+              return h.X
+            }
+          })
         await this.getPerspectiveNodesAndMetaEdges();
     }
 
@@ -265,13 +271,15 @@ export default class VisGraph {
               label: "containsLink"
             })
           }
-          this.edges.push({
-            from: sourceNode.id,
-            to: targetNode.id,
-            label: linkData.predicate,
-            //@ts-ignore
-            link
-          })
+          if(!sourceHidden && !targetHidden) {
+            this.edges.push({
+              from: sourceNode.id,
+              to: targetNode.id,
+              label: linkData.predicate,
+              //@ts-ignore
+              link
+            })
+          }
         }
     }
 
@@ -313,20 +321,26 @@ export default class VisGraph {
               group: "linkLanguageLink"
             }
           }
-          this.nodes.push(sourceNode)
-          this.nodes.push(targetNode)
+          const sourceNotInYet = this.nodes.filter(node => node.id == sourceNode.id).length == 0
+          const targetNotInYet = this.nodes.filter(node => node.id == targetNode.id).length == 0
+          const sourceHidden = this.hidden.find(node => node == sourceNode.label)
+          const targetHidden = this.hidden.find(node => node == targetNode.label)
+          if (sourceNotInYet && !sourceHidden ) this.nodes.push(sourceNode)
+          if (targetNotInYet && !targetHidden ) this.nodes.push(targetNode)
           this.edges.push({
             from: from,
             to: sourceNode.id,
             label: "containsLink"
           })
-          this.edges.push({
-            from: sourceNode.id,
-            to: targetNode.id,
-            label: linkData.predicate,
-            //@ts-ignore
-            link
-          })
+          if(!sourceHidden && !targetHidden) {
+            this.edges.push({
+              from: sourceNode.id,
+              to: targetNode.id,
+              label: linkData.predicate,
+              //@ts-ignore
+              link
+            })
+          }
         }
     }
 
