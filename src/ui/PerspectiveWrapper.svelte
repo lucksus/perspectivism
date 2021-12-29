@@ -72,7 +72,7 @@
 
     async function updateCustomActions() {
         customActions = []
-        const results = await perspective.infer(`customAction(X, '${selectedExpression}')`)
+        const results = await perspective.infer(`customAction(X, "${selectedExpression}")`)
         if(results) {
             for(let result of results) {
                 let actionUrl: string = result.X
