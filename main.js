@@ -67,7 +67,8 @@ app.whenReady().then(() => {
     },
     appBuiltInLangs: [
       "social-context",
-      "note-ipfs"
+      "note-ipfs",
+      "virtual-icons"
     ],
     mocks: false
   })
