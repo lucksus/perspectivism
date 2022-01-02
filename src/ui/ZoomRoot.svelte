@@ -55,12 +55,23 @@
         <ul class="perspective-list private-perspectives">
             {#each $perspectives as perspective}
                 {#if perspective !== agentPerspective && !perspective.sharedUrl}
-                    <li class="perspective-icon">
+                    <li class="perspective-list-item">
                         <div class="perspective-box zoom-me" data-to="PerspectiveWrapper" 
                             data-uuid={perspective.uuid}
                             data-settings=true
                         >
-                            {perspective.name}
+                            <img class="perspective-icon zoom-me" 
+                                src="images/silvereyeflower.png" 
+                                alt="perspective icon"
+                                data-to="PerspectiveWrapper" 
+                                data-uuid={perspective.uuid}
+                                data-settings=true
+                            >
+                            <span class="perspective-name zoom-me"
+                                data-to="PerspectiveWrapper" 
+                                data-uuid={perspective.uuid}
+                                data-settings=true
+                            >{perspective.name}</span>
                         </div>
                     </li>
                 {/if}
@@ -77,15 +88,16 @@
         text-align: center;
     }
     .perspective-box {
+        position: relative;
         display: inline-block;
         width: 200px;
-        height: 160px;
+        height: 212px;
         margin: auto;
-        border-radius: 50px;
-        background-color: aqua;
+        border-radius: 100px;
+        background-color: #00ffff73;
         text-align: center;
-        line-height: 160px;
-
+        line-height: 212px;
+        background-image: url('../images/silvereyeflower.png');
     }
 
     .agent-perspective {
@@ -98,9 +110,26 @@
         padding: 0;
     }
 
-    .perspective-icon {
+    .perspective-list-item {
         display: inline-block;
     }
+
+    .perspective-icon {
+        position: absolute;
+        left: 0;
+        width: 200px;
+    }
+
+    .perspective-name {
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 20px;
+        text-shadow: 1px 2px #fafafa;
+    } 
 
     .private {
         position: absolute;
