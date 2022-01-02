@@ -278,6 +278,9 @@
 			top: 48px;
 			right: 0;
 			bottom: 0;
+			background-image: url(../images/dashboard-background.png);
+			background-position: center;
+			background-size: cover;
 		}
     
         h1 {
