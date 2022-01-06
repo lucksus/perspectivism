@@ -2,7 +2,7 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { Crypto } = require("@peculiar/webcrypto");
 global.crypto = new Crypto();
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
 
@@ -17,6 +17,7 @@ let bootstrapFixtures = {
   worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
 }
 
+let ad4mCore
 app.whenReady().then(() => {
   ad4m
   .init({
@@ -72,7 +73,9 @@ app.whenReady().then(() => {
     ],
     mocks: false
   })
-  .then((ad4mCore) => {
+  .then((core) => {
+    ad4mCore = core
+
     console.log(
       "\x1b[36m%s\x1b[0m",
       "Starting account creation splash screen"
@@ -110,6 +113,7 @@ function createSplash () {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false
     },
     minimizable: false,
     alwaysOnTop: true,
@@ -134,6 +138,7 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false
     }
   })
 
@@ -155,10 +160,9 @@ function serveUI() {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+app.on('window-all-closed', async () => {
+  await ad4mCore.exit()
+  app.quit()
 })
 
 app.on('activate', () => {

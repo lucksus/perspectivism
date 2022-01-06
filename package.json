@@ -52,7 +52,7 @@
     "@types/mocha": "^8.0.3",
     "babel-jest": "^26.6.3",
     "date-fns": "^2.21.3",
-    "electron": "^10.1.1",
+    "electron": "^16.0.6",
     "electron-packager": "^15.2.0",
     "electron-rebuild": "^2.3.2",
     "email-validator": "^2.0.4",
