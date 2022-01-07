@@ -6,6 +6,8 @@
     import { DataSet } from 'vis-data'
     import md5 from 'md5'
 
+    const AGENT_PERSPECTIVE_NAME = '__agent_public_perspective'
+
     let agentPerspective
     let neighbourhoods = []
     let privatePerspectives = []
@@ -17,29 +19,38 @@
     let scale = 1
     let network
 
-    $: if(container) initGraph()
+    const ad4m: Ad4mClient = getContext('ad4mClient')
+    let perspectives = perspectivesStore(ad4m)
+    perspectives.subscribe(update)
+
+    async function initAgentPerspective() {
+      const me = await ad4m.agent.me()
+      const allPerspectives = await ad4m.perspective.all()
+      agentPerspective = allPerspectives.find(p => p.name === AGENT_PERSPECTIVE_NAME)
+      if(!agentPerspective) {
+        agentPerspective = await ad4m.perspective.add(AGENT_PERSPECTIVE_NAME)
+        agentPerspective.loadSnapshot(me.perspective)
+      }
+    }
 
     async function initGraph() {
         await createNetwork(container)
         update($perspectives)
     }
-        
 
-    const ad4m: Ad4mClient = getContext('ad4mClient')
-    let perspectives = perspectivesStore(ad4m)
-    perspectives.subscribe(update)
+    initAgentPerspective()
+    $: if(container) initGraph()
 
     async function update(newPerspectives) {
         for(let p of newPerspectives) {
-            console.log("procssing", p)
-            if(p.name == '__agent_public_perspective')
-                agentPerspective = p
-            else {
+            if(p.name != AGENT_PERSPECTIVE_NAME){
                 if(p.sharedUrl) {
                     neighbourhoods = [...neighbourhoods, p]
                 } else {
                     privatePerspectives = [...privatePerspectives, p]
                 }
+            } else {
+                agentPerspective = p
             }
         }
 
@@ -63,7 +74,7 @@
                 let { did } = await ad4m.agent.me()
                 email = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
             }catch(e) {
-                console.error(e)
+                console.debug(e)
             }
 
             console.log("got email: ", email)
@@ -217,7 +228,7 @@
             left: ${nodePositions[p.uuid]?.x-15+(50*scale)}px;
             transform: scale(${scale*0.8});
             `}>
-                {#if p.uuid === agentPerspective.uuid}
+                {#if agentPerspective && p.uuid === agentPerspective.uuid}
                     <div class="zoom-handle material-icons zoom-me" data-to="PerspectiveWrapper" 
                         data-uuid={p.uuid}
                         data-settings=false

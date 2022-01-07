@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { getContext } from 'svelte';
-    import { Ad4mClient, Literal } from '@perspect3vism/ad4m'
+    import { Literal, PerspectiveProxy } from '@perspect3vism/ad4m'
     import DataTable, {Body, Row, Cell} from '@smui/data-table';
     import Textfield from '@smui/textfield'
     import Button, {Label} from '@smui/button';
@@ -8,16 +7,12 @@
     import emailValidator from 'email-validator'
     import md5 from 'md5'
 
-    const ad4m: Ad4mClient = getContext('ad4mClient')
-
-    const AGENT_PERSPECTIVE_NAME = '__agent_public_perspective'
-
-    let did = "loading..."
     let firstName = "loading..."
     let lastName = "loading..."
     let email = "loading..."
 
-    let agentPerspective
+    export let agentPerspective: PerspectiveProxy
+    export let did: string
 
     async function populateUiFromPerspective() {
       try {
@@ -39,30 +34,14 @@
       }
     }
 
-    async function init() {
-      const me = await ad4m.agent.me()
-      did = me.did
-      const allPerspectives = await ad4m.perspective.all()
-      console.log("ALL Perspectives:", allPerspectives)
-      agentPerspective = allPerspectives.find(p => p.name === AGENT_PERSPECTIVE_NAME)
-      if(!agentPerspective) {
-        agentPerspective = await ad4m.perspective.add(AGENT_PERSPECTIVE_NAME)
-        agentPerspective.loadSnapshot(me.perspective)
-      }
-
-      await populateUiFromPerspective()
-
-      //await ad4m.agent.addUpdatedListener(populateUiFromPerspective)
-
-    }
-
     async function save() {
       await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://givenName', target: Literal.from(firstName).toUrl()})
       await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://familyName', target: Literal.from(lastName).toUrl()})
       await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://mbox', target: Literal.from(email).toUrl()})
     }
 
-    init()
+    $: if(agentPerspective)
+      populateUiFromPerspective()
 </script>
 
 <Card style="width: 360px;">

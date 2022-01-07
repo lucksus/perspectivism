@@ -155,8 +155,10 @@
     function noop(){}
     
     let me
+    let did
     async function init() {
         me = await ad4m.agent.me()
+        did = me.did
     }
 
     init()
@@ -238,7 +240,10 @@
                 {/if}
             {:else if active.k === 3 }
                 {#if showSidePanel}
-                    <AgentProfileSettings></AgentProfileSettings>
+                    <AgentProfileSettings 
+                        did={did}
+                        agentPerspective={perspective}
+                    ></AgentProfileSettings>
                 {/if}
             {:else if active.k === 4 }
                 {#if perspective}    
