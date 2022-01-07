@@ -29,7 +29,7 @@ Since AD4M already includes group semantics and spaces on a low level as Neighbo
 - [ ] "Canonical" Neighbourhood view
 - [ ] CRUD Social Organisms
 
-![Dashboard](screenshots/dashboard.png.png)
+![Dashboard](screenshots/dashboard.png)
 ![Graph with REPL and Social DNA](screenshots/graph_with_repl_and_social_dna.png)
 
 ## Build
