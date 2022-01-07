@@ -1,25 +1,34 @@
 <script lang="ts">
     import { getContext, createEventDispatcher } from "svelte";
     import type { Perspective } from '@perspect3vism/ad4m'
-    import IconButton from '@smui/icon-button';
-    import Fab, {Icon, Label} from '@smui/fab';
     import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
-    import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
-    import PerspectiveSettings from './PerspectiveSettings.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
-    import { query, mutation, getClient } from "svelte-apollo";
-    import { gql } from '@apollo/client';
-    import { LANGUAGES } from './graphql_queries'
     import { linkTo2D, coordToPredicate } from './uiUtils';
-    import { readable } from 'svelte/store'
+    import { linksStoreForPerspective } from "./LinksStore";
 
     export let perspective: Perspective
+    export let uuid: String
 
     const dispatch = createEventDispatcher();
     const ad4m: Ad4mClient = getContext('ad4mClient')
+
+    if(!perspective && uuid) {
+        (async () => {
+            perspective = await ad4m.perspective.byUUID(uuid)
+        })()
+    }
+
+    ad4m.perspective.addPerspectiveUpdatedListener(async p => {
+        //@ts-ignore
+        if(p.uuid == perspective.uuid || p.uuid == uuid) {
+            //@ts-ignore
+            perspective = await ad4m.perspective.byUUID(perspective.uuid)
+        }
+    })
+
 
     let linksStore
     let constructionMenu
@@ -45,9 +54,6 @@
     let linkingCursor = {}
     let dropMove = false
     let dropMoveTarget
-
-    let showSettings = false
-    let showExpressionBrwoser = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -258,36 +264,7 @@
     }
 
     $: if(perspective) {
-        linksStore = readable([], set => {
-            console.log("linksStore 1")
-
-            let allLinks = []
-            set(allLinks)
-
-            ad4m.perspective.addPerspectiveLinkAddedListener(perspective.uuid, newLink => {
-                allLinks = [...allLinks, newLink]
-                set(allLinks)
-            })
-
-            console.log("linksStore 2")
-
-            ad4m.perspective.addPerspectiveLinkRemovedListener(perspective.uuid, removedLink => {
-                allLinks = allLinks.filter(l => !linkEqual(l, removedLink))
-                set(allLinks)
-            })
-
-            console.log("linksStore 3")
-
-            async function init() {
-                let links
-                links = await ad4m.perspective.queryLinks(perspective.uuid, {})
-                allLinks = links
-                console.log("Init Perspective's links:", allLinks)
-                set(allLinks)
-            }
-
-            init()
-        })
+        linksStore = linksStoreForPerspective(ad4m, perspective)
     }
 
 
@@ -327,9 +304,19 @@
         linkingSource = link
     }
 
+    function noop(){}
+
 </script>
 
-<h1>${perspective.uuid}</h1>
+<div 
+    on:mousewheel|stopPropagation={noop} 
+    on:touchstart|stopPropagation={noop}
+    on:mouseup|stopPropagation={noop}
+>
+
+{#if !perspective || !perspective.uuid}
+    <h1>Loading...</h1>
+{:else}
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
@@ -380,45 +367,6 @@
     </div>
 </div>
 
-<div id="side-bar-container">
-    <div class="side-bar-panel panel-1" style={`transform: rotateY(${showExpressionBrwoser? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showExpressionBrwoser = !showExpressionBrwoser}>
-            <span class="float-right"><Icon class="material-icons">web</Icon></span>
-            <Label>Expression Browser</Label>
-        </div>
-        <div class="side-panel-content expression-browser-panel" style={`opacity: ${showExpressionBrwoser? '1' : '0'}`}>
-            <ExpressionBrowser
-                on:close={()=> showExpressionBrwoser = false}
-                on:link-expresson={event => ADD_LINK({variables: {
-                    link: JSON.stringify({
-                        source: 'root',
-                        target: event.detail
-                    })
-                }})}
-            ></ExpressionBrowser>
-        </div>
-    </div>
-
-    <div class="side-bar-panel panel-2" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showSettings = !showSettings}>
-            <span class="float-right"><Icon class="material-icons">settings</Icon></span>
-            <Label>Perspective Settings</Label>
-        </div>
-        <div class="side-panel-content settings-panel" style={`opacity: ${showSettings? '1' : '0'}`}>
-            <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
-                on:submit={()=> {
-                    showSettings = false
-                }}
-                on:cancel={()=> {
-                    showSettings = false
-                }}>
-            </PerspectiveSettings>
-        </div>
-    </div>
-</div>
-
-
-
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
     languageIcons={languageIcons}
@@ -430,8 +378,9 @@
     on:link={onLinkExpression}
 ></ExpressionContextMenu>
 
+{/if}
 
-
+</div>
 <style>
     .perspective-container {
         position: absolute;
@@ -441,65 +390,6 @@
         height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
-    }
-
-    #side-bar-container {
-        position: absolute;
-        right: 0;
-        top: 0;
-        perspective: 100px;
-        perspective-origin: rightpo;
-    }
-
-    .side-bar-panel {
-        position: absolute;
-        right: 0;
-        transform-style: preserve-3d;
-        transition: transform 0.5s;
-    }
-
-    .panel-1 {
-        top: 115px;
-    }
-
-    .panel-2 {
-        top: 425px;
-    }
-    
-    .expression-browser-panel {
-        height: 545px;
-        width: 380px;
-    }
-
-    .settings-panel {
-        width: 204px;
-    }
-
-    .side-bar-button {
-        position: absolute;
-        width: 175px;
-        height: 45px;
-        padding: 10px 50px 0 25px;
-        transform-origin: right bottom;
-        transform: rotate(-90deg) translateX(115px);
-        right: 0;
-        background-color: white;
-        border: 1px solid rgb(127, 129, 255);
-        color:   rgb(127, 129, 255);
-        cursor: pointer;
-    }
-
-    .float-right {
-        float: right;
-    }
-
-    .side-panel-content {
-        position: absolute;
-        transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
-        transition: opacity 0.5s;
-        padding: 40px;
-        border: 1px solid rgb(127, 129, 255);
-        background-color: white;
     }
 
     .debug {

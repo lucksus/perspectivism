@@ -28,7 +28,10 @@ const languages = {
   },
   "note-ipfs": {
     bundle: "https://github.com/perspect3vism/lang-note-ipfs/releases/download/0.0.3/bundle.js",
-  } 
+  },
+  "virtual-icons": {
+    bundle: "https://github.com/perspect3vism/virtual-icon-language/releases/download/v0.0.1/bundle.js"
+  }
 };
 
 async function main() {

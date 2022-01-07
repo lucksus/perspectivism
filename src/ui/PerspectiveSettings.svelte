@@ -44,11 +44,13 @@
         }
 
         console.log("LinkLanguages:", linkLanguages)
+        update()
     }
 
     init()
 
     async function update() {
+        console.log("update:", perspective, perspectiveId)
         const uuid = perspective ? perspective.uuid : perspectiveId
         if(!uuid) return
         perspective = await ad4m.perspective.byUUID(uuid)
@@ -65,7 +67,7 @@
         }
     }
 
-    update()
+    
 
     ad4m.perspective.addPerspectiveUpdatedListener(update)
 
@@ -111,13 +113,13 @@
 
 </script>
 
+{#if perspective}
 <div class="perspective-settings-container">
-    <h1>Perspective Settings</h1>
-    <DataTable>
+    <DataTable> 
         <Body>
             <Row>
                 <Cell>Name:</Cell>
-                <Cell><Textfield bind:value={perspectiveTemp.name} label="Name" /></Cell>
+                <Cell><Textfield bind:value={perspective.name} label="Name" /></Cell>
             </Row>
             <Row>
                 <Cell>Sharing:</Cell>
@@ -237,14 +239,19 @@
         </Body>
     </DataTable>
 </div>
-<p></p>
-<Button variant="raised" on:click={save}>
-    <Label>Ok</Label>
+
+<Button variant="raised" on:click={save} style="margin: 40px; padding: 25px;">
+    <Label>Save</Label>
 </Button>
+<!--
 <Button variant="outlined" on:click={cancel}>
     <Label>Cancel</Label>
 </Button>
+-->
 
+{/if}
 <style>
-
+    .perspective-settings-container {
+        float: left;
+    }
 </style>

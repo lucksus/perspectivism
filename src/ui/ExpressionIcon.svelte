@@ -220,7 +220,7 @@
 {#if childLinks}
     {JSON.stringify($childLinks)}
 {/if}
--->
+
 {#if childLinks}
     <ul class="child-plane">
         {#each childLinks as link}
@@ -236,7 +236,7 @@
     </ul>
     
 {/if}
-
+-->
 <style>
     .container {
         display: inline-block;

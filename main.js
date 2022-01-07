@@ -2,7 +2,7 @@ require = require("esm")(module/*, options*/)
 module.exports = require("./main.js")
 const { Crypto } = require("@peculiar/webcrypto");
 global.crypto = new Crypto();
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
 
@@ -17,6 +17,7 @@ let bootstrapFixtures = {
   worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
 }
 
+let ad4mCore
 app.whenReady().then(() => {
   ad4m
   .init({
@@ -29,11 +30,37 @@ app.whenReady().then(() => {
       neighbourhoods: "neighbourhood-store"
     },
     ad4mBootstrapFixtures: {
-      languages: [{
-        address: bootstrapFixtures.worldLinkLanguageHash,
-        meta: bootstrapFixtures.worldLinkLinguageMeta,
-        bundle: bootstrapFixtures.worldLinkLinguageBundle
-      }],
+      languages: [
+        {
+          address: bootstrapFixtures.worldLinkLanguageHash,
+          meta: bootstrapFixtures.worldLinkLinguageMeta,
+          bundle: bootstrapFixtures.worldLinkLinguageBundle
+        },
+        {
+          address: 'QmWxQXz8M62TG1Ba7L49uVXMgabzMx4AP4Y56gy3PRvGpW',
+          meta: {
+            author: 'did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n',
+            timestamp: '2021-10-07T21:39:36.607Z',
+            data: {
+              name: 'Social Context',
+              address: 'QmWxQXz8M62TG1Ba7L49uVXMgabzMx4AP4Y56gy3PRvGpW',
+              description: 'Holochain based LinkLanguage. First full implementation of a LinkLanguage, for collaborative Neighbourhoods where every agent can add links. No membrane. Basic template for all custom Neighbourhoods in this first iteration of the Perspect3vism test network.',
+              author: 'did:key:zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n',
+              templated: false,
+              templateSourceLanguageAddress: null,
+              templateAppliedParams: null,
+              possibleTemplateParams: [ 'uuid', 'name', 'description' ],
+              sourceCodeLink: "https://github.com/juntofoundation/Social-Context'"
+            },
+            proof: {
+              signature: "e933e34f88694816ea91361605c8c2553ceeb96e847f8c73b75477cc7d9bacaf11eae34e38c2e3f474897f59d20f5843d6f1d2c493b13552093bc16472b0ac33",
+              key: "#zQ3shkkuZLvqeFgHdgZgFMUx8VGkgVWsLA83w2oekhZxoCW2n",
+              valid: true
+            }
+          },
+          bundle: fs.readFileSync(path.join('src', 'languages', 'social-context', 'build', 'bundle.js')).toString()
+        }
+      ],
       perspectives: [{
         address: '__world',
         expression: bootstrapFixtures.worldPerspective
@@ -41,11 +68,14 @@ app.whenReady().then(() => {
     },
     appBuiltInLangs: [
       "social-context",
-      "note-ipfs"
+      "note-ipfs",
+      "virtual-icons"
     ],
     mocks: false
   })
-  .then((ad4mCore) => {
+  .then((core) => {
+    ad4mCore = core
+
     console.log(
       "\x1b[36m%s\x1b[0m",
       "Starting account creation splash screen"
@@ -83,6 +113,7 @@ function createSplash () {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false
     },
     minimizable: false,
     alwaysOnTop: true,
@@ -107,6 +138,7 @@ function createWindow () {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false
     }
   })
 
@@ -128,10 +160,9 @@ function serveUI() {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+app.on('window-all-closed', async () => {
+  await ad4mCore.exit()
+  app.quit()
 })
 
 app.on('activate', () => {
