@@ -69,15 +69,9 @@
         }))
     }
 
-    perspective.addListener(() => {
-        update()
-        return null
-    })
+    perspective.addListener('link-added', update)
+    perspective.addListener('link-removed', update)
 
-    perspective.removeListener(() => {
-        update()
-        return null
-    })
 
     update()
 
