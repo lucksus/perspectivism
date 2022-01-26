@@ -127,7 +127,10 @@
         iconReady = false
         const icon = new componentConstructor()
         //const expression = JSON.parse(JSON.stringify($queryResult))
-        //expression.data = JSON.parse(expression.data)
+        try{
+            expression.data = JSON.parse(expression.data)
+        }catch(e){}
+        
         icon.expression = expression
         while(container.lastChild)
             container.removeChild(container.lastChild)
