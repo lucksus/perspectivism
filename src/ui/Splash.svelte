@@ -4,15 +4,13 @@
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import InitDialog from "./InitDialog.svelte"
 	import { Ad4mClient } from "@perspect3vism/ad4m"
-	const wsLinkConfig = require('../../executorConfig.json')
 
-	// const wsLink = new WebSocketLink({
-	// 	uri: `ws://localhost:12000/graphql`,
-	// 	options: {
-	// 		reconnect: true
-	// 	}
-	// });
-	const wsLink = new WebSocketLink(JSON.parse(wsLinkConfig));
+	const wsLink = new WebSocketLink({
+		uri: `ws://localhost:12000/graphql`,
+		options: {
+			reconnect: true
+		}
+	});
 
 	const client = new ApolloClient({
 		//uri: 'http://localhost:4000',

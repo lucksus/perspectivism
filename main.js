@@ -19,6 +19,7 @@ let bootstrapFixtures = {
 
 let ad4mCore
 app.whenReady().then(() => {
+  createWindow()
   // ad4m
   // .init({
   //   appDataPath: app.getPath("appData"),
