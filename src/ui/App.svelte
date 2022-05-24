@@ -7,14 +7,16 @@
 	import { setClient } from "svelte-apollo"
 	import { removeTypenameFromMutationLink } from 'apollo-remove-typename-mutation-link';
 	import World from "./world";
+	const wsLinkConfig = require('../../executorConfig.json')
 	//import User from "./user";
 
-	const wsLink = new WebSocketLink({
-		uri: `ws://localhost:4000/graphql`,
-		options: {
-			reconnect: true
-		}
-	});
+	// const wsLink = new WebSocketLink({
+	// 	uri: `ws://localhost:12000/graphql`,
+	// 	options: {
+	// 		reconnect: true
+	// 	}
+	// });
+	const wsLink = new WebSocketLink(JSON.parse(wsLinkConfig));
 
 	const client = new ApolloClient({
 		//uri: 'http://localhost:4000',

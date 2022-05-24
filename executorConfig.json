@@ -1,0 +1,6 @@
+{
+    "uri": "ws://localhost:12000/graphql",
+    "options": {
+        "reconnect": true
+    }
+}
