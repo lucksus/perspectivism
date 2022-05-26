@@ -8,8 +8,10 @@
 	import { removeTypenameFromMutationLink } from 'apollo-remove-typename-mutation-link';
 	import World from "./world";
 	//import User from "./user";
+	const { ipcRenderer } = require('electron')
+	const executorPort = ipcRenderer.sendSync('port-request', '')
 	const wsLink = new WebSocketLink({
-		uri: `ws://localhost:12000/graphql`,
+		uri: `ws://localhost:${executorPort}/graphql`,
 		options: {
 			reconnect: true
 		}

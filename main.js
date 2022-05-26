@@ -16,10 +16,16 @@ let bootstrapFixtures = {
   worldLinkLinguageBundle:  fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'bundle.js')),
   worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
 }
+const {ipcMain} = require('electron');
 
 let ad4mCore
 app.whenReady().then(() => {
+  const executorPort = fs.readFileSync(path.join(app.getPath("appData"), '../.local/share/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
   createWindow()
+  ipcMain.on('port-request', (event, arg) => {
+    event.returnValue = executorPort
+  })
+
   // ad4m
   // .init({
   //   appDataPath: app.getPath("appData"),
