@@ -5,8 +5,10 @@
 	import InitDialog from "./InitDialog.svelte"
 	import { Ad4mClient } from "@perspect3vism/ad4m"
 
+	const { ipcRenderer } = require('electron')
+	const executorPort = ipcRenderer.sendSync('port-request', '')
 	const wsLink = new WebSocketLink({
-		uri: `ws://localhost:12000/graphql`,
+		uri: `ws://localhost:${executorPort}/graphql`,
 		options: {
 			reconnect: true
 		}
