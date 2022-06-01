@@ -7,9 +7,13 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import LinkExtern from './LinkExtern.svelte'
+	const { ipcRenderer } = require('electron')
+	// const executorPort = ipcRenderer.sendSync('port-request', '')
 
     const ad4m = getContext('ad4mClient')
-
+    function emitAgentUnlock() {
+        ipcRenderer.send('agent-unlock', '')
+    }
     async function check() {
         const status = await ad4m.agent.status()
         console.log("agent status check:", status)
@@ -22,6 +26,7 @@
                 unlockDialog.open()
             } else {
                 unlockDialog.close()
+                emitAgentUnlock()
             }
         }
     }
@@ -79,6 +84,7 @@
         passphrase = ""
         if(status.isUnlocked) {
             unlockDialog.close()
+            emitAgentUnlock()
         } else {
             unlockDialog.open()
         }

@@ -17,6 +17,7 @@ let bootstrapFixtures = {
   worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
 }
 const {ipcMain} = require('electron');
+const { exit } = require("process");
 
 let spawnExecutor = false
 console.log(process.argv)
@@ -132,8 +133,24 @@ app.whenReady().then(() => {
     });
   }
   else {
-    executorPort = fs.readFileSync(path.join(app.getPath("appData"), '../.local/share/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
-    createWindow()
+    try {
+      executorPort = fs.readFileSync(path.join(app.getPath("appData"), '../.local/share/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
+    }
+    catch(err) {
+      console.log('Unable to find executor port. Please make sure ad4m executor is running.')
+      app.exit(0)
+      process.exit(0)
+    }
+    
+    const win = createWindow()
+    const splash = createSplash()
+    ipcMain.on('port-request', (event, arg) => {
+      event.returnValue = executorPort
+    })
+    ipcMain.on('agent-unlock', (event, arg) => {
+      splash.close()
+      win.reload()
+    })
   }
   ipcMain.on('port-request', (event, arg) => {
     event.returnValue = executorPort
