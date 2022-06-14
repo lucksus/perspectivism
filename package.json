@@ -99,6 +99,7 @@
     "@transmute/did-wallet": "lucksus/did-wallet",
     "apollo-remove-typename-mutation-link": "^3.3.9",
     "apollo-server": "^2.18.2",
+    "appdata-path": "perspect3vism/appdata-path",
     "base-x": "^3.0.8",
     "electron-root-path": "^1.0.16",
     "esm": "^3.2.25",

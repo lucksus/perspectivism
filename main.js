@@ -8,6 +8,7 @@ const ad4m = require('@perspect3vism/ad4m-executor')
 
 const fs = require('fs')
 const path = require('path')
+const getAppDataPath = require('appdata-path')
 
 const worldLinkLanguageHash = 'QmchPr6NgxFUrrETHrd49DSRdfFMdn6A5sw2JSXhujy4gS'
 let bootstrapFixtures = {
@@ -32,7 +33,7 @@ app.whenReady().then(() => {
     executorPort = 4000
     ad4m
     .init({
-      appDataPath: app.getPath("appData"),
+      appDataPath: getAppDataPath(),
       resourcePath: __dirname,
       appDefaultLangPath: "./src/languages",
       ad4mBootstrapLanguages: {
@@ -134,7 +135,7 @@ app.whenReady().then(() => {
   }
   else {
     try {
-      executorPort = fs.readFileSync(path.join(app.getPath("appData"), '../.local/share/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
+      executorPort = fs.readFileSync(path.join(getAppDataPath(), '/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
     }
     catch(err) {
       console.log('Unable to find executor port. Please make sure ad4m executor is running.')
