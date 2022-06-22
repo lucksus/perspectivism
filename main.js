@@ -12,10 +12,10 @@ const getAppDataPath = require('appdata-path')
 
 const worldLinkLanguageHash = 'QmchPr6NgxFUrrETHrd49DSRdfFMdn6A5sw2JSXhujy4gS'
 let bootstrapFixtures = {
-  worldPerspective: JSON.parse(fs.readFileSync('./bootstrap/world.perspective.json')),
+  worldPerspective: JSON.parse(fs.readFileSync(path.join(__dirname, 'bootstrap', 'world.perspective.json'))),
   worldLinkLanguageHash,
-  worldLinkLinguageBundle:  fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'bundle.js')),
-  worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join('./bootstrap/', worldLinkLanguageHash, 'meta.json'))),
+  worldLinkLinguageBundle:  fs.readFileSync(path.join(__dirname, 'bootstrap', worldLinkLanguageHash, 'bundle.js')),
+  worldLinkLinguageMeta: JSON.parse(fs.readFileSync(path.join(__dirname, 'bootstrap', worldLinkLanguageHash, 'meta.json'))),
 }
 const {ipcMain} = require('electron');
 const { exit } = require("process");
