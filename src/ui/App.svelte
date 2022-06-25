@@ -7,14 +7,23 @@
 	import { setClient } from "svelte-apollo"
 	import { removeTypenameFromMutationLink } from 'apollo-remove-typename-mutation-link';
 	import World from "./world";
+import CapabilityDialog from "./CapabilityDialog.svelte";
 	//import User from "./user";
 	const { ipcRenderer } = require('electron')
 	const executorPort = ipcRenderer.sendSync('port-request', '')
+	const jwt = ipcRenderer.sendSync('jwt-request', '')
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:${executorPort}/graphql`,
 		options: {
-			reconnect: true
-		}
+			reconnect: true,
+			connectionParams: async () => {
+				return {
+					headers: {
+						authorization: jwt
+					}
+				}
+			}
+		},
 	});
 
 	const client = new ApolloClient({
@@ -34,7 +43,7 @@
 	  });
 	setClient(client)
 	setContext('ad4mClient', new Ad4mClient(client))
-	  
+	setContext('executorPort', executorPort) 
 	const world = new World(client);
 	setContext('world', world)
 	//const user = new User(world, client);
@@ -47,6 +56,7 @@
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono">
 </svelte:head>
 
+<!-- conditional rendering depending on if have capability or not -->
 <main>
 
 	<MainView></MainView>

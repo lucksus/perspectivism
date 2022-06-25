@@ -20,6 +20,7 @@ let bootstrapFixtures = {
 const {ipcMain} = require('electron');
 const { exit } = require("process");
 
+let jwt
 let spawnExecutor = false
 console.log(process.argv)
 if(process.argv.length === 4 && process.argv[2] === "executor") {
@@ -148,13 +149,19 @@ app.whenReady().then(() => {
     ipcMain.on('port-request', (event, arg) => {
       event.returnValue = executorPort
     })
-    ipcMain.on('agent-unlock', (event, arg) => {
+    ipcMain.on('valid-jwt', (event, arg) => {
+      console.log('jwt', arg)
+      jwt = arg
       splash.close()
       win.reload()
     })
+
   }
   ipcMain.on('port-request', (event, arg) => {
     event.returnValue = executorPort
+  })
+  ipcMain.on('jwt-request', (event, arg) => {
+    event.returnValue = jwt
   })
 })
 
