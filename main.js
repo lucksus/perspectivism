@@ -145,14 +145,15 @@ app.whenReady().then(() => {
     }
     
     const win = createWindow()
-    const splash = createSplash()
+    // const splash = createSplash()
     ipcMain.on('port-request', (event, arg) => {
       event.returnValue = executorPort
     })
     ipcMain.on('valid-jwt', (event, arg) => {
       console.log('jwt', arg)
-      jwt = arg
-      splash.close()
+      jwt = arg 
+      // splash.close()
+      setTimeout(() => {}, 200)
       win.reload()
     })
 

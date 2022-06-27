@@ -7,10 +7,13 @@
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
     import LinkExtern from './LinkExtern.svelte'
-import { Ad4mClient } from "@perspect3vism/ad4m";
-import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { WebSocketLink } from "@apollo/client/link/ws";
+    import { Ad4mClient } from "@perspect3vism/ad4m";
+    import { ApolloClient, InMemoryCache } from "@apollo/client";
+    import { WebSocketLink } from "@apollo/client/link/ws";
+    import { createEventDispatcher } from 'svelte';
 	const { ipcRenderer } = require('electron')
+
+	const dispatch = createEventDispatcher();
 
     const ad4m = getContext('ad4mClient')
     const executorPort = getContext('executorPort')
@@ -72,6 +75,8 @@ import { WebSocketLink } from "@apollo/client/link/ws";
         try {
             let status = await ad4mClientJwt.agent.status()
             console.log('agent status:', status)
+            dispatch('valid-jwt')
+            setTimeout(() => {}, 100)
             emitJwt(jwt)
         }
         catch (e) {
@@ -79,32 +84,31 @@ import { WebSocketLink } from "@apollo/client/link/ws";
         }
     } 
 </script>
+
+<h2>Request Capabilty Token</h2>
 <div class="capability-request">
-<Button variant="raised" on:click={requestCapability}>
-    <Label>Request Code</Label>
-</Button>
-<Textfield fullwidth lineRipple={false} label="Keystore">
-    <Input bind:value={code} id="jwt-generation-code" />
-    <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
-    <LineRipple />
-</Textfield>
-<HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
-<Button variant="raised" on:click={generateJwt}>
-    <Label>Generate JWT</Label>
-</Button>
+    <Button variant="raised" on:click={requestCapability}>
+        <Label>Request Code</Label>
+    </Button>
+    <Textfield fullwidth lineRipple={false} label="Keystore">
+        <Input bind:value={code} id="jwt-generation-code" />
+        <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
+        <LineRipple />
+    </Textfield>
+    <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
+    <Button variant="raised" on:click={generateJwt}>
+        <Label>Generate JWT</Label>
+    </Button>
 </div>
 
-
 <style>
+
+  h2 {
+    text-align: center;
+    font-size: 24px;
+  }
+
     .capability-request {
         background-color: white;
-    }
-    .error {
-        color: red;
-    }
-
-    .did {
-        max-width: 512px;
-        word-wrap: break-word;
     }
 </style>

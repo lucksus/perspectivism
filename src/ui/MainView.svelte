@@ -11,15 +11,19 @@
 	import type { Ad4mClient } from '@perspect3vism/ad4m'
 	import Zumly from 'zumly'
 	import ZoomRoot from './ZoomRoot.svelte'
+	import CapabilityDialog from "./CapabilityDialog.svelte";
 	//import { perspectivesStore } from "./PerspectivesStore";
 
 	//const ad4m: Ad4mClient = getContext('ad4mClient')
 	const allContexts = getAllContexts()
+	const jwt = getContext('jwt')
 
 	let collapsed = false;
 	let collapsing = false;
 	let drawerOpen = false;
 	let languageSettingsDialog
+	let capabilityDialog
+
 
 	onMount(async ()=> {
 		// Zumly instance
@@ -49,8 +53,14 @@
 
 		await zumly.init()
 		zumly.componentContext.set('zumly', zumly)
+		if(!jwt){
+			capabilityDialog.open()
+		}
 	})
-	
+	function validJwt() {
+		console.log('closing jwt dialog')
+		capabilityDialog.close()
+	}	
 
 </script>
 
@@ -101,6 +111,15 @@
 			<Label>Close</Label>
 		</Button>
 	</Actions>
+</Dialog>
+<Dialog 
+	bind:this={capabilityDialog}
+	scrimClickAction=""
+  	escapeKeyAction=""
+>
+	<CapabilityDialog
+		on:valid-jwt={validJwt}
+	/>
 </Dialog>
 
 <style>
