@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getContext } from "svelte";
+    import { getContext, onMount } from "svelte";
     import Dialog, {Title, Content, Actions} from '@smui/dialog';
 	import Button, {Label} from '@smui/button';
 	import Textfield, {Input} from '@smui/textfield';
@@ -21,8 +21,13 @@
         ipcRenderer.sendSync('valid-jwt', jwt)
     }
 
+    let dialog
     let requestId
     let code
+
+    onMount(()=>{
+        dialog.open()
+    })
 
 
     async function requestCapability() {
@@ -85,21 +90,30 @@
     } 
 </script>
 
-<h2>Request Capabilty Token</h2>
-<div class="capability-request">
-    <Button variant="raised" on:click={requestCapability}>
-        <Label>Request Code</Label>
-    </Button>
-    <Textfield fullwidth lineRipple={false} label="Keystore">
-        <Input bind:value={code} id="jwt-generation-code" />
-        <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
-        <LineRipple />
-    </Textfield>
-    <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
-    <Button variant="raised" on:click={generateJwt}>
-        <Label>Generate JWT</Label>
-    </Button>
-</div>
+<Dialog
+    bind:this={dialog}
+    aria-labelledby="dialog-title"
+    aria-describedby="dialog-content"
+    scrimClickAction=""
+    escapeKeyAction=""
+>
+    <Title id="dialog-title">Request Capabilty Token</Title>
+    <Content id="dialog-content">
+        <Button variant="raised" on:click={requestCapability}>
+            <Label>Request Code</Label>
+        </Button>
+        <Textfield fullwidth lineRipple={false} label="Keystore">
+            <Input bind:value={code} id="jwt-generation-code" />
+            <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
+            <LineRipple />
+        </Textfield>
+        <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
+        <Button variant="raised" on:click={generateJwt}>
+            <Label>Generate JWT</Label>
+        </Button>
+    </Content>
+</Dialog>
+
 
 <style>
 

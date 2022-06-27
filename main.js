@@ -129,8 +129,8 @@ app.whenReady().then(() => {
         console.log("\x1b[32m", "All languages initialized!");
   
   
-        createWindow()
-        splash.close()
+        //createWindow()
+        //splash.close()
       });
     });
   }
@@ -144,17 +144,17 @@ app.whenReady().then(() => {
       process.exit(0)
     }
     
-    const win = createWindow()
-    // const splash = createSplash()
+    //const win = createWindow()
+    const splash = createSplash()
     ipcMain.on('port-request', (event, arg) => {
       event.returnValue = executorPort
     })
     ipcMain.on('valid-jwt', (event, arg) => {
       console.log('jwt', arg)
       jwt = arg 
-      // splash.close()
+      splash.close()
       setTimeout(() => {}, 200)
-      win.reload()
+      createWindow()
     })
 
   }
