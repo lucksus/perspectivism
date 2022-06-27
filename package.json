@@ -134,7 +134,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "graphics/Logo.png"
+        "icon": "graphics/Logo.icns"
       },
       "makers": [
         {
