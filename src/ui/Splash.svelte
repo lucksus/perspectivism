@@ -8,6 +8,7 @@
 
 	const { ipcRenderer } = require('electron')
 	const executorPort = ipcRenderer.sendSync('port-request', '')
+	const executorSpawned = ipcRenderer.sendSync('executor-spawned', '')
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:${executorPort}/graphql`,
 		options: {
@@ -46,6 +47,10 @@
 </svelte:head>
 
 <main>
-	<CapabilityDialog></CapabilityDialog>
+	{#if executorSpawned}
+		<InitDialog></InitDialog>
+	{:else}
+		<CapabilityDialog></CapabilityDialog>
+	{/if}
 </main>
 
