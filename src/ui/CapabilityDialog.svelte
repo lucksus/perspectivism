@@ -25,6 +25,7 @@
     let dialog
     let requestId
     let code
+    let validCode = true
 
     onMount(async ()=>{
         if(jwt) {
@@ -36,6 +37,9 @@
                 // jwt invalid, inform user
                 dialog.open()
             }
+        }
+        else {
+            dialog.open()
         }
     })
 
@@ -53,15 +57,10 @@
         try {
             let jwt = await ad4m.agent.generateJwt(requestId, code);
             console.log("auth jwt: ", jwt);
-            const validJwt = await checkJwt(jwt)
-            if(validJwt) {
-                emitJwt(jwt)
-            }
-            else {
-                // inform user code is invalid
-            }
+            await checkJwt(jwt)
         } catch (err) {
             console.log(err);
+            validCode = false
         }
     }
 
@@ -98,12 +97,10 @@
             console.log('agent status:', status)
             dispatch('valid-jwt')
             setTimeout(() => {}, 100)
-            // emitJwt(jwt)
-            return true
+            emitJwt(jwt)
         }
         catch (e) {
             console.log(e)
-            return false
         }
     } 
 </script>
@@ -115,14 +112,14 @@
     scrimClickAction=""
     escapeKeyAction=""
 >
-    <Title id="dialog-title">Request Capabilty Token</Title>
+    <Title id="dialog-title">Request Capability Token</Title>
     <Content id="dialog-content">
         <Button variant="raised" on:click={requestCapability}>
             <Label>Request Code</Label>
         </Button>
-        <Textfield fullwidth lineRipple={false} label="Keystore">
+        <Textfield fullwidth invalid={!validCode} lineRipple={false} label="Keystore">
             <Input bind:value={code} id="jwt-generation-code" />
-            <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
+            <FloatingLabel for="jwt-generation-code">{validCode ? "Code" : "Invalid Code"}</FloatingLabel>
             <LineRipple />
         </Textfield>
         <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
