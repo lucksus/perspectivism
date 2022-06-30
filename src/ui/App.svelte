@@ -10,8 +10,8 @@
 
 	//import User from "./user";
 	const { ipcRenderer } = require('electron')
-	const executorPort = ipcRenderer.sendSync('port-request', '')
-	const jwt = ipcRenderer.sendSync('jwt-request', '')
+	const { executorPort, jwt } = ipcRenderer.sendSync('connection-request', '')
+	// const jwt = ipcRenderer.sendSync('jwt-request', '')
 	console.log('jwt: ', jwt)
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:${executorPort}/graphql`,

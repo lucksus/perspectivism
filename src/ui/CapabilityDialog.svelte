@@ -17,6 +17,7 @@
 
     const ad4m = getContext('ad4mClient')
     const executorPort = getContext('executorPort')
+    const jwt = getContext('jwt')
     function emitJwt(jwt) {
         ipcRenderer.sendSync('valid-jwt', jwt)
     }
@@ -25,8 +26,17 @@
     let requestId
     let code
 
-    onMount(()=>{
-        dialog.open()
+    onMount(async ()=>{
+        if(jwt) {
+            try {
+                await ad4m.agent.status()
+                emitJwt(jwt)
+            }
+            catch(e) {
+                // jwt invalid, inform user
+                dialog.open()
+            }
+        }
     })
 
 
@@ -43,7 +53,13 @@
         try {
             let jwt = await ad4m.agent.generateJwt(requestId, code);
             console.log("auth jwt: ", jwt);
-            await checkJwt(jwt)
+            const validJwt = await checkJwt(jwt)
+            if(validJwt) {
+                emitJwt(jwt)
+            }
+            else {
+                // inform user code is invalid
+            }
         } catch (err) {
             console.log(err);
         }
@@ -82,10 +98,12 @@
             console.log('agent status:', status)
             dispatch('valid-jwt')
             setTimeout(() => {}, 100)
-            emitJwt(jwt)
+            // emitJwt(jwt)
+            return true
         }
         catch (e) {
             console.log(e)
+            return false
         }
     } 
 </script>
