@@ -84,20 +84,34 @@ app.whenReady().then(() => {
       app.exit(0)
       process.exit(0)
     }
-    
+    try {
+      jwt = fs.readFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), {encoding:'utf8', flag:'r'})
+    }
+    catch(e) {
+      console.log('capability token not found')
+    }
     //const win = createWindow()
-    const splash = createSplash()
-    ipcMain.on('port-request', (event, arg) => {
-      event.returnValue = executorPort
-    })
-    ipcMain.on('valid-jwt', (event, arg) => {
-      console.log('jwt', arg)
-      jwt = arg 
-      splash.close()
-      setTimeout(() => {}, 200)
+    if(!jwt) {
+      const splash = createSplash()
+      ipcMain.on('port-request', (event, arg) => {
+        event.returnValue = executorPort
+      })
+      ipcMain.on('valid-jwt', (event, arg) => {
+        // store jwt - overwrite existing if exists
+        console.log('jwt', arg)
+        jwt = arg 
+        if (fs.existsSync(path.join(getAppDataPath(), '/perspect3ve'))===false) {
+          fs.mkdirSync(path.join(getAppDataPath(), '/perspect3ve'),0777);
+        }
+        fs.writeFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), jwt)
+        splash.close()
+        setTimeout(() => {}, 200)
+        createWindow()
+      })
+    }
+    else {
       createWindow()
-    })
-
+    }
   }
   ipcMain.on('port-request', (event, arg) => {
     event.returnValue = executorPort
