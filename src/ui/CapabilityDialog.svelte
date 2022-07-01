@@ -26,6 +26,7 @@
     let requestId
     let code
     let validCode = true
+    let corruptedJwt = false
 
     onMount(async ()=>{
         if(jwt) {
@@ -35,6 +36,7 @@
             }
             catch(e) {
                 // jwt invalid, inform user
+                corruptedJwt = true
                 dialog.open()
             }
         }
@@ -112,7 +114,7 @@
     scrimClickAction=""
     escapeKeyAction=""
 >
-    <Title id="dialog-title">Request Capability Token</Title>
+    <Title id="dialog-title">{corruptedJwt ? "Corrupted JWT: Request New Token" : "Request Capability Token"}</Title>
     <Content id="dialog-content">
         <Button variant="raised" on:click={requestCapability}>
             <Label>Request Code</Label>
