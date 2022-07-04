@@ -17,6 +17,7 @@
 
     const ad4m = getContext('ad4mClient')
     const executorPort = getContext('executorPort')
+    const jwt = getContext('jwt')
     function emitJwt(jwt) {
         ipcRenderer.sendSync('valid-jwt', jwt)
     }
@@ -24,9 +25,24 @@
     let dialog
     let requestId
     let code
+    let validCode = true
+    let corruptedJwt = false
 
-    onMount(()=>{
-        dialog.open()
+    onMount(async ()=>{
+        if(jwt) {
+            try {
+                await ad4m.agent.status()
+                emitJwt(jwt)
+            }
+            catch(e) {
+                // jwt invalid, inform user
+                corruptedJwt = true
+                dialog.open()
+            }
+        }
+        else {
+            dialog.open()
+        }
     })
 
 
@@ -46,6 +62,7 @@
             await checkJwt(jwt)
         } catch (err) {
             console.log(err);
+            validCode = false
         }
     }
 
@@ -97,14 +114,14 @@
     scrimClickAction=""
     escapeKeyAction=""
 >
-    <Title id="dialog-title">Request Capabilty Token</Title>
+    <Title id="dialog-title">{corruptedJwt ? "Corrupted JWT: Request New Token" : "Request Capability Token"}</Title>
     <Content id="dialog-content">
         <Button variant="raised" on:click={requestCapability}>
             <Label>Request Code</Label>
         </Button>
-        <Textfield fullwidth lineRipple={false} label="Keystore">
+        <Textfield fullwidth invalid={!validCode} lineRipple={false} label="Keystore">
             <Input bind:value={code} id="jwt-generation-code" />
-            <FloatingLabel for="jwt-generation-code">Code</FloatingLabel>
+            <FloatingLabel for="jwt-generation-code">{validCode ? "Code" : "Invalid Code"}</FloatingLabel>
             <LineRipple />
         </Textfield>
         <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>

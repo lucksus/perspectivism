@@ -7,7 +7,7 @@
 	import { Ad4mClient } from "@perspect3vism/ad4m"
 
 	const { ipcRenderer } = require('electron')
-	const executorPort = ipcRenderer.sendSync('port-request', '')
+	const { executorPort, jwt } = ipcRenderer.sendSync('connection-request', '')
 	const executorSpawned = ipcRenderer.sendSync('executor-spawned', '')
 	const wsLink = new WebSocketLink({
 		uri: `ws://localhost:${executorPort}/graphql`,
@@ -16,7 +16,7 @@
 			connectionParams: async () => {
 				return {
 					headers: {
-						authorization: ""
+						authorization: jwt
 					}
 				}
 			}
@@ -38,6 +38,7 @@
   	});
 	setContext('ad4mClient', new Ad4mClient(client))
 	setContext('executorPort', executorPort)
+	setContext('jwt', jwt)
 </script>
 
 <svelte:head>

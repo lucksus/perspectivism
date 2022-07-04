@@ -65,8 +65,8 @@ app.whenReady().then(() => {
       );
   
       const splash = createSplash()
-      ipcMain.on('port-request', (event, arg) => {
-        event.returnValue = executorPort
+      ipcMain.on('connection-request', (event, arg) => {
+        event.returnValue = { executorPort, jwt: '' }
       })
 
       ad4mCore.waitForLanguages().then(async () => {
@@ -84,27 +84,31 @@ app.whenReady().then(() => {
       app.exit(0)
       process.exit(0)
     }
-    
+    try {
+      jwt = fs.readFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), {encoding:'utf8', flag:'r'})
+    }
+    catch(e) {
+      console.log('capability token not found')
+      jwt = ''
+    }
     //const win = createWindow()
     const splash = createSplash()
-    ipcMain.on('port-request', (event, arg) => {
-      event.returnValue = executorPort
+    ipcMain.on('connection-request', (event, arg) => {
+      event.returnValue = { executorPort, jwt }
     })
     ipcMain.on('valid-jwt', (event, arg) => {
+      // store jwt - overwrite existing if exists
       console.log('jwt', arg)
       jwt = arg 
+      if (fs.existsSync(path.join(getAppDataPath(), '/perspect3ve'))===false) {
+        fs.mkdirSync(path.join(getAppDataPath(), '/perspect3ve'),0777);
+      }
+      fs.writeFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), jwt)
       splash.close()
       setTimeout(() => {}, 200)
       createWindow()
     })
-
   }
-  ipcMain.on('port-request', (event, arg) => {
-    event.returnValue = executorPort
-  })
-  ipcMain.on('jwt-request', (event, arg) => {
-    event.returnValue = jwt
-  })
 })
 
 function createSplash () {
