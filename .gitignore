@@ -35,3 +35,5 @@ src/languages/agent-profiles/agent-profiles.dna
 default.nix
 ad4m
 swipl
+
+out/
