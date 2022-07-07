@@ -28,6 +28,32 @@
     let validCode = true
     let corruptedJwt = false
 
+    function generateCient(authorization: string|void) {
+        const wsLink = new WebSocketLink({
+            uri: `ws://localhost:${executorPort}/graphql`,
+            options: {
+                reconnect: true,
+                connectionParams: async () => {
+                    return { headers: { authorization }}
+                }
+            },
+            webSocketImpl: WebSocket,
+        });
+        let apolloClient = new ApolloClient({
+            link: wsLink,
+            cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
+            defaultOptions: {
+                watchQuery: {
+                    fetchPolicy: "no-cache",
+                },
+                query: {
+                    fetchPolicy: "no-cache",
+                }
+            },
+        })
+        return new Ad4mClient(apolloClient)
+    }
+
     onMount(async ()=>{
         if(jwt) {
             try {
@@ -49,7 +75,8 @@
     async function requestCapability() {
         try {
             let capabilities = [{"with":{"domain":"*","pointers":["*"]},"can":["*"]}]
-            requestId = await ad4m.agent.requestCapability("perspect3ve", "general purpose ad4m browser", "https://github.com/perspect3vism/perspect3ve", JSON.stringify(capabilities));
+            let ad4mClientWithoutJwt = generateCient('')
+            requestId = await ad4mClientWithoutJwt.agent.requestCapability("perspect3ve", "general purpose ad4m browser", "https://github.com/perspect3vism/perspect3ve", JSON.stringify(capabilities));
             console.log("auth request id: ", requestId);
         } catch (err) {
             console.log(err);
@@ -57,7 +84,8 @@
     }
     async function generateJwt() {
         try {
-            let jwt = await ad4m.agent.generateJwt(requestId, code);
+            let ad4mClientWithoutJwt = generateCient('')
+            let jwt = await ad4mClientWithoutJwt.agent.generateJwt(requestId, code);
             console.log("auth jwt: ", jwt);
             await checkJwt(jwt)
         } catch (err) {
@@ -67,33 +95,7 @@
     }
 
     async function checkJwt(jwt) {
-        const wsLink = new WebSocketLink({
-            uri: `ws://localhost:${executorPort}/graphql`,
-            options: {
-                reconnect: true,
-                connectionParams: async () => {
-                    return {
-                        headers: {
-                            authorization: jwt
-                        }
-                    }
-                }
-            },
-            webSocketImpl: WebSocket,
-        });
-        let apolloClient = new ApolloClient({
-            link: wsLink,
-            cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
-            defaultOptions: {
-                watchQuery: {
-                    fetchPolicy: "no-cache",
-                },
-                query: {
-                    fetchPolicy: "no-cache",
-                }
-            },
-        })
-        let ad4mClientJwt = new Ad4mClient(apolloClient)
+        let ad4mClientJwt = generateCient(jwt)
         try {
             let status = await ad4mClientJwt.agent.status()
             console.log('agent status:', status)
