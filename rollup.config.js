@@ -9,6 +9,7 @@ import typescript from '@rollup/plugin-typescript';
 import json from '@rollup/plugin-json'
 
 const production = !process.env.ROLLUP_WATCH;
+let spawnExecutor = false;
 
 function serve() {
 	let server;
@@ -20,10 +21,18 @@ function serve() {
 	return {
 		writeBundle() {
 			if (server) return;
-			server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
-				stdio: ['ignore', 'inherit', 'inherit'],
-				shell: true
-			});
+			if (spawnExecutor) {
+				server = require('child_process').spawn('npm', ['run', 'start:spawn-executor', '--', '--dev'], {
+					stdio: ['ignore', 'inherit', 'inherit'],
+					shell: true
+				});
+			}
+			else {
+				server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+					stdio: ['ignore', 'inherit', 'inherit'],
+					shell: true
+				});
+			}
 
 			process.on('SIGTERM', toExit);
 			process.on('exit', toExit);
@@ -81,7 +90,12 @@ function plugins(cssFile) {
 	production && terser()
 ]}
 
-export default [
+export default commandLineArgs => {
+	if (commandLineArgs.configSpawnExecutor === true) {
+			spawnExecutor = true;
+			console.log('executor spawned')
+		};
+	return [
 	{
 		input: 'src/ui/Splash.svelte',
 		output: {
@@ -193,3 +207,4 @@ export default [
 		}
 	}
 ]
+}
