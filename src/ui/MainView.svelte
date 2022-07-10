@@ -8,10 +8,8 @@
 	import Button, { Label } from '@smui/button';
 	import PerspectiveWrapper from './PerspectiveWrapper.svelte';
 	import LanguagesSettings from './LanguagesSettings.svelte'
-	import type { Ad4mClient } from '@perspect3vism/ad4m'
 	import Zumly from 'zumly'
 	import ZoomRoot from './ZoomRoot.svelte'
-	//import { perspectivesStore } from "./PerspectivesStore";
 
 	//const ad4m: Ad4mClient = getContext('ad4mClient')
 	const allContexts = getAllContexts()
