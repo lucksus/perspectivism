@@ -42,9 +42,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       uses: ncipollo/release-action@v1
       with:
-        artifacts: 
-          - "out/make/deb/x64/*"
-          - "out/make/zip/linux/x64/*"
+        artifacts: "out/make/**/*"
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
     - name: Upload the binary (windows-latest)
