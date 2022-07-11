@@ -125,6 +125,7 @@ function createSplash () {
     alwaysOnTop: true,
     frame: false,
     transparent: true,
+    icon: path.join(__dirname, 'graphics', 'Logo.png')
   })
 
   // and load the index.html of the app.
@@ -145,7 +146,8 @@ function createWindow () {
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false
-    }
+    },
+    icon: path.join(__dirname, 'graphics', 'Logo.png')
   })
 
   // and load the index.html of the app.
