@@ -40,7 +40,7 @@ jobs:
       if: matrix.platform == 'macos-latest'
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "out/make/dmg/*"
+        artifacts: "out/make/**/*"
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
     - name: Upload the binary (linux-latest)
