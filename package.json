@@ -1,5 +1,6 @@
 {
   "name": "perspect3ve",
+  "description": "General purpose AD4M browser",
   "version": "0.0.1",
   "license": "CAL-1.0",
   "main": "main.js",
@@ -134,7 +135,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "graphics/Logo.icns"
+        "icon": "graphics/Logo"
       },
       "makers": [
         {
@@ -151,11 +152,16 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "name": "Perspect3ve",
+            "icon": "graphics/Logo.png",
+            "homepage": "https://github.com/perspect3vism/perspect3ve",
+            "productName": "Perspect3ve",
+            "productDescription": "Fractal browser of the AD4M-based web of social organisms. Browsing, editing and interacting with Perspectives, Neighbourhoods and Social Organisms. Managing and Creating of Social DNA and Social Organisms."
+          }
         },
         {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "name": "@electron-forge/maker-zip"
         }
       ]
     }
