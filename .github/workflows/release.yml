@@ -27,7 +27,7 @@ jobs:
       if: matrix.platform == 'windows-latest'
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[16.1, 16.11, 17.2'
+        vs-version: '[16.1, 16.11, 17.2)'
     - name: Install dependencies
       run: npm install
     - name: Build
