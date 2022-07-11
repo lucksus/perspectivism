@@ -9,6 +9,9 @@ const ad4m = require('@perspect3vism/ad4m-executor')
 const fs = require('fs')
 const path = require('path')
 const getAppDataPath = require('appdata-path')
+const { homedir } = require('os')
+const ad4mDir = path.join(homedir(), '.ad4m')
+const perspect3veDir = path.join(homedir(), '.perspect3ve')
 
 const worldLinkLanguageHash = 'QmchPr6NgxFUrrETHrd49DSRdfFMdn6A5sw2JSXhujy4gS'
 let bootstrapFixtures = {
@@ -77,7 +80,7 @@ app.whenReady().then(() => {
   }
   else {
     try {
-      executorPort = fs.readFileSync(path.join(getAppDataPath(), '/ad4m/executor-port'), {encoding:'utf8', flag:'r'})
+      executorPort = fs.readFileSync(path.join(ad4mDir, 'executor-port'), {encoding:'utf8', flag:'r'})
     }
     catch(err) {
       console.log('Unable to find executor port. Please make sure ad4m executor is running.')
@@ -85,7 +88,7 @@ app.whenReady().then(() => {
       process.exit(0)
     }
     try {
-      jwt = fs.readFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), {encoding:'utf8', flag:'r'})
+      jwt = fs.readFileSync(path.join(perspect3veDir, 'capability-token'), {encoding:'utf8', flag:'r'})
     }
     catch(e) {
       console.log('capability token not found')
@@ -100,10 +103,10 @@ app.whenReady().then(() => {
       // store jwt - overwrite existing if exists
       console.log('jwt', arg)
       jwt = arg 
-      if (fs.existsSync(path.join(getAppDataPath(), '/perspect3ve'))===false) {
-        fs.mkdirSync(path.join(getAppDataPath(), '/perspect3ve'),0777);
+      if (fs.existsSync(perspect3veDir)===false) {
+        fs.mkdirSync(perspect3veDir,0777);
       }
-      fs.writeFileSync(path.join(getAppDataPath(), '/perspect3ve/capability-token'), jwt)
+      fs.writeFileSync(path.join(perspect3veDir, 'capability-token'), jwt)
       splash.close()
       setTimeout(() => {}, 200)
       createWindow()
