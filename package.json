@@ -23,7 +23,7 @@
     "rebuild": "electron-rebuild -f -w serialport",
     "build-linux": "electron-packager . Perspectivism --platform=linux --overwrite --icon=./graphics/Logo.png",
     "build-macos": "electron-packager . Perspectivism --platform=darwin --overwrite --icon=./graphics/Logo.png",
-    "postinstall": "ln -sf node_modules/@perspect3vism/ad4m-executor/default.nix default.nix && npm run create-symlinks",
+    "postinstall": "ln -sf node_modules/@perspect3vism/ad4m-executor/default.nix default.nix",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
