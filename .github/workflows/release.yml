@@ -23,9 +23,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Add msbuild to PATH
+    - name: Install Windows build-tools through npm
       if: matrix.platform == 'windows-latest'
-      uses: ilammy/msvc-dev-cmd@v1
+      run: npm install -g windows-build-tools
     - name: Install dependencies
       run: npm install
     - name: Build
