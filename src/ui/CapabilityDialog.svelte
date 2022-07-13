@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getContext, onMount } from "svelte";
+    import { onMount } from "svelte";
     import Dialog, {Title, Content, Actions} from '@smui/dialog';
 	import Button, {Label} from '@smui/button';
 	import Textfield, {Input} from '@smui/textfield';
@@ -10,7 +10,6 @@
     import { ApolloClient, InMemoryCache } from "@apollo/client";
     import { WebSocketLink } from "@apollo/client/link/ws";
     import { createEventDispatcher } from 'svelte';
-	const { ipcRenderer } = require('electron')
 
 	const dispatch = createEventDispatcher();
     
@@ -18,10 +17,7 @@
     export let capToken: string
     export let appName: string
     export let appIconPath: string
-
-    function emitJwt(jwt) {
-        ipcRenderer.sendSync('valid-jwt', jwt)
-    }
+    export let resolve: (executorUrl: string, capToken: string, client: Ad4mClient)=>void
 
     let dialog
     let requestId
@@ -60,7 +56,7 @@
             try {
                 const ad4m = generateCient(executorUrl, capToken)
                 await ad4m.agent.status()
-                emitJwt(capToken)
+                resolve(executorUrl, capToken, ad4m)
             }
             catch(e) {
                 // jwt invalid, inform user
@@ -103,7 +99,7 @@
             console.log('agent status:', status)
             dispatch('valid-jwt')
             setTimeout(() => {}, 100)
-            emitJwt(jwt)
+            resolve(executorUrl, jwt, ad4mClientJwt)
         }
         catch (e) {
             console.log(e)

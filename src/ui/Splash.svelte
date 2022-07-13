@@ -39,6 +39,10 @@
 	setContext('ad4mClient', new Ad4mClient(client))
 	setContext('executorPort', executorPort)
 	setContext('jwt', jwt)
+
+	function resolve(executorUrl, capToken, ad4mClient) {
+        ipcRenderer.sendSync('valid-jwt', capToken)
+    }
 </script>
 
 <svelte:head>
@@ -56,6 +60,7 @@
 			appIconPath="Perspect3veLogo.png"
 			executorUrl="ws://localhost:{executorPort}/graphql" 
 			capToken={jwt}
+			resolve={resolve}
 		></CapabilityDialog>
 	{/if}
 </main>
