@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from "svelte"
+	import { onMount, setContext } from "svelte"
 	import { ApolloClient, InMemoryCache } from "@apollo/client";
 	import { WebSocketLink } from '@apollo/client/link/ws';
 	import InitDialog from "./InitDialog.svelte"
@@ -43,6 +43,13 @@
 	function resolve(executorUrl, capToken, ad4mClient) {
         ipcRenderer.sendSync('valid-jwt', capToken)
     }
+
+	let capDialog
+
+	onMount(()=> {
+		capDialog.resolve = resolve
+		capDialog.run()
+	})
 </script>
 
 <svelte:head>
@@ -56,11 +63,11 @@
 		<InitDialog></InitDialog>
 	{:else}
 		<CapabilityDialog 
+			bind:this={capDialog}
 			appName="Perspect3ve"
 			appIconPath="Perspect3veLogo.png"
 			executorUrl="ws://localhost:{executorPort}/graphql" 
 			capToken={jwt}
-			resolve={resolve}
 			showQrScanner=true
 			qrScanRequest={()=>"wurst"}
 		></CapabilityDialog>

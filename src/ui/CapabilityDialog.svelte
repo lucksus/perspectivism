@@ -53,7 +53,7 @@
         return new Ad4mClient(apolloClient)
     }
 
-    onMount(async ()=>{
+    export async function run() {
         if(executorUrl && capToken) {
             try {
                 const ad4m = generateCient(executorUrl, capToken)
@@ -69,7 +69,7 @@
         else {
             dialog.open()
         }
-    })
+    }
 
 
     async function requestCapability() {
