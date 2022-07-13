@@ -6,7 +6,6 @@
 	import HelperText from '@smui/textfield/helper-text/index';
 	import FloatingLabel from '@smui/floating-label';
     import LineRipple from '@smui/line-ripple';
-    import LinkExtern from './LinkExtern.svelte'
     import { Ad4mClient } from "@perspect3vism/ad4m";
     import { ApolloClient, InMemoryCache } from "@apollo/client";
     import { WebSocketLink } from "@apollo/client/link/ws";
@@ -14,10 +13,12 @@
 	const { ipcRenderer } = require('electron')
 
 	const dispatch = createEventDispatcher();
+    
+    export let executorUrl: string
+    export let capToken: string
+    export let appName: string
+    export let appIconPath: string
 
-    const ad4m = getContext('ad4mClient')
-    const executorPort = getContext('executorPort')
-    const jwt = getContext('jwt')
     function emitJwt(jwt) {
         ipcRenderer.sendSync('valid-jwt', jwt)
     }
@@ -28,9 +29,9 @@
     let validCode = true
     let corruptedJwt = false
 
-    function generateCient(authorization: string|void) {
+    function generateCient(uri:string, authorization: string|void) {
         const wsLink = new WebSocketLink({
-            uri: `ws://localhost:${executorPort}/graphql`,
+            uri,
             options: {
                 reconnect: true,
                 connectionParams: async () => {
@@ -55,10 +56,11 @@
     }
 
     onMount(async ()=>{
-        if(jwt) {
+        if(executorUrl && capToken) {
             try {
+                const ad4m = generateCient(executorUrl, capToken)
                 await ad4m.agent.status()
-                emitJwt(jwt)
+                emitJwt(capToken)
             }
             catch(e) {
                 // jwt invalid, inform user
@@ -75,7 +77,7 @@
     async function requestCapability() {
         try {
             let capabilities = [{"with":{"domain":"*","pointers":["*"]},"can":["*"]}]
-            let ad4mClientWithoutJwt = generateCient('')
+            let ad4mClientWithoutJwt = generateCient(executorUrl, '')
             requestId = await ad4mClientWithoutJwt.agent.requestCapability("perspect3ve", "general purpose ad4m browser", "https://github.com/perspect3vism/perspect3ve", JSON.stringify(capabilities));
             console.log("auth request id: ", requestId);
         } catch (err) {
@@ -84,7 +86,7 @@
     }
     async function generateJwt() {
         try {
-            let ad4mClientWithoutJwt = generateCient('')
+            let ad4mClientWithoutJwt = generateCient(executorUrl, '')
             let jwt = await ad4mClientWithoutJwt.agent.generateJwt(requestId, code);
             console.log("auth jwt: ", jwt);
             await checkJwt(jwt)
@@ -95,7 +97,7 @@
     }
 
     async function checkJwt(jwt) {
-        let ad4mClientJwt = generateCient(jwt)
+        let ad4mClientJwt = generateCient(executorUrl, jwt)
         try {
             let status = await ad4mClientJwt.agent.status()
             console.log('agent status:', status)
@@ -116,20 +118,56 @@
     scrimClickAction=""
     escapeKeyAction=""
 >
-    <Title id="dialog-title">{corruptedJwt ? "Corrupted JWT: Request New Token" : "Request Capability Token"}</Title>
+    <Title id="dialog-title">
+        <img class="title-logo" src="Ad4mLogo.png" alt="Logo"> AD4M Connection Wizard
+    </Title>
     <Content id="dialog-content">
-        <Button variant="raised" on:click={requestCapability}>
-            <Label>Request Code</Label>
-        </Button>
-        <Textfield fullwidth invalid={!validCode} lineRipple={false} label="Keystore">
-            <Input bind:value={code} id="jwt-generation-code" />
-            <FloatingLabel for="jwt-generation-code">{validCode ? "Code" : "Invalid Code"}</FloatingLabel>
-            <LineRipple />
-        </Textfield>
-        <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
-        <Button variant="raised" on:click={generateJwt}>
-            <Label>Generate JWT</Label>
-        </Button>
+        {#if !requestId}
+            <span class="app-name">{appName}</span> needs to connect to your AD4M node/executor and request a unique capability token.
+            {#if appIconPath}
+                <div class="icons-connection">
+                    <img src="{appIconPath}" alt="App Logo" style="width: 150px">
+                    <span class="material-icons link-icon">link</span>
+                    <img src="Ad4mLogo.png" alt="Logo" style="width: 150px">
+                </div>
+            {/if}
+
+            Please enter or correct the AD4M executor URL:
+            <Textfield fullwidth invalid={!validCode} lineRipple={false} label="AD4M executor URL:">
+                <Input bind:value={executorUrl} id="executor-url" />
+                <FloatingLabel for="executor-url">URL</FloatingLabel>
+                <LineRipple />
+            </Textfield>
+
+            <p></p>
+
+            <Button variant="raised" on:click={requestCapability}>
+                <Label>Send Capability Request</Label>
+            </Button>
+        {/if}
+
+        {#if requestId}
+            Capability request was successfully sent.
+            Please check your AD4M admin UI (AD4Min), 
+            confirm the request there and 
+            <span class="app-name">
+                enter the 6-digit security code below, that AD4Min displays to you.
+            </span>
+            <Textfield fullwidth invalid={!validCode} lineRipple={false} label="Security Code">
+                <Input bind:value={code} id="jwt-generation-code" />
+                <FloatingLabel for="jwt-generation-code">{validCode ? "Security Code" : "Invalid Code"}</FloatingLabel>
+                <LineRipple />
+            </Textfield>
+            <HelperText id="unlock-helper-text">Please enter the code from ad4min</HelperText>
+            <p>
+                <Button variant="raised" on:click={()=>requestId=undefined}>
+                    <Label>Back</Label>
+                </Button>
+                <Button variant="raised" on:click={generateJwt}>
+                    <Label>Submit</Label>
+                </Button>
+            </p>
+        {/if}
     </Content>
 </Dialog>
 
@@ -141,7 +179,29 @@
     font-size: 24px;
   }
 
-    .capability-request {
-        background-color: white;
-    }
+  .dialog-title {
+    text-align: center;
+    line-height: 42px;
+  }
+
+  .title-logo {
+    height: 42px;
+    margin-bottom: -12px;
+  } 
+
+  .app-name {
+    font-weight: bold;
+  } 
+
+  .icons-connection {
+    text-align: center;
+  } 
+
+  .link-icon {
+    position: relative;
+    top: -50px;
+  } 
+  .capability-request {
+    background-color: white;
+  }
 </style>

@@ -51,7 +51,12 @@
 	{#if executorSpawned}
 		<InitDialog></InitDialog>
 	{:else}
-		<CapabilityDialog></CapabilityDialog>
+		<CapabilityDialog 
+			appName="Perspect3ve"
+			appIconPath="Perspect3veLogo.png"
+			executorUrl="ws://localhost:{executorPort}/graphql" 
+			capToken={jwt}
+		></CapabilityDialog>
 	{/if}
 </main>
 
