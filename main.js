@@ -44,8 +44,9 @@ app.whenReady().then(() => {
     executorUrl = `ws://localhost:${executorPort}/graphql`
     ad4m
     .init({
-      appDataPath: __dirname,
+      appDataPath: path.join(__dirname, "ad4m"),
       resourcePath: __dirname,
+      ipfsRepoPath: path.join(__dirname, "ad4m", "ipfs"),
       appDefaultLangPath: "./src/languages",
       networkBootstrapSeed: "./bootstrap/mainnetSeed.json",
       bootstrapFixtures: {
