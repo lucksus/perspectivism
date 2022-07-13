@@ -17,7 +17,9 @@
     export let capToken: string
     export let appName: string
     export let appIconPath: string
+    export let showQrScanner: string|void
     export let resolve: (executorUrl: string, capToken: string, client: Ad4mClient)=>void
+    export let qrScanRequest: ()=>string
 
     let dialog
     let requestId
@@ -129,11 +131,19 @@
             {/if}
 
             Please enter or correct the AD4M executor URL:
+            
             <Textfield fullwidth invalid={!validCode} lineRipple={false} label="AD4M executor URL:">
                 <Input bind:value={executorUrl} id="executor-url" />
-                <FloatingLabel for="executor-url">URL</FloatingLabel>
                 <LineRipple />
             </Textfield>
+
+            {#if showQrScanner}
+                <br>
+                Or click here to scan your executor's QR code:
+                <Button on:click={()=>{executorUrl = qrScanRequest()}}>
+                    <span class="material-icons">qr_code</span>
+                </Button>
+            {/if}
 
             <p></p>
 

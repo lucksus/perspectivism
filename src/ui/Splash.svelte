@@ -61,6 +61,8 @@
 			executorUrl="ws://localhost:{executorPort}/graphql" 
 			capToken={jwt}
 			resolve={resolve}
+			showQrScanner=true
+			qrScanRequest={()=>"wurst"}
 		></CapabilityDialog>
 	{/if}
 </main>
