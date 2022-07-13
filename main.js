@@ -22,8 +22,10 @@ let bootstrapFixtures = {
 }
 const {ipcMain} = require('electron');
 const { exit } = require("process");
+const {ad4mConnect} = require('ad4m-connect')
 
-let jwt
+let capToken
+let executorUrl
 let spawnExecutor = false
 console.log(process.argv)
 if(process.argv.length > 3 && (process.argv[2] === "executor")) {
@@ -39,6 +41,7 @@ app.whenReady().then(() => {
   let executorPort
   if (spawnExecutor) {
     executorPort = 4000
+    executorUrl = `ws://localhost:${executorPort}/graphql`
     ad4m
     .init({
       appDataPath: __dirname,
@@ -69,7 +72,7 @@ app.whenReady().then(() => {
   
       const splash = createSplash()
       ipcMain.on('connection-request', (event, arg) => {
-        event.returnValue = { executorPort, jwt: '' }
+        event.returnValue = { executorUrl, capToken: '' }
       })
 
       ad4mCore.waitForLanguages().then(async () => {
@@ -79,45 +82,33 @@ app.whenReady().then(() => {
     });
   }
   else {
-    try {
-      executorPort = fs.readFileSync(path.join(ad4mDir, 'executor-port'), {encoding:'utf8', flag:'r'})
-    }
-    catch(err) {
-      console.log('Unable to find executor port. Please make sure ad4m executor is running.')
-      app.exit(0)
-      process.exit(0)
-    }
-    try {
-      jwt = fs.readFileSync(path.join(perspect3veDir, 'capability-token'), {encoding:'utf8', flag:'r'})
-    }
-    catch(e) {
-      console.log('capability token not found')
-      jwt = ''
-    }
-    //const win = createWindow()
-    const splash = createSplash()
-    ipcMain.on('connection-request', (event, arg) => {
-      event.returnValue = { executorPort, jwt }
+
+    ad4mConnect({
+      appName: "Perspect3ve", 
+      appIconPath: path.join(__dirname, "graphics", "Logo.png"), 
+      capabilities: [{"with":{"domain":"*","pointers":["*"]},"can":["*"]}], 
+      dataPath: perspect3veDir
     })
-    ipcMain.on('valid-jwt', (event, arg) => {
-      // store jwt - overwrite existing if exists
-      console.log('jwt', arg)
-      jwt = arg 
-      if (fs.existsSync(perspect3veDir)===false) {
-        fs.mkdirSync(perspect3veDir,0777);
-      }
-      fs.writeFileSync(path.join(perspect3veDir, 'capability-token'), jwt)
-      splash.close()
-      setTimeout(() => {}, 200)
-      createWindow()
-    })
+      .then(({client, capabilityToken, executorUrl}) => {
+        console.log(client, capabilityToken, executorUrl)
+        capToken = capabilityToken
+        ipcMain.on('connection-request', (event, arg) => {
+          event.returnValue = { executorUrl, capToken }
+        })
+        createWindow()
+      })
+      .catch(()=> {
+        console.log("User closed AD4M connection wizard. Exiting...")
+        app.exit(0)
+        process.exit(0)
+      }) 
   }
 })
 
 function createSplash () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1000,
+    width: 1050,
     height: 600,
     webPreferences: {
       nodeIntegration: true,

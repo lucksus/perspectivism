@@ -8,19 +8,16 @@
 	import { removeTypenameFromMutationLink } from 'apollo-remove-typename-mutation-link';
 	import World from "./world";
 
-	//import User from "./user";
 	const { ipcRenderer } = require('electron')
-	const { executorPort, jwt } = ipcRenderer.sendSync('connection-request', '')
-	// const jwt = ipcRenderer.sendSync('jwt-request', '')
-	console.log('jwt: ', jwt)
+	const { executorUrl, capToken } = ipcRenderer.sendSync('connection-request', '')
 	const wsLink = new WebSocketLink({
-		uri: `ws://localhost:${executorPort}/graphql`,
+		uri: executorUrl,
 		options: {
 			reconnect: true,
 			connectionParams: async () => {
 				return {
 					headers: {
-						authorization: jwt
+						authorization: capToken
 					}
 				}
 			}
@@ -28,7 +25,6 @@
 	});
 	
 	const client = new ApolloClient({
-		//uri: 'http://localhost:4000',
 		link: ApolloLink.from([removeTypenameFromMutationLink, wsLink]) ,
 		cache: new InMemoryCache(),
 		defaultOptions: {
@@ -44,10 +40,8 @@
 	});
 	setClient(client)
 	setContext('ad4mClient', new Ad4mClient(client))
-	setContext('executorPort', executorPort) 
 	const world = new World(client);
 	setContext('world', world)
-	setContext('jwt', jwt)
 	//const user = new User(world, client);
 	//setContext('user', user)
 

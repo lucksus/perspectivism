@@ -110,6 +110,7 @@
     "@transmute/did-key-secp256k1": "^0.2.1-unstable.29",
     "@transmute/did-key.js": "^0.2.1-unstable.29",
     "@transmute/did-wallet": "lucksus/did-wallet",
+    "ad4m-connect": "file:../ad4m-connect",
     "apollo-remove-typename-mutation-link": "^3.3.9",
     "apollo-server": "^2.18.2",
     "appdata-path": "perspect3vism/appdata-path",

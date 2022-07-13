@@ -7,16 +7,16 @@
 	import { Ad4mClient } from "@perspect3vism/ad4m"
 
 	const { ipcRenderer } = require('electron')
-	const { executorPort, jwt } = ipcRenderer.sendSync('connection-request', '')
+	const { executorUrl, capToken } = ipcRenderer.sendSync('connection-request', '')
 	const executorSpawned = ipcRenderer.sendSync('executor-spawned', '')
 	const wsLink = new WebSocketLink({
-		uri: `ws://localhost:${executorPort}/graphql`,
+		uri: executorUrl,
 		options: {
 			reconnect: true,
 			connectionParams: async () => {
 				return {
 					headers: {
-						authorization: jwt
+						authorization: capToken
 					}
 				}
 			}
@@ -37,8 +37,6 @@
 		},
   	});
 	setContext('ad4mClient', new Ad4mClient(client))
-	setContext('executorPort', executorPort)
-	setContext('jwt', jwt)
 
 	function resolve(executorUrl, capToken, ad4mClient) {
         ipcRenderer.sendSync('valid-jwt', capToken)
@@ -66,8 +64,8 @@
 			bind:this={capDialog}
 			appName="Perspect3ve"
 			appIconPath="Perspect3veLogo.png"
-			executorUrl="ws://localhost:{executorPort}/graphql" 
-			capToken={jwt}
+			executorUrl={executorUrl} 
+			capToken={capToken}
 			showQrScanner=true
 			qrScanRequest={()=>"wurst"}
 		></CapabilityDialog>
