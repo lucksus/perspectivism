@@ -28,7 +28,7 @@ function serve() {
 				});
 			}
 			else {
-				server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+				server = require('child_process').spawn('npm', ['run', 'electron', '--', '--dev'], {
 					stdio: ['ignore', 'inherit', 'inherit'],
 					shell: true
 				});
