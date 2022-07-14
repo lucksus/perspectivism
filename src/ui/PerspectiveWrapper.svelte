@@ -19,6 +19,15 @@
     export let settings: string
     export let agentprofile: string
 
+    const ad4m: Ad4mClient = getContext('ad4mClient')
+    let perspective: PerspectiveProxy|null
+
+    ad4m.perspective.byUUID(uuid).then((p)=>{
+        perspective = p
+        perspective.addListener("link-added", (link)=>{updateToolbar()})
+        perspective.addListener("link-removed", (link)=>{updateToolbar()})
+    })
+
     let showFooterPanel = false
     let showSidePanel = false
     let showLinkWizard = false
@@ -30,6 +39,9 @@
 
     let selectedExpression
     let customActions = []
+    let sdnaFlows = []
+    let sdnaFlowActions = {}
+    let sdnaFlowStates = {}
 
     function openLinkWizard() {
         linkWizard.reset()
@@ -68,11 +80,48 @@
         selectedExpression = ''
     }
 
-    $: if(selectedExpression) updateCustomActions()
+    function updateToolbar() {
+        updateCustomActions()
+        updateSDNA()
+    }
+
+    $: if(selectedExpression || !selectedExpression) {
+        updateToolbar()
+    }
+
+    async function updateSDNA() {
+        sdnaFlowActions = {}
+        sdnaFlows = []
+        sdnaFlowStates = {}
+        if(!selectedExpression) return
+        sdnaFlows = await perspective.availableFlows(selectedExpression)
+        console.log("sdnaFlows:", sdnaFlows)
+        for(let flow of sdnaFlows) {
+            try{
+                sdnaFlowActions[flow] = await perspective.flowActions(flow, selectedExpression)
+                console.log("sdnaFlowActions[flow]:", sdnaFlowActions[flow])    
+            } catch(e) {
+                sdnaFlowActions[flow] = []
+            }
+            
+            try{
+                sdnaFlowStates[flow] = await perspective.flowState(flow, selectedExpression)
+                console.log("sdnaFlowStates[flow] :", sdnaFlowStates[flow] )
+            } catch(e) {
+                sdnaFlowStates[flow] = NaN
+            }
+        }
+    }
 
     async function updateCustomActions() {
         customActions = []
-        const results = await perspective.infer(`customAction(X, "${selectedExpression}")`)
+        let results 
+        try {
+            results = await perspective.infer(`customAction(X, "${selectedExpression}")`)
+        } catch(e) {
+            console.debug("No custom actions defined:", e)
+        }
+        
         if(results) {
             for(let result of results) {
                 let actionUrl: string = result.X
@@ -118,15 +167,6 @@
 
     if(typeof settings === 'string')
         settings = JSON.parse(settings)
-
-    const ad4m: Ad4mClient = getContext('ad4mClient')
-    let perspective: PerspectiveProxy|null
-
-    $: if(uuid) {
-        (async () => {
-            perspective = await ad4m.perspective.byUUID(uuid)
-        })()
-    }
 
     let tabs = [
         { k: 1, label: 'Expression Browser', icon: 'web' },
@@ -275,6 +315,30 @@
                 </LinkWizard>
             </div>
         {/if}
+        {#each sdnaFlows as flow}
+            <div class="sdna-panel">
+                <span class="sdna-header">
+                    <span class="material-icons">handshake</span>
+                    {flow}
+                </span>
+                {#if !isNaN(sdnaFlowStates[flow])}
+                    <span class="sdna-state">{sdnaFlowStates[flow]*100}%</span>
+                {:else}
+                    <Button variant="raised" on:click={()=>perspective.startFlow(flow, selectedExpression)}>
+                        <ButtonIcon class="material-icons">add</ButtonIcon>
+                    </Button>                    
+                {/if}
+                <span class="sdna-buttons">
+                    {#if sdnaFlowActions[flow]}
+                        {#each sdnaFlowActions[flow] as action}
+                            <Button variant="raised" on:click={()=>perspective.runFlowAction(flow, selectedExpression, action)}>
+                                <ButtonLabel>{action}</ButtonLabel>
+                            </Button>    
+                        {/each}
+                    {/if}
+                </span>
+            </div>
+        {/each}
         <div class="footer-header">
             <span class="toolbar">
                 <IconButton class="material-icons" on:click={() => showFooterPanel = !showFooterPanel}>
@@ -347,9 +411,23 @@
     }
 
     .footer-header { 
+        position: relative;
         height: 42px; 
         background-color: #44aaee6b;
     }
+
+    .sdna-panel {
+        height: 42px; 
+        margin-top: -42px;
+        padding: 10px 0 0 15px;
+        background-color: #44eeda6b;
+    }
+
+    .sdna-header {
+        font-weight: bold;
+        font-size: 19px;
+        margin-right: 4px;
+    } 
 
     .footer-title {
         margin-left: 50px;
