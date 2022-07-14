@@ -5,7 +5,7 @@ global.crypto = new Crypto();
 const { app, BrowserWindow } = require('electron')
 const express = require('express')
 const ad4m = require('@perspect3vism/ad4m-executor')
-
+const { ad4mConnect } = require('@perspect3vism/ad4m-connect')
 const fs = require('fs')
 const path = require('path')
 const getAppDataPath = require('appdata-path')
@@ -22,7 +22,6 @@ let bootstrapFixtures = {
 }
 const {ipcMain} = require('electron');
 const { exit } = require("process");
-const {ad4mConnect} = require('ad4m-connect')
 
 let capToken
 let executorUrl
