@@ -1,12 +1,13 @@
 <script lang="ts">
     import { getContext, createEventDispatcher } from "svelte";
-    import { Ad4mClient, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
+    import { Ad4mClient, Literal, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
     import ExpressionIcon from './ExpressionIcon.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { linksStoreForPerspective } from "./LinksStore";
     import { Network } from 'vis-network/esnext'
     import VisGraph from "./VisGraph";
     import LinkContextMenu from "./LinkContextMenu.svelte";
+    import Button, {Label as ButtonLabel, Icon as ButtonIcon} from '@smui/button';
 
     export let perspective: PerspectiveProxy
     export let uuid: string 
@@ -141,8 +142,19 @@
         nodePositions = []
         for(let node of graph.nodes) {
             nodePositions.push( {
-                url: node.label,
+                id: node.id,
+                label: node.label,
                 pos: network.canvasToDOM(network.getPosition(node.id)),
+            })
+        }
+    }
+
+    function writeNodePositions() {
+        for(let node of nodePositions) {
+            perspective.setSingleTarget({
+                source: node.id,
+                predicate: 'perspect3ve://2d_position',
+                target: Literal.from(node.pos).toUrl()
             })
         }
     }
@@ -233,6 +245,8 @@
     on:touchstart|stopPropagation={noop}
 >
 
+<Button on:click={writeNodePositions}>Save Positions</Button>
+
 {#if !perspective || !perspective.uuid}
     <h1>Loading...</h1>
 {:else}
@@ -241,26 +255,26 @@
     {#if nodePositions}
         <div class="expression-icons">
             {#each nodePositions as node}
-                {#if shouldRenderExpressionIcon(node.url)}
+                {#if shouldRenderExpressionIcon(node.id)}
                     <div class="expression-icon-wrapper" style={
                         `top: ${node.pos.y+(30*scale)}px; 
                         left: ${node.pos.x}px;
                         transform: scale(${scale*0.8});
                         `}>
-                        {#if node.url.startsWith('neighbourhood://') && uuidForNeighbourhood(node.url)}
+                        {#if node.id.startsWith('neighbourhood://') && uuidForNeighbourhood(node.url)}
                             <div class="zoom-me nh-zoom" 
                                 data-to="PerspectiveWrapper" 
-                                data-uuid={uuidForNeighbourhood(node.url)}
+                                data-uuid={uuidForNeighbourhood(node.id)}
                                 on:mouseup={(e)=>triggerZumly(e)}
                             >
-                                <h1>{node.url}</h1>
+                                <h1>{node.id}</h1>
                             </div>
                         {:else}
                             <ExpressionIcon 
-                                expressionURL={node.url} 
+                                expressionURL={node.id} 
                                 perspectiveUUID={perspective.uuid}
                                 on:context-menu={onExpressionContextMenu} 
-                                rotated={iconStates[node.url] === 'rotated'}
+                                rotated={iconStates[node.id] === 'rotated'}
                             />
                         {/if}
                     </div>
