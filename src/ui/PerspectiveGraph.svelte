@@ -150,12 +150,19 @@
     }
 
     function writeNodePositions() {
-        for(let node of nodePositions) {
-            perspective.setSingleTarget({
-                source: node.id,
-                predicate: 'perspect3ve://2d_position',
-                target: Literal.from(node.pos).toUrl()
-            })
+        const PRED = 'perspect3ve://2d_position'
+        for(let node of graph.nodes) {
+            const pos = network.getPosition(node.id)
+            const incomingEdges = graph.edges.filter(e => e.label == PRED && e.to == node.id)
+            if(incomingEdges.length == 0) {
+                // only store position for non-position nodes
+                perspective.setSingleTarget({
+                    source: node.id,
+                    predicate: PRED,
+                    target: Literal.from(pos).toUrl()
+                })
+            }
+            
         }
     }
 

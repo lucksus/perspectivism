@@ -228,7 +228,7 @@ export default class VisGraph {
 
     async loadConnectedLinks(perspective, isNeighbourhood) {
         const linkLanguageLinksNode = this.loadLinkLanguageNode(perspective, isNeighbourhood);
-        const links = await perspective.get(new LinkQuery({}));
+        let links = await perspective.get(new LinkQuery({}))        
         
         let from;
         if (isNeighbourhood) {
@@ -239,6 +239,7 @@ export default class VisGraph {
   
         for (const link of links) {
           const linkData = link.data;
+          if(linkData.predicate == 'perspect3ve://2d_position') continue
           const inferredConnections = links.filter(linkF => linkF.data.target == linkData.source);
           let sourceNode = this.urlToNode(linkData.source, links)
           //sourceNode.isSource = true
