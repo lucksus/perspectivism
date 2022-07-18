@@ -1,4 +1,4 @@
-import { Ad4mClient, LinkQuery, Literal, PerspectiveProxy } from '@perspect3vism/ad4m'
+import { Ad4mClient, LinkExpression, LinkQuery, Literal, PerspectiveProxy } from '@perspect3vism/ad4m'
 import { v4 as uuidv4 } from 'uuid'
 import type { Edge, Node } from 'vis-network/esnext'
 
@@ -191,6 +191,42 @@ export default class VisGraph {
         }
     }
 
+    urlToNode(url: string, allLinks: LinkExpression[]): Node {
+      let label
+      let shape
+      let font
+
+      try{
+        label = Literal.fromUrl(url).get()
+        if(typeof label == 'object') label = JSON.stringify(label)
+        shape = 'text'
+        font = '20px arial blue'
+      }catch(e){
+        label = url
+      }
+
+      let node = {
+        id: url,
+        label,
+        widthConstraint: 150,
+        group: "linkLanguageLink",
+        shape,
+        font
+      } as Node
+
+      try {
+        const posLinks = allLinks.filter(l => l.data.source == url && l.data.predicate == 'perspect3ve://2d_position');
+
+        const pos = Literal.fromUrl(posLinks[0].target).get()
+        //@ts-ignore
+        node.x = pos.x
+        //@ts-ignore
+        node.y = pos.y
+      }catch(e) {}
+      
+      return node
+    }
+
     async loadConnectedLinks(perspective, isNeighbourhood) {
         const linkLanguageLinksNode = this.loadLinkLanguageNode(perspective, isNeighbourhood);
         const links = await perspective.get(new LinkQuery({}));
@@ -205,27 +241,8 @@ export default class VisGraph {
         for (const link of links) {
           const linkData = link.data;
           const inferredConnections = links.filter(linkF => linkF.data.target == linkData.source);
-          let sourceNode
-          try {
-            let label = Literal.fromUrl(linkData.source).get()
-            if(typeof label == 'object') label = JSON.stringify(label)
-            sourceNode = {
-                id: linkData.source,
-                label,
-                widthConstraint: 150,
-                group: "linkLanguageLink",
-                shape: 'text',
-                isSource: true
-            }
-          } catch(e) {
-            sourceNode = {
-                id: linkData.source,
-                label: linkData.source,
-                widthConstraint: 150,
-                group: "linkLanguageLink",
-                isSource: true
-            }
-          }
+          let sourceNode = this.urlToNode(linkData.source, links)
+          //sourceNode.isSource = true
           
           let targetNode;
           if (linkData.target.includes("neighbourhood://")) {
@@ -238,26 +255,9 @@ export default class VisGraph {
               color: '#FF0013'
             }
           } else {
-            try {
-              let label = Literal.fromUrl(linkData.target).get()
-              if(typeof label == 'object') label = JSON.stringify(label)
-                targetNode = {
-                    id: linkData.target,
-                    label,
-                    widthConstraint: 150,
-                    group: "linkLanguageLink",
-                    shape: 'text',
-                    font: '20px arial blue'
-                }
-            } catch(e) {
-                targetNode = {
-                    id: linkData.target,
-                    label: linkData.target,
-                    widthConstraint: 150,
-                    group: "linkLanguageLink",
-                }
-            }
+            targetNode = this.urlToNode(linkData.target, links)
           }
+
           const sourceNotInYet = this.nodes.filter(node => node.id == sourceNode.id).length == 0
           const targetNotInYet = this.nodes.filter(node => node.id == targetNode.id).length == 0
           const sourceHidden = this.hidden.find(node => node == sourceNode.label)
