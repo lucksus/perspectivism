@@ -94,23 +94,29 @@
         sdnaFlows = []
         sdnaFlowStates = {}
         if(!selectedExpression) return
-        sdnaFlows = await perspective.availableFlows(selectedExpression)
-        console.log("sdnaFlows:", sdnaFlows)
-        for(let flow of sdnaFlows) {
-            try{
-                sdnaFlowActions[flow] = await perspective.flowActions(flow, selectedExpression)
-                console.log("sdnaFlowActions[flow]:", sdnaFlowActions[flow])    
-            } catch(e) {
-                sdnaFlowActions[flow] = []
+        
+        try {
+            sdnaFlows = await perspective.availableFlows(selectedExpression)
+            console.debug("sdnaFlows:", sdnaFlows)
+            for(let flow of sdnaFlows) {
+                try{
+                    sdnaFlowActions[flow] = await perspective.flowActions(flow, selectedExpression)
+                    console.debug("sdnaFlowActions[flow]:", sdnaFlowActions[flow])    
+                } catch(e) {
+                    sdnaFlowActions[flow] = []
+                }
+                
+                try{
+                    sdnaFlowStates[flow] = await perspective.flowState(flow, selectedExpression)
+                    console.debug("sdnaFlowStates[flow] :", sdnaFlowStates[flow] )
+                } catch(e) {
+                    sdnaFlowStates[flow] = NaN
+                }
             }
-            
-            try{
-                sdnaFlowStates[flow] = await perspective.flowState(flow, selectedExpression)
-                console.log("sdnaFlowStates[flow] :", sdnaFlowStates[flow] )
-            } catch(e) {
-                sdnaFlowStates[flow] = NaN
-            }
+        } catch(e) {
+            console.debug("No SDNA flows defined:", e)
         }
+
     }
 
     async function updateCustomActions() {
