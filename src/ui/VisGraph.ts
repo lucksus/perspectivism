@@ -216,8 +216,7 @@ export default class VisGraph {
 
       try {
         const posLinks = allLinks.filter(l => l.data.source == url && l.data.predicate == 'perspect3ve://2d_position');
-
-        const pos = Literal.fromUrl(posLinks[0].target).get()
+        const pos = Literal.fromUrl(posLinks[0].data.target).get()
         //@ts-ignore
         node.x = pos.x
         //@ts-ignore
