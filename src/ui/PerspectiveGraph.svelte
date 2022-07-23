@@ -7,7 +7,7 @@
     import { Network } from 'vis-network/esnext'
     import VisGraph from "./VisGraph";
     import LinkContextMenu from "./LinkContextMenu.svelte";
-    import Button, {Label as ButtonLabel, Icon as ButtonIcon} from '@smui/button';
+    import { debounce } from "./uiUtils"
 
     export let perspective: PerspectiveProxy
     export let uuid: string 
@@ -44,6 +44,7 @@
     })
 
     async function update() {
+        console.log("UPDATE")
         await graphFromPerspective(perspective)
         network.setData({nodes: graph.nodes, edges: graph.edges})
         getNodePositions()
@@ -179,15 +180,7 @@
         console.debug("Node positions saved.")
     }
 
-    const debounce = (fn, delay) => {
-        let timeout;
-        return () => {
-            if(timeout) clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                fn();
-            }, delay);
-        }
-    }
+
 
     const debouncedWriteNodePositions = debounce(writeNodePositions, 1000)
 

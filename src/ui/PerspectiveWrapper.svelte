@@ -14,6 +14,7 @@
     import LinkWizard from "./LinkWizard.svelte";
     import PrologExpressionView from "./PrologExpressionView.svelte";
     import ActionsView from "./ActionsView.svelte";
+    import { debounce } from "./uiUtils"
 
     export let uuid: string
     export let settings: string
@@ -24,8 +25,9 @@
 
     ad4m.perspective.byUUID(uuid).then((p)=>{
         perspective = p
-        perspective.addListener("link-added", (link)=>{updateToolbar()})
-        perspective.addListener("link-removed", (link)=>{updateToolbar()})
+        const debouncedUpdateToolbar = debounce(updateToolbar, 500)
+        perspective.addListener("link-added", debouncedUpdateToolbar)
+        perspective.addListener("link-removed", debouncedUpdateToolbar)
     })
 
     let showFooterPanel = false
@@ -81,6 +83,7 @@
     }
 
     function updateToolbar() {
+        console.log("UPDATE TOOLBAR")
         updateCustomActions()
         updateSDNA()
     }
