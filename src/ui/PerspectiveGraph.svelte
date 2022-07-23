@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext, createEventDispatcher } from "svelte";
-    import { Ad4mClient, Literal, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
+    import { Ad4mClient, LinkExpression, Literal, parseExprUrl, PerspectiveProxy } from '@perspect3vism/ad4m'
     import ExpressionIcon from './ExpressionIcon.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { linksStoreForPerspective } from "./LinksStore";
@@ -15,6 +15,13 @@
     const ad4m: Ad4mClient = getContext('ad4mClient')
     const zumly = getContext('zumly')
     const dispatch = createEventDispatcher()
+
+    const POSITION_PREDICATE = 'perspect3ve://2d_position'
+
+    let agentDID
+    ad4m.agent.me().then(agent => {
+        agentDID = agent.did
+    })
     
 
     if(!perspective && uuid) {
@@ -105,6 +112,12 @@
             })
         }
 
+        for(let event of ['stabilized']) {
+            network.on(event, () => {
+                debouncedWriteNodePositions()
+            })
+        }
+
         network.on('zoom', (params) => {
             scale = params.scale
             getNodePositions()
@@ -150,21 +163,33 @@
     }
 
     function writeNodePositions() {
-        const PRED = 'perspect3ve://2d_position'
         for(let node of graph.nodes) {
             const pos = network.getPosition(node.id)
-            const incomingEdges = graph.edges.filter(e => e.label == PRED && e.to == node.id)
+            const incomingEdges = graph.edges.filter(e => e.label == POSITION_PREDICATE && e.to == node.id)
             if(incomingEdges.length == 0) {
                 // only store position for non-position nodes
                 perspective.setSingleTarget({
                     source: node.id,
-                    predicate: PRED,
+                    predicate: POSITION_PREDICATE,
                     target: Literal.from(pos).toUrl()
                 })
             }
-            
+        }
+
+        console.debug("Node positions saved.")
+    }
+
+    const debounce = (fn, delay) => {
+        let timeout;
+        return () => {
+            if(timeout) clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                fn();
+            }, delay);
         }
     }
+
+    const debouncedWriteNodePositions = debounce(writeNodePositions, 1000)
 
     let linksStore
     let expressionContextMenu
@@ -176,8 +201,13 @@
         linksStoreForPerspective(ad4m, perspective).then(store => {
             linksStore = store
         })
-        perspective.addListener('link-added', update)
-        perspective.addListener('link-removed', update)
+        const updateIfNotPositionLink = (link: LinkExpression) => {
+            if(link.author == agentDID && link.data.predicate == POSITION_PREDICATE)
+                return
+            update()
+        }
+        perspective.addListener('link-added', updateIfNotPositionLink)
+        perspective.addListener('link-removed', updateIfNotPositionLink)
     }
 
 
@@ -251,8 +281,6 @@
     on:mousewheel|stopPropagation={noop} 
     on:touchstart|stopPropagation={noop}
 >
-
-<Button on:click={writeNodePositions}>Save Positions</Button>
 
 {#if !perspective || !perspective.uuid}
     <h1>Loading...</h1>
