@@ -25,7 +25,7 @@
 
     ad4m.perspective.byUUID(uuid).then((p)=>{
         perspective = p
-        const debouncedUpdateToolbar = debounce(updateToolbar, 500)
+        const debouncedUpdateToolbar = debounce(updateToolbar, 150)
         perspective.addListener("link-added", debouncedUpdateToolbar)
         perspective.addListener("link-removed", debouncedUpdateToolbar)
     })
@@ -93,10 +93,12 @@
     }
 
     async function updateSDNA() {
-        sdnaFlowActions = {}
-        sdnaFlows = []
-        sdnaFlowStates = {}
-        if(!selectedExpression) return
+        if(!selectedExpression) {
+            sdnaFlowActions = {}
+            sdnaFlows = []
+            sdnaFlowStates = {}
+            return
+        }
         
         try {
             sdnaFlows = await perspective.availableFlows(selectedExpression)
