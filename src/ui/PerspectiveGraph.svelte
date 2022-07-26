@@ -4,7 +4,7 @@
     import ExpressionIcon from './ExpressionIcon.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
     import { linksStoreForPerspective } from "./LinksStore";
-    import { Network } from 'vis-network/esnext'
+    import { Network } from 'vis-network/esnext/index'
     import VisGraph from "./VisGraph";
     import LinkContextMenu from "./LinkContextMenu.svelte";
     import { debounce } from "./uiUtils"
