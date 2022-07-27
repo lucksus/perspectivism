@@ -2,12 +2,17 @@ import { Ad4mClient, LinkExpression, LinkQuery, Literal, PerspectiveProxy } from
 import { v4 as uuidv4 } from 'uuid'
 import type { Edge, Node } from 'vis-network/esnext'
 
+interface Decoration {
+  shape: string,
+  color: string,
+}
 export default class VisGraph {
     #perspective: PerspectiveProxy
     nodes: Node[]
     edges: Edge[]
     connectLinkElements: boolean
     hidden: string[]
+    decorations: Map<string, Decoration>
 
     constructor(perspective: PerspectiveProxy) {
         this.#perspective = perspective
@@ -15,6 +20,7 @@ export default class VisGraph {
         this.nodes = []
         this.edges = []
         this.hidden = []
+        this.decorations = new Map<string, Decoration>()
     }
 
     toggleLinkElementConnect() {
@@ -37,6 +43,39 @@ export default class VisGraph {
               return h.X
             }
           })
+
+        interface ExpressionDecoration{X: string, Color: string, Shape}
+        let classDecorations: ExpressionDecoration[] 
+        let instanceDecorations: ExpressionDecoration[]
+
+        try {
+          classDecorations = await this.#perspective.infer("class_check(c, X), class_color(c, Color), class_decoration_shape(c, Shape)")
+        }catch(e){
+          console.debug("While infering classDecorations:", e)
+        }
+
+        try {
+          instanceDecorations = await this.#perspective.infer("class_check(c,X), instance_color(c, X, Color), instance_decoration_shape(c, X, Shape)")
+        }catch(e) {
+          console.debug("While infering instanceDecorations:", e)
+        }
+        
+        if(classDecorations)
+          for(let d of classDecorations) {
+            this.decorations.set(d.X, {
+              shape: d.Shape,
+              color: d.Color
+            })
+          }
+
+        if(instanceDecorations)
+          for(let d of instanceDecorations) {
+            this.decorations.set(d.X, {
+              shape: d.Shape,
+              color: d.Color
+            })
+          }
+        
         await this.getPerspectiveNodesAndMetaEdges();
     }
 
@@ -205,12 +244,24 @@ export default class VisGraph {
         label = url
       }
 
+      const customDecoration = this.decorations.get(url)
+      let color
+      let group
+      if(customDecoration) {
+        console.debug("custom decoration for", url, customDecoration)
+        shape = customDecoration.shape
+        color = {background: customDecoration.color}
+      } else {
+        group = "linkLanguageLink"
+      }
+
       let node = {
         id: url,
         label,
         widthConstraint: 150,
-        group: "linkLanguageLink",
+        group,
         shape,
+        color,
         font
       } as Node
 
