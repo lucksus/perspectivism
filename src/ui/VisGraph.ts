@@ -60,21 +60,23 @@ export default class VisGraph {
           console.debug("While infering instanceDecorations:", e)
         }
         
-        if(classDecorations)
+        try{
           for(let d of classDecorations) {
             this.decorations.set(d.X, {
               shape: d.Shape,
               color: d.Color
             })
           }
+        } catch(e) {}
 
-        if(instanceDecorations)
+        try{
           for(let d of instanceDecorations) {
             this.decorations.set(d.X, {
               shape: d.Shape,
               color: d.Color
             })
           }
+        } catch(e) {}
         
         await this.getPerspectiveNodesAndMetaEdges();
     }
