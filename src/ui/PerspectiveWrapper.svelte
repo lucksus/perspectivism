@@ -16,6 +16,7 @@
     import ActionsView from "./ActionsView.svelte";
     import { debounce } from "./uiUtils"
     import ConstructionPalette from "./ConstructionPalette.svelte";
+    import { executeCustomAction } from "./executeCustomAction";
 
     export let uuid: string
     export let settings: string
@@ -146,32 +147,6 @@
                         customActions = [...customActions, {name, code}]
                     }
                 }
-            }
-        }
-    }
-
-    async function executeCustomAction(action) {
-        console.log("execute:", action.code)
-
-        const replaceThis = (input: string|undefined) => {
-            if(input)
-                return input.replace('this', selectedExpression)
-            else
-                return undefined
-        }
-
-        for(let command of action.code) {
-            switch(command.action) {
-                case 'addLink':
-                    await perspective.add(new Link({
-                        source: replaceThis(command.source),
-                        predicate: replaceThis(command.predicate),
-                        target: replaceThis(command.target)
-                    }))
-                    break;
-                case 'removeLink':
-                    await perspective.remove(command.linkExpression)
-                    break;
             }
         }
     }
@@ -367,7 +342,7 @@
             </span>
             <span class="tool-buttons">
                 {#each customActions as action}
-                    <Button variant="raised" on:click={()=>executeCustomAction(action)}>
+                    <Button variant="raised" on:click={()=>executeCustomAction(action.code, selectedExpression, perspective)}>
                         <ButtonLabel>{action.name}</ButtonLabel>
                     </Button>    
                 {/each}
