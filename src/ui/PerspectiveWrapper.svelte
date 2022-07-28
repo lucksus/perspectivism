@@ -15,6 +15,7 @@
     import PrologExpressionView from "./PrologExpressionView.svelte";
     import ActionsView from "./ActionsView.svelte";
     import { debounce } from "./uiUtils"
+    import ConstructionPalette from "./ConstructionPalette.svelte";
 
     export let uuid: string
     export let settings: string
@@ -259,6 +260,11 @@
         <h2>Loading...</h2>
     {/if}
 
+    {#if perspective}
+    <div class="palette">
+        <ConstructionPalette perspective={perspective}></ConstructionPalette>
+    </div>
+    {/if}
     
 
     <div class="side-panel" style={`width: ${showSidePanel ? '400px' : '0'};`}>
@@ -509,4 +515,11 @@
     .visible {
         display: block;
     }
+
+    .palette {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translate(0, -50%);
+    } 
 </style>
