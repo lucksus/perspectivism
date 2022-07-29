@@ -114,7 +114,6 @@
    }
 
    .dialog-class {
-    position: fixed;
     width: 444px;
     height: 419px;
    } 

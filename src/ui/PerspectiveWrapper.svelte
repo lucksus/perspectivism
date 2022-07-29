@@ -477,6 +477,8 @@
 
     .side-content {
         position: relative;
+        overflow: scroll;
+        height: 80%;
     }
 
     .picker {
