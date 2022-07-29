@@ -5,11 +5,14 @@
     import LineRipple from '@smui/line-ripple';
     import Button, {Label, Icon} from '@smui/button';
     import ExpressionIcon from './ExpressionIcon.svelte'
+    import Switch from '@smui/switch';
+    import FormField from '@smui/form-field';
     const dispatch = createEventDispatcher();
 
     let urlTemp
     let url
     let expression
+    let plain = false
 
     function load() {
         url = urlTemp
@@ -50,8 +53,12 @@
 </div>
 
 {#if url && url.length > 0}
+    <FormField>
+        <Switch bind:checked={plain} />
+        <span slot="label">Show plain source</span>
+    </FormField>
     <div class="expression-container">
-        <ExpressionIcon expressionURL={url}></ExpressionIcon>
+        <ExpressionIcon expressionURL={url} plain={plain}></ExpressionIcon>
     </div>
 
     <div class="link-button">

@@ -3,9 +3,6 @@
 
 .DS_Store
 
-/src/ad4m/*.js
-/src/core/*.js
-/src/core/**/*.js
 /src/**/*.js.map
 /src/languages/**/*.js
 /src/languages/**/*.js.map
@@ -13,10 +10,31 @@
 /src/languages/**/node_modules
 /src/languages/**/hc-dna/target
 /src/languages/**/hc-dna/tests/node_modules
-/src/languages/**/hc-dna/*.dna.gz
-/src/stores/LinksStore.js
+/src/languages/**/hc-dna/*.dna
+/src/languages/social-context/*
+/src/languages/agent-expression-store/*
+/src/languages/neighbourhood-store/*
+/src/languages/note-ipfs/*
+/src/languages/languages/*
+/src/ui/world.js
+/src/ui/user.js
+/src/ui/logUtils.js
+/src/ui/PerspectivesStore.js
+/src/ui/LinksStore.js
+/src/ui/VisGraph.js
 
 holochain
 lair-keystore
+hc
+.hc
+.hc_live*
 
 Perspectivism-linux-x64
+.cargo
+src/languages/agent-profiles/agent-profiles.dna
+default.nix
+ad4m
+swipl
+
+out/
+src/ui/executeCustomAction.js

@@ -13,3 +13,13 @@ export function linkTo2D(link) {
 export function coordToPredicate(coords) {
     return `coord2d://${coords.x}_${coords.y}`
 }
+
+export function debounce(fn, delay) {
+    let timeout;
+    return () => {
+        if(timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            fn();
+        }, delay);
+    }
+}

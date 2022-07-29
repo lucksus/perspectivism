@@ -1,98 +1,34 @@
 <script lang="ts">
-    import type Perspective from '../ad4m/Perspective'
-
-    export let perspective: Perspective
-
-    import IconButton from '@smui/icon-button';
-    import Fab, {Icon, Label} from '@smui/fab';
-    import Link, { hashLinkExpression, linkEqual } from '../ad4m/Links';
-    import { exprRef2String } from '../ad4m/ExpressionRef';
+    import { getContext, createEventDispatcher } from "svelte";
+    import type { Perspective } from '@perspect3vism/ad4m'
+    import { exprRef2String, hashLinkExpression, linkEqual, Link } from '@perspect3vism/ad4m';
     import ExpressionIcon from './ExpressionIcon.svelte';
-    import ExpressionBrowser from './ExpressionBrowser.svelte';
     import iconComponentFromString from './iconComponentFromString';
     import ConstructionMenu from './ConstructionMenu.svelte'
-    import PerspectiveSettings from './PerspectiveSettings.svelte';
     import ExpressionContextMenu from "./ExpressionContextMenu.svelte";
-    import { createEventDispatcher } from 'svelte';
-    const dispatch = createEventDispatcher();
-    import { query, mutation, getClient } from "svelte-apollo";
-    import { gql } from '@apollo/client';
-    import { LANGUAGES } from './graphql_queries'
     import { linkTo2D, coordToPredicate } from './uiUtils';
+    import { linksStoreForPerspective } from "./LinksStore";
 
-    const gqlClient = getClient()
+    export let perspective: Perspective
+    export let uuid: String
 
-    $: if(perspective) {
-        gqlClient.subscribe({
-        query: gql`
-            subscription {
-                linkAdded(perspectiveUUID: "${perspective.uuid}") {
-                    timestamp
-                }
-            }   
-        `}).subscribe({
-            next: () => linksStore.fetchMore({}),
-            error: (e) => console.error(e)
-        })
+    const dispatch = createEventDispatcher();
+    const ad4m: Ad4mClient = getContext('ad4mClient')
 
-        gqlClient.subscribe({
-        query: gql`
-            subscription {
-                linkRemoved(perspectiveUUID: "${perspective.uuid}") {
-                    timestamp
-                }
-            }   
-        `}).subscribe({
-            next: () => linksStore.refetch({}),
-            error: (e) => console.error(e)
-        })
+    if(!perspective && uuid) {
+        (async () => {
+            perspective = await ad4m.perspective.byUUID(uuid)
+        })()
     }
 
-    $: ALL_LINKS_QUERY = gql`{ 
-        links(perspectiveUUID: "${perspective.uuid}", query: { }) {
-            author { did }
-            timestamp
-            data {
-                source
-                predicate
-                target
-            }
+    ad4m.perspective.addPerspectiveUpdatedListener(async p => {
+        //@ts-ignore
+        if(p.uuid == perspective.uuid || p.uuid == uuid) {
+            //@ts-ignore
+            perspective = await ad4m.perspective.byUUID(perspective.uuid)
         }
-    }`
+    })
 
-    $: ADD_LINK = mutation(gql`
-        mutation AddLink($link: String){
-            addLink(input: { perspectiveUUID: "${perspective.uuid}", link: $link }) {
-                author { did }
-                timestamp
-                data {
-                    source
-                    predicate
-                    target
-                }
-            }
-        }
-    `)
-
-    $: UPDATE_LINK = mutation(gql`
-        mutation UpdateLink($oldLink: String, $newLink: String){
-            updateLink(input: { perspectiveUUID: "${perspective.uuid}", oldLink: $oldLink, newLink: $newLink }) {
-                timestamp
-            }
-        }
-    `)
-
-    $: REMOVE_LINK = mutation(gql`
-        mutation RemoveLink($link: String){
-            removeLink(input: { perspectiveUUID: "${perspective.uuid}", link: $link }) 
-        }
-    `)
-
-    $: CREATE_EXPRESSION = mutation(gql`
-        mutation CreateExpression($languageAddress: String, $content: String) {
-            createExpression(input: { languageAddress: $languageAddress, content: $content})
-        }
-    `)
 
     let linksStore
     let constructionMenu
@@ -118,9 +54,6 @@
     let linkingCursor = {}
     let dropMove = false
     let dropMoveTarget
-
-    let showSettings = false
-    let showExpressionBrwoser = false
 
     $: if(content && zoom!=undefined && translateX!=undefined && translateY!=undefined) {
         console.debug("SET TRANSFORM:", zoom)
@@ -173,8 +106,8 @@
     }
 
     function hoveredLink(coords, moving) {
-        for(const i in $linksStore.data.links) {
-            const link = $linksStore.data.links[i]
+        for(const i in $linksStore) {
+            const link = $linksStore[i]
             if(link.data.source === "root" && link.data.predicate?.startsWith("coord2d://") && link.data.target != moving.target) {
                 const linkCoords = linkTo2D(link)
                 const d = dist(coords, linkCoords)
@@ -233,26 +166,26 @@
             const linkId = getLinkIdFromPath(event)
             console.log("link id:", linkId)
             if(linkId) {
-                const hoveredLink = $linksStore.data.links.find(l => hashLinkExpression(l) == linkId)
+                const hoveredLink = $linksStore.find(l => hashLinkExpression(l) == linkId)
                 if(isLinking) {
                     const newLink = {
                         source: linkingSource.data.target,
                         target: hoveredLink.data.target,
                     }
-                    ADD_LINK({
-                        variables: {
-                            link: JSON.stringify(newLink)
-                        }
-                    })
+                    ad4m.perspective.addLink(perspective.uuid, newLink)
                 } else {
                     if(hoveredLink) {
                         movingLink = {
-                            author: { did: hoveredLink.author.did },
+                            author: hoveredLink.author,
                             timestamp: hoveredLink.timestamp,
                             data: {
                                 source: hoveredLink.data.source,
                                 predicate: hoveredLink.data.predicate,
                                 target: hoveredLink.data.target,
+                            },
+                            proof: {
+                                key: hoveredLink.proof.key,
+                                signature: hoveredLink.proof.signature
                             }
                         }
                         movingLinkOriginal = JSON.parse(JSON.stringify(movingLink))
@@ -278,13 +211,8 @@
                 newLinkObject.data.source = dropMoveTarget.data.target
             }
             delete newLinkObject.id
-            console.debug("Updating link:", JSON.stringify(movingLinkOriginal), JSON.stringify(movingLinkOriginal))
-            UPDATE_LINK({
-                variables: {
-                    oldLink: JSON.stringify(movingLinkOriginal), 
-                    newLink: JSON.stringify(newLinkObject)
-                }
-            })
+            console.debug("Updating link:", JSON.stringify(movingLinkOriginal), JSON.stringify(newLinkObject.data))
+            ad4m.perspective.updateLink(perspective.uuid, movingLinkOriginal, newLinkObject.data)
         }
 
         isPanning = false
@@ -299,50 +227,23 @@
         constructionMenu.open(event.clientX, event.clientY)
     }
 
-    gqlClient.query({
-        query: LANGUAGES,
-        variables: { filter: "expressionUI" }
-    }).then( expressionUILanguages => {
-        console.log("Got installed languages:", JSON.stringify(expressionUILanguages))
-        languages = expressionUILanguages.data.languages
+    ad4m.languages.byFilter("expressionUI").then( expressionUILanguages => {
+        languages = expressionUILanguages
     })
 
 
     async function commitExpression(lang, content, container) {
-        const creationResult = await CREATE_EXPRESSION({
-            variables: {
-                languageAddress: lang.address,
-                content: JSON.stringify(content)
-            }
-        })
-
-        const exprURL = creationResult.data.createExpression
+        const exprURL = await ad4m.expression.create(JSON.stringify(content), lang.address)
         console.log("Created new expression:", exprURL)
-        
-        ADD_LINK({
-            variables: {
-                link: JSON.stringify(new Link({source: 'root', target: exprURL}))
-            }
-        })
-
+        ad4m.perspective.addLink(perspective.uuid, new Link({source: 'root', target: exprURL}))
         container.innerHTML = ''
     }
 
     async function createExpression(lang) {
         console.log("Create expression:", lang, JSON.stringify(lang))
         if(!constructorIconComponents[lang.name]) {
-            const { data } = await gqlClient.query({
-                query: gql`
-                { 
-                    language(address: "${lang.address}") {
-                        constructorIcon {
-                            code
-                        }
-                    }
-                }
-                `
-            })
-            const code = data.language.constructorIcon.code
+            const language = await ad4m.languages.byAddress(lang.address)
+            const code = language.constructorIcon.code
             const ConstructorIcon = iconComponentFromString(code, lang.name)
             constructorIconComponents[lang.name] = ConstructorIcon
             customElements.define(lang.name+"-constructor", ConstructorIcon);
@@ -363,7 +264,9 @@
     }
 
     $: if(perspective) {
-        linksStore = query(ALL_LINKS_QUERY)
+        linksStoreForPerspective(ad4m, perspective).then(store =>{
+            linksStore = store
+        })
     }
 
 
@@ -389,13 +292,10 @@
 
     function onDeleteExpression(event) {
         const expression = event.detail
-        $linksStore.data.links.forEach(l => {
+        $linksStore.forEach(l => {
             if(l.data.target === expression) {
-                REMOVE_LINK({
-                    variables: {
-                        link: JSON.stringify(l)
-                    }
-                })
+                console.log("deleting expression:", l)
+                ad4m.perspective.removeLink(perspective.uuid, l)
             }
         })
     }
@@ -406,9 +306,19 @@
         linkingSource = link
     }
 
+    function noop(){}
+
 </script>
 
-<h1>${perspective.uuid}</h1>
+<div 
+    on:mousewheel|stopPropagation={noop} 
+    on:touchstart|stopPropagation={noop}
+    on:mouseup|stopPropagation={noop}
+>
+
+{#if !perspective || !perspective.uuid}
+    <h1>Loading...</h1>
+{:else}
 
 <div class="perspective-container" 
     on:mousewheel={handleMouseWheel}
@@ -420,40 +330,34 @@
     >
     <div class="perspective-content" bind:this={content}>
         <ul class="inline">
-            {#if $linksStore.loading}
-                <li>Loading...</li>
-            {:else if $linksStore.error}
-                <li>ERROR: {$linksStore.error.message}</li>
-            {:else}
-                {#each $linksStore.data.links as link}
-                    {#if link.data.source === 'root'}
-                        {#if isMovingExpression && movingLink && linkEqual(link, movingLinkOriginal)}
-                        <li class="inline expression-list-container" 
-                            style={`position: absolute; transform: translateX(${linkTo2D(movingLink).x}px) translateY(${linkTo2D(movingLink).y}px);`}
-                            data-link-id={hashLinkExpression(link)}
-                            >
-                            <div class="drop-move-container" style={`transform: translateZ(${dropMove ? -2000 : 0}px);`}>
-                                <ExpressionIcon expressionURL={link.data.target} perspectiveUUID={perspective.uuid}/>
-                            </div>
-                        </li>
-                        {:else}
-                        <li class="inline expression-list-container" 
-                            style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
-                            data-link-id={hashLinkExpression(link)}
-                            >
-                            <ExpressionIcon
-                                expressionURL={link.data.target}
-                                parentLink={link}
-                                perspectiveUUID={perspective.uuid}
-                                on:context-menu={onExpressionContextMenu} 
-                                rotated={iconStates[link.data.target] === 'rotated'}
-                                selected={linkingSource?.data?.target === link.data.target}>
-                            </ExpressionIcon>
-                        </li>
-                        {/if}
+            {#each $linksStore as link}
+                {#if link.data.source === 'root'}
+                    {#if isMovingExpression && movingLink && linkEqual(link, movingLinkOriginal)}
+                    <li class="inline expression-list-container" 
+                        style={`position: absolute; transform: translateX(${linkTo2D(movingLink).x}px) translateY(${linkTo2D(movingLink).y}px);`}
+                        data-link-id={hashLinkExpression(link)}
+                        >
+                        <div class="drop-move-container" style={`transform: translateZ(${dropMove ? -2000 : 0}px);`}>
+                            <ExpressionIcon expressionURL={link.data.target} perspectiveUUID={perspective.uuid}/>
+                        </div>
+                    </li>
+                    {:else}
+                    <li class="inline expression-list-container" 
+                        style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}
+                        data-link-id={hashLinkExpression(link)}
+                        >
+                        <ExpressionIcon
+                            expressionURL={link.data.target}
+                            parentLink={link}
+                            perspectiveUUID={perspective.uuid}
+                            on:context-menu={onExpressionContextMenu} 
+                            rotated={iconStates[link.data.target] === 'rotated'}
+                            selected={linkingSource?.data?.target === link.data.target}>
+                        </ExpressionIcon>
+                    </li>
                     {/if}
-                {/each}
-            {/if}
+                {/if}
+            {/each}
         </ul>        
         <div id="constructor-container"></div>
 
@@ -464,45 +368,6 @@
         {/if}
     </div>
 </div>
-
-<div id="side-bar-container">
-    <div class="side-bar-panel panel-1" style={`transform: rotateY(${showExpressionBrwoser? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showExpressionBrwoser = !showExpressionBrwoser}>
-            <span class="float-right"><Icon class="material-icons">web</Icon></span>
-            <Label>Expression Browser</Label>
-        </div>
-        <div class="side-panel-content expression-browser-panel" style={`opacity: ${showExpressionBrwoser? '1' : '0'}`}>
-            <ExpressionBrowser
-                on:close={()=> showExpressionBrwoser = false}
-                on:link-expresson={event => ADD_LINK({variables: {
-                    link: JSON.stringify({
-                        source: 'root',
-                        target: event.detail
-                    })
-                }})}
-            ></ExpressionBrowser>
-        </div>
-    </div>
-
-    <div class="side-bar-panel panel-2" style={`transform: rotateY(${showSettings? '90deg' : '0' })`}>
-        <div class="side-bar-button" on:click={() => showSettings = !showSettings}>
-            <span class="float-right"><Icon class="material-icons">settings</Icon></span>
-            <Label>Perspective Settings</Label>
-        </div>
-        <div class="side-panel-content settings-panel" style={`opacity: ${showSettings? '1' : '0'}`}>
-            <PerspectiveSettings perspective={JSON.parse(JSON.stringify(perspective))} 
-                on:submit={()=> {
-                    showSettings = false
-                }}
-                on:cancel={()=> {
-                    showSettings = false
-                }}>
-            </PerspectiveSettings>
-        </div>
-    </div>
-</div>
-
-
 
 <ConstructionMenu bind:this={constructionMenu} 
     languages={languages} 
@@ -515,8 +380,9 @@
     on:link={onLinkExpression}
 ></ExpressionContextMenu>
 
+{/if}
 
-
+</div>
 <style>
     .perspective-container {
         position: absolute;
@@ -526,65 +392,6 @@
         height: 100%;
         perspective: 1000px;
         transform-style: preserve-3d;
-    }
-
-    #side-bar-container {
-        position: absolute;
-        right: 0;
-        top: 0;
-        perspective: 100px;
-        perspective-origin: rightpo;
-    }
-
-    .side-bar-panel {
-        position: absolute;
-        right: 0;
-        transform-style: preserve-3d;
-        transition: transform 0.5s;
-    }
-
-    .panel-1 {
-        top: 115px;
-    }
-
-    .panel-2 {
-        top: 425px;
-    }
-    
-    .expression-browser-panel {
-        height: 545px;
-        width: 380px;
-    }
-
-    .settings-panel {
-        width: 204px;
-    }
-
-    .side-bar-button {
-        position: absolute;
-        width: 175px;
-        height: 45px;
-        padding: 10px 50px 0 25px;
-        transform-origin: right bottom;
-        transform: rotate(-90deg) translateX(115px);
-        right: 0;
-        background-color: white;
-        border: 1px solid rgb(127, 129, 255);
-        color:   rgb(127, 129, 255);
-        cursor: pointer;
-    }
-
-    .float-right {
-        float: right;
-    }
-
-    .side-panel-content {
-        position: absolute;
-        transform: rotateY(-90deg) translateX(-300px) translateZ(255px);
-        transition: opacity 0.5s;
-        padding: 40px;
-        border: 1px solid rgb(127, 129, 255);
-        background-color: white;
     }
 
     .debug {

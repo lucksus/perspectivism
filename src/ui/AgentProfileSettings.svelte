@@ -1,70 +1,50 @@
 <script lang="ts">
+    import { Literal, PerspectiveProxy } from '@perspect3vism/ad4m'
     import DataTable, {Body, Row, Cell} from '@smui/data-table';
-    import { mutation, getClient } from "svelte-apollo";
-    import { AGENT, UPDATE_AGENT_PROFILE } from './graphql_queries';
     import Textfield from '@smui/textfield'
     import Button, {Label} from '@smui/button';
-    import { gql } from '@apollo/client';
     import Card, {Content, PrimaryAction, Media, MediaContent, Actions, ActionButtons, ActionIcons} from '@smui/card';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
 
-    const QGL_CLIENT = getClient()
-    const M_UPDATE_AGENT_PROFILE = mutation(UPDATE_AGENT_PROFILE)
-
-    let did = "loading..."
-    let name = "loading..."
+    let firstName = "loading..."
+    let lastName = "loading..."
     let email = "loading..."
 
-    function update() {
-        QGL_CLIENT.query({query: AGENT}).then(result => {
-            if(result.error) {
-                console.error(result)
-            } else {
-                const agent = result.data.agent.agent
-                did = agent.did
-                name = agent.name ? agent.name : ""
-                email = agent.email ? agent.email : ""
-            }
-        })
+    export let agentPerspective: PerspectiveProxy
+    export let did: string
+
+    async function populateUiFromPerspective() {
+      try {
+        firstName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
+      }catch(e) {
+        firstName = "<not set>"
+      }
+
+      try {
+        lastName = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
+      }catch(e) {
+        lastName = "<not set>"
+      }
+
+      try {
+        email = Literal.fromUrl(await agentPerspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
+      }catch(e) {
+        email = "<not set>"
+      }
     }
 
-    QGL_CLIENT.subscribe({
-          query: gql`
-              subscription {
-                  agentUpdated {
-                    did
-                    name
-                    email
-                  }
-              }   
-          `}).subscribe({
-              next: result => {
-                console.debug(result)
-                const agent = result.data.agentUpdated
-                did = agent.did
-                name = agent.name ? agent.name : ""
-                email = agent.email ? agent.email : ""
-              },
-              error: (e) => console.error(e)
-          })
-
-
-    function save() {
-        M_UPDATE_AGENT_PROFILE({
-            variables: { name, email }
-        })
+    async function save() {
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://givenName', target: Literal.from(firstName).toUrl()})
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://familyName', target: Literal.from(lastName).toUrl()})
+      await agentPerspective.setSingleTarget({source: did, predicate: 'foaf://mbox', target: Literal.from(email).toUrl()})
     }
 
-    update()
+    $: if(agentPerspective)
+      populateUiFromPerspective()
 </script>
 
 <Card style="width: 360px;">
-    <div style="padding: 20px">
-        <h2 class="mdc-typography--headline6" style="margin: 0;">Your Agent Profile</h2>
-        <div class="mdc-typography--subtitle2" style="margin: 0; overflow-wrap: anywhere;">{did}</div>
-    </div>
-    <hr>
     <PrimaryAction>
       <Media aspectRatio="square" >
         <MediaContent>
@@ -79,9 +59,13 @@
         <DataTable>
             <Body>
                 <Row>
-                    <Cell>Name:</Cell>
-                    <Cell><Textfield bind:value={name} label="Name" /></Cell>
+                    <Cell>First name:</Cell>
+                    <Cell><Textfield bind:value={firstName} label="First name" /></Cell>
                 </Row>
+                <Row>
+                  <Cell>Last name:</Cell>
+                  <Cell><Textfield bind:value={lastName} label="Last name" /></Cell>
+              </Row>
                 <Row>
                     <Cell>Email:</Cell>
                     <Cell><Textfield bind:value={email} label="Email" /></Cell>
@@ -99,3 +83,5 @@
     </Actions>
   </Card>
 
+
+  

@@ -62,3 +62,30 @@ button:not(:disabled):active {
 button:focus {
 	border-color: #666;
 }
+
+.z-view {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	bottom: 50px;
+	right: 50px;
+	border: #44aaee6b 3px solid;
+	border-radius: 50px;
+	overflow: hidden;
+}
+
+.vis-network {
+	outline: none;
+}
+
+.hljs-symbol {
+	color: cornflowerblue;
+}
+
+.hljs-number {
+	color: darkblue;
+}
+
+.hljs-string {
+	color: red;
+}

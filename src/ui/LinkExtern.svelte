@@ -1,12 +1,11 @@
 <script lang="ts">
-    import { mutation } from "svelte-apollo";
-    import { OPEN_LINK } from './graphql_queries';
-    const GQL_OPEN_LINK = mutation(OPEN_LINK)
+    import { getContext } from "svelte";
+    const ad4m = getContext('ad4mClient')
 
     export let url: String;
 
     function click() {
-        GQL_OPEN_LINK({variables: { url }})
+        ad4m.runtime.openLink(url)
     }
 </script>
 

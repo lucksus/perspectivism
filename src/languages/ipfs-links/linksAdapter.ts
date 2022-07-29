@@ -1,7 +1,7 @@
-import type Expression from "../../ad4m/Expression";
-import type { LinksAdapter, NewLinksObserver } from "../../ad4m/Language";
-import Link, { hashLinkExpression, LinkQuery } from "../../ad4m/Links";
-import type LanguageContext from "../../ad4m/LanguageContext";
+import type Expression from "@perspect3vism/ad4m/Expression";
+import type { LinksAdapter, NewLinksObserver } from "@perspect3vism/ad4m/Language";
+import Link, { hashLinkExpression, LinkQuery } from "@perspect3vism/ad4m/Links";
+import type LanguageContext from "@perspect3vism/ad4m-language-context/LanguageContext";
 import Room from 'ipfs-pubsub-room'
 import path from 'path'
 import fs from 'fs'
@@ -199,7 +199,7 @@ export class IpfsLinksAdapter implements LinksAdapter {
         return true
     }
 
-    others() {
+    async others() {
         return []
     }
 

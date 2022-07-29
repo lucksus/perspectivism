@@ -1,56 +1,82 @@
 <script lang="ts">
-    import type Expression from "../ad4m/Expression"
+    import type { Expression } from "@perspect3vism/ad4m"
+    import { Literal, parseExprUrl, Perspective } from "@perspect3vism/ad4m"
     import iconComponentFromString from "./iconComponentFromString";
-    import { createEventDispatcher } from 'svelte';
+    import { getContext, createEventDispatcher } from 'svelte';
     const dispatch = createEventDispatcher();
-    import { query, mutation, getClient } from "svelte-apollo";
     import { gql } from "@apollo/client"
-    import { CHILD_LINKS_QUERY } from "./graphql_queries";
     import { linkTo2D, coordToPredicate } from './uiUtils';
     import emailValidator from 'email-validator'
     import md5 from 'md5'
     import {Graphic} from '@smui/list';
     import { DoubleBounce } from 'svelte-loading-spinners'
 
-
     export let expressionURL: string
     export let parentLink: Expression
     export let componentConstructor
     export let selected: boolean
     export let perspectiveUUID: string
+    export let plain: boolean
+
+    const ad4m: Ad4mClient = getContext('ad4mClient')
 
     let expression = null
-    let queryResult = null
+    let expressionRaw = null
     let expressionRef = null
     let iconReady = false
-    let childLinks
+    let childLinks = null
+    let loading = true
+    let authorName = null
+    let authorEmail = null
 
     
-    $: if(expressionURL) queryResult = query(gql`
-        { 
-            expression(url: "${expressionURL}") {
-                author { did, name, email }
-                timestamp
-                data
-                language {
-                    address
-                }
-                proof {
-                    valid
-                    invalid
-                }
-            }
-        }
-    `)
+    $: if(expressionURL && loading) ad4m.expression.get(expressionURL).then(result => {
+        expression = result
+        console.log("Expression:", JSON.stringify(expression))
+        loading = false
+    })
 
-    $: if(expressionURL && perspectiveUUID) {
-        childLinks = query(CHILD_LINKS_QUERY, {
-            variables: {
-                perspectiveUUID,
-                source: expressionURL
-            }
+    $: if(expressionURL && plain && loading) ad4m.expression.getRaw(expressionURL).then(result => {
+        expressionRaw = result
+        loading = false
+    })
+    
+    $: if(expressionURL && perspectiveUUID) 
+        ad4m.perspective.queryLinks(perspectiveUUID, { source: expressionURL})
+        .then(result => {
+            childLinks = result
         })
-    }
+
+    $: if(expression) ad4m.expression.get(expression.author).then(result => {
+        let author = JSON.parse(result.data)
+        console.log("Expression author:", author)
+
+        let did = author.did
+        let firstName, lastName, email
+        let perspective = new Perspective(author.perspective.links)
+
+        console.log("single target: ", perspective.getSingleTarget({source: did, predicate: 'foaf://givenName'}))
+        try {
+            firstName = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://givenName'})).get()
+        }catch(e) {
+            firstName = "<not set>"
+        }
+
+        try {
+            lastName = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://familyName'})).get()
+        }catch(e) {
+            lastName = "<not set>"
+        }
+
+        try {
+            email = Literal.fromUrl(perspective.getSingleTarget({source: did, predicate: 'foaf://mbox'})).get()
+        }catch(e) {
+            email = "<not set>"
+        }
+        
+        authorName = `${firstName} ${lastName}`
+        authorEmail = email
+    })
     
 
     //let expression: void | Expression = null
@@ -74,29 +100,19 @@
         componentConstructor = customElements.get(customElementName)
         if(!componentConstructor) {
             try {
-                console.debug("ExpressionIcon loading icon for:", expressionURL)
-                const { data } = await getClient().query({
-                    query: gql`
-                    { 
-                        expression(url: "${expressionURL}") {
-                            icon {
-                                code
-                            }
-                        }
-                    }
-                    `
-                })
-                const code = data.expression.icon.code
+                const exprRef = parseExprUrl(expressionURL)
+                const lang = await ad4m.languages.byAddress(exprRef.language.address)
+                const code = lang.icon.code
                 componentConstructor = iconComponentFromString(code, "icon")
                 customElements.define(customElementName, componentConstructor)
             } catch (e) {
+                console.error(e)
                 componentConstructor = customElements.get(customElementName)
             }
         }
     }
 
-    $: if(!$queryResult.loading && $queryResult.data) {
-        expression = $queryResult.data.expression
+    $: if(!loading) {
         customElementName = iconComponentName(expression.language.address)
     }
 
@@ -107,11 +123,14 @@
     }
     
     
-    $: if(container && componentConstructor && !$queryResult.loading) {
+    $: if(container && componentConstructor && !loading) {
         iconReady = false
         const icon = new componentConstructor()
-        const expression = JSON.parse(JSON.stringify($queryResult.data.expression))
-        expression.data = JSON.parse(expression.data)
+        //const expression = JSON.parse(JSON.stringify($queryResult))
+        try{
+            expression.data = JSON.parse(expression.data)
+        }catch(e){}
+        
         icon.expression = expression
         while(container.lastChild)
             container.removeChild(container.lastChild)
@@ -138,27 +157,33 @@
 
 </script>
 
+{#if plain }
+<div>
+    {#if loading}
+        <DoubleBounce size="60" color="#7f81ff" unit="px" duration="1s"></DoubleBounce>
+    {:else}
+        {expressionRaw}
+    {/if}
+</div>
+{:else}
 <div class="box" on:contextmenu={rightClick} style={`transform: rotateY(${rotated?180:0}deg)`}>
 <div class="displacement-container" style={`transform: translateX(-${width/2}px);`}>
-    {#if $queryResult.loading}
+    {#if loading}
         <DoubleBounce size="60" color="#7f81ff" unit="px" duration="1s"></DoubleBounce>
-    {:else if $queryResult.error}
-        Loading failed!
-        {$queryResult.error}
     {:else}
     <div class="box__face container" class:selected class:invalid="{!expression?.proof?.valid}" bind:this={container}/>
     <div class="box__face back" style={`transform:   rotateY(180deg) translateZ(${depth}px); width: ${width}px; height: ${height}px;`}>
         <div class="backside-content">
             <div>
                 <h2 class="header">Author</h2>
-                {#if emailValidator.validate(expression?.author?.email) }
-                    <img class="avatar" src="http://www.gravatar.com/avatar/{md5(expression?.author?.email)}?s=75" alt="gravatar">
+                {#if emailValidator.validate(authorEmail) }
+                    <img class="avatar" src="http://www.gravatar.com/avatar/{md5(authorEmail)}?s=75" alt="gravatar">
                 {/if}
-                <span class="property">Name:</span><span class="value">{expression?.author?.name}</span>
+                <span class="property">Name:</span><span class="value">{authorName}</span>
                 <br>
-                <span class="property">Email:</span><span class="value">{expression?.author?.email}</span>
+                <span class="property">Email:</span><span class="value">{authorEmail}</span>
                 <br>
-                <span class="property">DID:</span> <span class="value">{expression?.author?.did}</span>
+                <span class="property">DID:</span> <span class="value">{expression?.author}</span>
             </div>
             <div>
                 <h2 class="header">Timestamp</h2> 
@@ -186,24 +211,22 @@
                     {/if}
                 {/if}
             </div>
-            <!--{expression?.data}-->
         </div>
     </div>
     <div class="box__face right" style={`transform:  translateX(${width-depth/2}px)  translateZ(-${depth/2}px) rotateY(90deg); width: ${depth}px; height: ${height}px;`}>right</div>
     <div class="box__face left" style={`transform:  translateX(-${depth/2}px) rotateY(-90deg) translateX(-${depth/2}px); width: ${depth}px; height: ${height}px;`}>left</div>
-    <!--<div class="box__face top" style={`transform:  rotateX(90deg) translateZ(${height}px); width: ${width}px; height: ${depth}px;`}>top</div>
-    <div class="box__face bottom" style={`transform:  rotateX(-90deg) translateZ(${height}px); width: ${width}px; height: ${depth}px;`}>bottom</div>-->
     {/if}
 </div>
 </div>
+{/if}
 <!--
 {#if childLinks}
     {JSON.stringify($childLinks)}
 {/if}
--->
-{#if childLinks && !$childLinks.loading && $childLinks.data?.links}
+
+{#if childLinks}
     <ul class="child-plane">
-        {#each $childLinks.data.links as link}
+        {#each childLinks as link}
             <li class="inline expression-list-container" 
             style={`position: absolute; transform: translateX(${linkTo2D(link).x}px) translateY(${linkTo2D(link).y}px);`}>
                 <svelte:self 
@@ -216,7 +239,7 @@
     </ul>
     
 {/if}
-
+-->
 <style>
     .container {
         display: inline-block;
